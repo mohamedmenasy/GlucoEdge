@@ -1,5 +1,7 @@
-# External upstream dependency - cloned per setup instructions, not vendored
-GlucoBench/
+# External upstream dependency - cloned per setup instructions, not vendored.
+# No trailing slash: worktrees hold this as a symlink back to the main
+# checkout's clone, and a directory-only pattern won't match a symlink.
+GlucoBench
 
 # Python
 __pycache__/
