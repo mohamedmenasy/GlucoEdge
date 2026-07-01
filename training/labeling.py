@@ -12,6 +12,8 @@ THREE_CLASS_MAP = {
 
 
 def label_trend(last_value: float, future_value: float, horizon_minutes: float = 15.0) -> str:
+    # last_value/future_value are mg/dL (GlucoBench leaves `gl` unscaled), so
+    # rate is mg/dL per minute - the thresholds below assume that unit.
     rate = (future_value - last_value) / horizon_minutes
     if rate <= -2:
         return "falling_fast"

@@ -46,3 +46,9 @@ GlucoEdge's classifier is **5-class** (`falling_fast` / `falling` /
 `stable` / `rising` / `rising_fast`) going forward. This is the label set
 that the next sub-project (LiteRT conversion) and the Android app must
 match.
+
+Note for that next sub-project: this run's purpose was to settle the class
+count, not to produce a deployable model — `train.py` sets no random seed
+and saves no checkpoint, so nothing from this run is reusable directly.
+LiteRT conversion should start by retraining weinstock/5-class with a fixed
+seed and persisting a `state_dict`, then convert that.
