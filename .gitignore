@@ -19,3 +19,6 @@ results/
 
 # OS
 .DS_Store
+
+# Local worktrees for isolated feature work
+.worktrees/
