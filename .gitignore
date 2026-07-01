@@ -1,0 +1,21 @@
+# External upstream dependency - cloned per setup instructions, not vendored
+GlucoBench/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+.pytest_cache/
+
+# Data / model artifacts (regenerable, can be large)
+*.csv
+*.pt
+*.pth
+*.tflite
+*.onnx
+results/
+
+# OS
+.DS_Store
