@@ -32,7 +32,11 @@ def load_formatter(dataset: str) -> DataFormatter:
 
 def class_weights(train_ds: GlucoseTrendDataset, num_classes: int) -> torch.Tensor:
     labels = np.array(train_ds.labels)
-    weights = compute_class_weight("balanced", classes=np.arange(num_classes), y=labels)
+    present = np.unique(labels)
+    weights = np.ones(num_classes, dtype=np.float64)
+    if len(present) > 0:
+        present_weights = compute_class_weight("balanced", classes=present, y=labels)
+        weights[present] = present_weights
     return torch.tensor(weights, dtype=torch.float32)
 
 
