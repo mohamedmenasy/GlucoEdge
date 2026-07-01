@@ -11,18 +11,21 @@ from sklearn.metrics import classification_report
 from sklearn.utils.class_weight import compute_class_weight
 from torch.utils.data import DataLoader
 
+from training.dataset import GlucoseTrendDataset
+from training.labeling import FIVE_CLASSES, THREE_CLASSES, THREE_CLASS_MAP
+from training.model import TrendCNN
+
 GLUCOEDGE_ROOT = Path(__file__).resolve().parent.parent
 GLUCOBENCH_ROOT = GLUCOEDGE_ROOT / "GlucoBench"
-sys.path.insert(0, str(GLUCOBENCH_ROOT))
-
-from data_formatter.base import DataFormatter  # noqa: E402
-
-from training.dataset import GlucoseTrendDataset  # noqa: E402
-from training.labeling import FIVE_CLASSES, THREE_CLASSES, THREE_CLASS_MAP  # noqa: E402
-from training.model import TrendCNN  # noqa: E402
 
 
-def load_formatter(dataset: str) -> DataFormatter:
+def load_formatter(dataset: str) -> "DataFormatter":
+    # Imported lazily: GlucoBench is an external clone, not a package
+    # dependency, so only the code path that actually reads its data
+    # needs it importable (keeps `pytest` runnable without cloning it).
+    sys.path.insert(0, str(GLUCOBENCH_ROOT))
+    from data_formatter.base import DataFormatter
+
     config_path = GLUCOBENCH_ROOT / "config" / f"{dataset}.yaml"
     with open(config_path) as f:
         config = yaml.safe_load(f)
