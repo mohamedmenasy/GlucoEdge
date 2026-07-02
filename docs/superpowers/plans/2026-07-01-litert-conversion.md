@@ -6,12 +6,12 @@
 
 **Architecture:** `training/train.py` gains `--seed`/`--save-checkpoint` flags to produce a reproducible checkpoint. A new `conversion/` package (separate dependencies from `training/`, kept out of the existing CI job) converts that checkpoint to a float `.tflite` and a static-INT8 `.tflite` via `litert_torch` + `torchao`'s PT2E flow, then benchmarks all three representations on the same held-out test set.
 
-**Tech Stack:** `litert-torch==0.9.1` (PyTorch→LiteRT conversion), `torchao==0.17.0` (PT2E quantization), `ai-edge-litert==2.1.6` (Python runtime for running `.tflite` files).
+**Tech Stack:** `litert-torch==0.9.1` (PyTorch→LiteRT conversion), `torchao==0.17.0` (PT2E quantization), `ai-edge-litert==2.1.5` (Python runtime for running `.tflite` files — pinned to `2.1.5`, not the originally-planned `2.1.6`, per Task 2's actual install: `litert-torch==0.9.1` pulls in `ai-edge-quantizer==0.7.0`, which requires exactly `ai-edge-litert==2.1.5`).
 
 ## Global Constraints
 
 - The model must stay `torch.export`-compliant (PyTorch ≥2.1.0 — already satisfied by `torch==2.3.0` and `TrendCNN`'s plain conv/relu/pool/linear architecture).
-- `conversion/requirements.txt` holds exactly `litert-torch==0.9.1`, `torchao==0.17.0`, `ai-edge-litert==2.1.6` — these must never be added to the root `requirements.txt`, since the existing CI job (`.github/workflows/tests.yml`) must keep working with only the root install.
+- `conversion/requirements.txt` holds exactly `litert-torch==0.9.1`, `torchao==0.17.0`, `ai-edge-litert==2.1.5` (see Tech Stack note on the version) — these must never be added to the root `requirements.txt`, since the existing CI job (`.github/workflows/tests.yml`) must keep working with only the root install.
 - Every `litert_torch`/`torchao`/`ai_edge_litert` import inside `conversion/` must be inside a function, not at module level — matching the lazy-import pattern already established in `training/train.py` for GlucoBench, so importing `conversion.convert` or `conversion.benchmark` never requires these dependencies to be installed.
 - INT8 calibration uses `formatter.val_data`, never `formatter.test_data` — the test set is reserved for the accuracy-delta comparison and must stay uncontaminated by anything that shaped the quantized model.
 - Latency numbers are measured on this development machine's CPU via `ai_edge_litert`'s `Interpreter`, explicitly labeled as a proxy — nothing in code output or docs may imply this is a real Android on-device measurement (that comes in the next sub-project).
@@ -193,7 +193,7 @@ git commit -m "Add --seed and --save-checkpoint flags to the training CLI"
 ```
 litert-torch==0.9.1
 torchao==0.17.0
-ai-edge-litert==2.1.6
+ai-edge-litert==2.1.5
 ```
 
 - [ ] **Step 3: Install and verify**
