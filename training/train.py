@@ -19,6 +19,10 @@ GLUCOEDGE_ROOT = Path(__file__).resolve().parent.parent
 GLUCOBENCH_ROOT = GLUCOEDGE_ROOT / "GlucoBench"
 
 
+def set_seed(seed: int) -> None:
+    torch.manual_seed(seed)
+
+
 def load_formatter(dataset: str) -> "DataFormatter":
     # Imported lazily: GlucoBench is an external clone, not a package
     # dependency, so only the code path that actually reads its data
@@ -95,7 +99,12 @@ def main():
     parser.add_argument("--dataset", choices=["iglu", "weinstock"], required=True)
     parser.add_argument("--classes", choices=["5", "3"], default="5")
     parser.add_argument("--epochs", type=int, default=15)
+    parser.add_argument("--seed", type=int, default=None)
+    parser.add_argument("--save-checkpoint", action="store_true")
     args = parser.parse_args()
+
+    if args.seed is not None:
+        set_seed(args.seed)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     formatter = load_formatter(args.dataset)
@@ -116,10 +125,17 @@ def main():
     print(f"train class counts: {train_label_counts}")
 
     model = train_model(train_ds, val_ds, len(classes), args.epochs, device)
-    report = evaluate(model, test_ds, classes, device)
 
     results_dir = GLUCOEDGE_ROOT / "results"
     results_dir.mkdir(exist_ok=True)
+
+    if args.save_checkpoint:
+        checkpoint_path = results_dir / f"{args.dataset}_{args.classes}class_model.pt"
+        torch.save(model.state_dict(), checkpoint_path)
+        print(f"wrote {checkpoint_path}")
+
+    report = evaluate(model, test_ds, classes, device)
+
     out_path = results_dir / f"{args.dataset}_{args.classes}class_report.json"
     with open(out_path, "w") as f:
         json.dump(
