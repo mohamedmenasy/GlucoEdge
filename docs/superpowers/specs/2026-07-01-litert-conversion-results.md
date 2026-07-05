@@ -44,15 +44,15 @@ on this proxy."
 |---|---|---|
 | Original PyTorch checkpoint | 0.5184 | 0.5060 |
 | Float `.tflite` | 0.5184 | 0.5060 |
-| INT8 `.tflite` | 0.5552 | 0.3983 |
+| INT8 `.tflite` | 0.5866 | 0.4135 |
 
 Float conversion is lossless: its accuracy and macro-avg recall match the
 PyTorch checkpoint exactly, class-by-class (format conversion only, no
 precision loss).
 
 INT8 quantization's accuracy is *higher* than the float/PyTorch baseline
-(0.5184 -> 0.5552, +3.68 points) but its macro-avg recall is *lower*
-(0.5060 -> 0.3983, -10.77 points). Reporting only the accuracy number here
+(0.5184 -> 0.5866, +6.82 points) but its macro-avg recall is *lower*
+(0.5060 -> 0.4135, -9.25 points). Reporting only the accuracy number here
 would be actively misleading, and would repeat the exact mistake this
 project has already flagged and avoided once before (the original iglu
 smoke test's whole reason for existing: always predicting the majority
@@ -61,18 +61,25 @@ class beats a real model on raw accuracy while being useless). `stable` is
 imbalanced. Per-class recall shows the mechanism directly: INT8 only
 improves recall on the majority class; every other class gets worse.
 
+The calibration set for the INT8 conversion was 200 real windows from the
+validation split, which under-covers the input range: the learned input
+quantization ceiling is ~240 mg/dL while the weinstock test data reaches
+401 mg/dL, so roughly 28% of test windows saturate at the input even with
+correct clipping — a real, documented cost of static INT8 with narrow
+calibration, not an implementation artifact.
+
 | class | support (% of test set) | PyTorch/float recall | INT8 recall | change |
 |---|---|---|---|---|
-| falling_fast | 3,692 (2.9%) | 0.5119 | 0.1324 | -0.3795 (-74.1% relative) |
-| falling | 11,387 (9.0%) | 0.5484 | 0.3919 | -0.1565 (-28.5% relative) |
-| stable | 95,998 (75.5%) | 0.5225 | 0.6133 | +0.0909 (+17.4% relative) |
-| rising | 11,012 (8.7%) | 0.4761 | 0.4108 | -0.0653 (-13.7% relative) |
-| rising_fast | 5,076 (4.0%) | 0.4712 | 0.4431 | -0.0282 (-6.0% relative) |
+| falling_fast | 3,692 (2.9%) | 0.5119 | 0.1907 | -0.3212 (-62.7% relative) |
+| falling | 11,387 (9.0%) | 0.5484 | 0.4306 | -0.1178 (-21.5% relative) |
+| stable | 95,998 (75.5%) | 0.5225 | 0.6529 | +0.1304 (+25.0% relative) |
+| rising | 11,012 (8.7%) | 0.4761 | 0.3845 | -0.0916 (-19.2% relative) |
+| rising_fast | 5,076 (4.0%) | 0.4712 | 0.4090 | -0.0622 (-13.2% relative) |
 
 INT8 quantization biased predictions toward the majority `stable` class:
 `stable`'s recall rose while all four minority-class recalls fell,
 `falling_fast` (the smallest class, 2.9% of the test set) hit hardest with
-a 74.1% relative drop. The accuracy improvement is an artifact of that
+a 62.7% relative drop. The accuracy improvement is an artifact of that
 majority-class bias, not a genuine gain — on an imbalanced test set like
 this one, predicting the majority class more often mechanically raises
 accuracy while making the classifier worse at catching the minority trend
@@ -84,7 +91,7 @@ INT8 quantization's real, measured effect on this model is: a genuine
 ~31% smaller file (5.25 KB saved), no measurable latency benefit on this
 CPU proxy (the model is too small for compute savings to show up over
 fixed interpreter-call overhead), and a real macro-avg-recall cost
-(-10.77 points, driven by majority-class bias) that the top-line accuracy
+(-9.25 points, driven by majority-class bias) that the top-line accuracy
 number alone hides rather than reveals. Whether that size-for-recall
 tradeoff is worth taking is a decision for the next sub-project (the
 Android app) to make explicitly against real constraints, rather than

@@ -30,7 +30,9 @@ def _quantize_input(window: np.ndarray, input_detail: dict) -> np.ndarray:
     if dtype == np.float32:
         return x
     scale, zero_point = input_detail["quantization"]
-    return ((x / scale) + zero_point).astype(dtype)
+    info = np.iinfo(dtype)
+    q = np.round(x / scale) + zero_point
+    return np.clip(q, info.min, info.max).astype(dtype)
 
 
 def _dequantize_output(raw_output: np.ndarray, output_detail: dict) -> np.ndarray:

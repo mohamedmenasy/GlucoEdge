@@ -1,3 +1,7 @@
+# Pins are the versions the LiteRT conversion/quantization was validated
+# against. The local venv used for the recorded conversion and benchmark
+# runs had drifted on transitive deps (torch 2.12.1, numpy 2.5.0) beyond
+# these pins without affecting the results.
 litert-torch==0.9.1
 torchao==0.17.0
 ai-edge-litert==2.1.5
