@@ -78,6 +78,37 @@ majority of the data, so a model that always predicts `stable` beats a
 real classifier on raw accuracy while being useless for the actual
 product. Per-class recall is the metric that matters.)
 
+## Android app (`android/`)
+
+Kotlin + Jetpack Compose app that replays a CGM trace through LiteRT
+entirely on-device. On real hardware it runs inference via the LiteRT
+**CompiledModel** API; on emulators it falls back to the classic
+`Interpreter` (XNNPACK off), because `CompiledModel` natively crashes
+(SIGILL, in a CPU feature-probe instruction) on Apple-Silicon-hosted AVDs.
+The UI shows which engine and which environment (emulator/device) are
+active. The manifest requests **no INTERNET permission** — the OS itself
+guarantees no network calls for inference, and CI fails if any dependency
+tries to merge that permission in.
+
+- Bundled models: `trend_float.tflite` (default) and `trend_int8.tflite`
+  (toggle in-app) — provenance and hashes in
+  `android/app/src/main/assets/MODELS.md`.
+- Replay data: a committed synthetic trace; optionally extract a real
+  GlucoBench segment locally (never committed) with
+  `python -m conversion.export_replay_trace`.
+- Build: `cd android && ./gradlew :app:assembleDebug`
+- Unit tests (run in CI): `./gradlew :app:testDebugUnitTest`
+- **Parity tests (local-only gate, needs an emulator/device):**
+  `./gradlew :app:connectedDebugAndroidTest` — proves the Kotlin inference
+  path reproduces the Python benchmark's outputs (golden vectors) for both
+  models, including round-and-clip INT8 input quantization. This currently
+  runs against the emulator fallback path; the CompiledModel path is
+  compile-verified but stays unverified until this suite runs on a physical
+  device.
+
+The app shows measured on-device inference latency; numbers from an
+emulator are labeled as such and are not device measurements.
+
 ## Roadmap
 
 Per the original project plan, in order:
