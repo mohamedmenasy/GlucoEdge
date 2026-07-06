@@ -75,11 +75,13 @@ fun MainScreen(viewModel: MainViewModel, deviceLabel: String) {
                     Text(if (s == state.speed) "[${s.multiplier}×]" else "${s.multiplier}×")
                 }
             }
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = viewModel::onToggleModel) {
                 Text(
-                    if (state.model.name == "FLOAT") "INT8" else "float",
-                    maxLines = 1,
-                    softWrap = false
+                    if (state.model.name == "FLOAT") "Switch to INT8 model" else "Switch to float model",
+                    maxLines = 1
                 )
             }
         }
