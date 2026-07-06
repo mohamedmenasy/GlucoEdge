@@ -10,6 +10,10 @@
   "trend_float.tflite": "eb96c7e66ab13a41a6bacdcbeb00c0c089d63f67dd1a45c2947a48ff301b08e6",
   "trend_int8.tflite": "0dc3538704c89f055fb7437e50a5bf42c81a64853a4b527d49c206569f8bea29"
  },
+ "int8_output_quant": {
+  "scale": 0.03525744006037712,
+  "zero_point": 58
+ },
  "vectors": [
   {
    "window": [

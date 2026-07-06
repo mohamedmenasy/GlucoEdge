@@ -203,3 +203,14 @@ Compose defaults.
 - Synthetic trace generator shape (plausible mg/dL dynamics covering all
   five classes, including values above 240 so INT8 saturation is visible
   in the demo and covered by goldens).
+
+## Implementation notes (recorded deviations)
+
+Inference runs on the `ViewModel`'s main-dispatcher `collect` rather than a
+background dispatcher; this is plan-sanctioned (the plan doesn't mandate a
+background dispatcher), and moot in practice since the ~1 ms per-model
+latency makes blocking the UI thread a non-issue — the reported latency
+numbers therefore share the UI thread with everything else. The float
+parity tolerance shipped at 1e-5 (the tighter of the two the spec allowed):
+all 20 golden vectors pass at that tolerance on the emulator, so the 1e-4
+fallback was never needed.

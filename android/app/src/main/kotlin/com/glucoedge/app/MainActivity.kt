@@ -1,6 +1,5 @@
 package com.glucoedge.app
 
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.glucoedge.app.inference.TrendClassifier
+import com.glucoedge.app.inference.isEmulator
 import com.glucoedge.app.replay.CsvTraceLoader
 import com.glucoedge.app.ui.GlucoEdgeTheme
 import com.glucoedge.app.ui.MainScreen
@@ -34,9 +34,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val deviceLabel = if (Build.FINGERPRINT.contains("generic") ||
-            Build.MODEL.contains("sdk_gphone") || Build.HARDWARE == "ranchu"
-        ) "emulator" else "device"
+        val deviceLabel = if (isEmulator()) "emulator" else "device"
         setContent { GlucoEdgeTheme { MainScreen(viewModel, deviceLabel) } }
     }
 }

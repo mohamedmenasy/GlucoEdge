@@ -101,7 +101,10 @@ tries to merge that permission in.
   `android/app/src/main/assets/MODELS.md`.
 - Replay data: a committed synthetic trace; optionally extract a real
   GlucoBench segment locally (never committed) with
-  `python -m conversion.export_replay_trace`.
+  `python -m conversion.export_replay_trace`. An APK built on a machine
+  where `real_trace.csv` has been extracted bundles that (GlucoBench-derived)
+  file as an asset — don't distribute such builds; the committed repo and CI
+  builds contain only the synthetic trace.
 - Build: `cd android && ./gradlew :app:assembleDebug`
 - Unit tests (run in CI): `./gradlew :app:testDebugUnitTest`
 - **Parity tests (local-only gate, needs an emulator/device):**

@@ -1,7 +1,6 @@
 package com.glucoedge.app.inference
 
 import android.content.Context
-import android.os.Build
 import com.google.ai.edge.litert.Accelerator
 import com.google.ai.edge.litert.CompiledModel
 import java.io.File
@@ -35,22 +34,6 @@ interface Classifier {
 private data class QuantParams(val scale: Float, val zeroPoint: Int)
 
 /**
- * Detects the emulator/host pairing where `CompiledModel.create()` is known to SIGILL-crash
- * the process (see task-8-report.md): a native ARM SVE feature-probe instruction (`rdsvl`)
- * inside `libLiteRt.so`, run unconditionally at model-compile time, faults because this AVD's
- * guest kernel *advertises* SVE2/SME2 (inherited from an Apple Silicon host via
- * Hypervisor.framework passthrough) without actually being able to execute it. A SIGILL kills
- * the whole process and cannot be caught by Kotlin/JVM code, so the engine must be chosen
- * statically from build-time device signals, never via a runtime try/catch around
- * `CompiledModel.create()`.
- */
-private fun isEmulator(): Boolean =
-    Build.HARDWARE == "ranchu" ||
-        Build.HARDWARE == "cutf" ||
-        Build.FINGERPRINT.contains("generic") ||
-        Build.MODEL.contains("sdk_gphone")
-
-/**
  * Wraps a LiteRT inference backend (the hot path). For the INT8 model, input quantization
  * params are read ONCE at load time via the classic Interpreter API (same artifact) - never
  * hardcoded - and the Kotlin quantization replicates the corrected Python benchmark: round
@@ -64,9 +47,9 @@ private fun isEmulator(): Boolean =
  * Apple-Silicon-hosted) - a native ARM SVE feature-probe (`rdsvl`) inside `libLiteRt.so`, run
  * before any `Options`/`Accelerator` choice takes effect, faults because the guest kernel
  * advertises SVE2/SME2 it can't actually execute (full evidence, disassembly, and tombstones:
- * `.superpowers/sdd/task-8-report.md`). Since a SIGILL can't be caught at runtime, the engine
- * is chosen statically at load time from [isEmulator], not via try/catch around
- * `CompiledModel.create()`.
+ * `docs/superpowers/specs/2026-07-05-emulator-compiledmodel-sigill.md`). Since a SIGILL can't be
+ * caught at runtime, the engine is chosen statically at load time from [isEmulator], not via
+ * try/catch around `CompiledModel.create()`.
  *
  * **The `CompiledModel` branch is UNVERIFIED on real hardware.** It compiles and its API
  * surface matches the brief exactly (confirmed via `javap` against litert 2.1.0), but it has
@@ -187,7 +170,8 @@ class TrendClassifier private constructor(private val engine: Engine) : Classifi
 
             val engine = if (isEmulator()) {
                 // useXNNPACK(false): the SVE feature-probe that SIGILL-crashes on emulators
-                // lives in XNNPACK's native init path - see class KDoc and task-8-report.md.
+                // lives in XNNPACK's native init path - see class KDoc and
+                // docs/superpowers/specs/2026-07-05-emulator-compiledmodel-sigill.md.
                 // Interpreter(File, Options) reads/mmaps the cacheDir copy directly - no
                 // separate readBytes() + manual ByteBuffer wrap needed.
                 val interpreter = Interpreter(file, Interpreter.Options().setUseXNNPACK(false))

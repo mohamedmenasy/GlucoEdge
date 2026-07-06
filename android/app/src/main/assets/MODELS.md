@@ -29,7 +29,7 @@ exception, so there is no runtime try/fallback available - the engine is chosen 
 load time from build-time device signals (`Build.HARDWARE == "ranchu"`/`"cutf"`,
 `Build.FINGERPRINT` containing `"generic"`, or `Build.MODEL` containing `"sdk_gphone"`), never
 via try/catch around `CompiledModel.create()`. Full evidence (disassembly, tombstones) is in
-`.superpowers/sdd/task-8-report.md`.
+`docs/superpowers/specs/2026-07-05-emulator-compiledmodel-sigill.md`.
 
 On a device matching one of those emulator signals, `TrendClassifier` runs both models through
 the classic `org.tensorflow.lite.Interpreter` (XNNPACK explicitly disabled, which avoids the

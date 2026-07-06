@@ -72,12 +72,19 @@ def main() -> None:
         p.name: hashlib.sha256(p.read_bytes()).hexdigest()
         for p in [ASSETS / "trend_float.tflite", ASSETS / "trend_int8.tflite"]
     }
+    int8_scale, int8_zero_point = int8_out_detail["quantization"]
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(
         json.dumps(
-            {"class_names": CLASS_NAMES, "model_sha256": sha, "vectors": vectors},
+            {
+                "class_names": CLASS_NAMES,
+                "model_sha256": sha,
+                "int8_output_quant": {"scale": float(int8_scale), "zero_point": int(int8_zero_point)},
+                "vectors": vectors,
+            },
             indent=1,
         )
+        + "\n"
     )
     print(f"wrote {OUT} ({len(vectors)} vectors, classes all covered)")
 

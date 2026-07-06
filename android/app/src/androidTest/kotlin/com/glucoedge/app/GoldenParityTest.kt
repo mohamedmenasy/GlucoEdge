@@ -3,6 +3,7 @@ package com.glucoedge.app
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.glucoedge.app.inference.ModelFile
+import com.glucoedge.app.inference.QuantizationMath
 import com.glucoedge.app.inference.TrendClassifier
 import java.security.MessageDigest
 import org.json.JSONObject
@@ -58,7 +59,7 @@ class GoldenParityTest {
                         "vector $i logit $j",
                         expectedLogits.getDouble(j),
                         prediction.logits[j].toDouble(),
-                        1e-4,
+                        1e-5,
                     )
                 }
             }
@@ -69,7 +70,11 @@ class GoldenParityTest {
 
     @Test
     fun int8ModelMatchesPythonClasses() {
-        val vectors = goldens().getJSONArray("vectors")
+        val goldens = goldens()
+        val vectors = goldens.getJSONArray("vectors")
+        val outputQuant = goldens.getJSONObject("int8_output_quant")
+        val scale = outputQuant.getDouble("scale").toFloat()
+        val zeroPoint = outputQuant.getInt("zero_point")
         val classifier = TrendClassifier.create(appContext, ModelFile.INT8)
         try {
             for (i in 0 until vectors.length()) {
@@ -79,6 +84,25 @@ class GoldenParityTest {
                 }
                 val prediction = classifier.classify(window)
                 assertEquals("vector $i int8 class", v.getInt("int8_class"), prediction.classIndex)
+
+                // Exact parity, not just argmax: dequantize the golden raw int8 output in
+                // Kotlin via the same QuantizationMath the app uses, and require bit-for-bit
+                // agreement with the on-device logits. Both sides compute (q - zeroPoint) *
+                // scale in fp32 from the same integer inputs, so exact equality is achievable -
+                // unlike the float model, there is no accumulated floating-point arithmetic
+                // difference to tolerate.
+                val rawOutput = v.getJSONArray("int8_raw_output")
+                val rawBytes = ByteArray(rawOutput.length()) { rawOutput.getInt(it).toByte() }
+                val expectedLogits = QuantizationMath.dequantizeInt8(rawBytes, scale, zeroPoint)
+                assertEquals("vector $i int8 logit count", expectedLogits.size, prediction.logits.size)
+                for (j in expectedLogits.indices) {
+                    assertEquals(
+                        "vector $i int8 logit $j",
+                        expectedLogits[j],
+                        prediction.logits[j],
+                        0.0f,
+                    )
+                }
             }
         } finally {
             classifier.close()
