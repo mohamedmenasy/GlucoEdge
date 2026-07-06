@@ -76,7 +76,11 @@ fun MainScreen(viewModel: MainViewModel, deviceLabel: String) {
                 }
             }
             OutlinedButton(onClick = viewModel::onToggleModel) {
-                Text(if (state.model.name == "FLOAT") "→ INT8" else "→ float")
+                Text(
+                    if (state.model.name == "FLOAT") "INT8" else "float",
+                    maxLines = 1,
+                    softWrap = false
+                )
             }
         }
 
