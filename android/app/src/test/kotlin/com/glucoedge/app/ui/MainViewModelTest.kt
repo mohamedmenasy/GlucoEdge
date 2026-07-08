@@ -1,11 +1,14 @@
 package com.glucoedge.app.ui
 
+import com.glucoedge.app.explain.ExplainerState
+import com.glucoedge.app.explain.NoteGenerator
 import com.glucoedge.app.inference.Classifier
 import com.glucoedge.app.inference.Prediction
 import com.glucoedge.app.replay.Reading
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -76,4 +79,72 @@ class MainViewModelTest {
         assertEquals(com.glucoedge.app.inference.ModelFile.INT8, vm.uiState.value.model)
         assertEquals(0, vm.uiState.value.stats.count)
     }
+
+    @Test fun explainerHiddenWithoutModelFile() = runTest(dispatcher) {
+        val vm = viewModel() // default modelFileProvider returns null
+        assertEquals(ExplainerState.Hidden, vm.explainerState.value)
+    }
+
+    @Test fun explainerReadyWithModelAndGeneratesNote() = runTest(dispatcher) {
+        val gen = FakeGenerator()
+        val vm = MainViewModel(
+            traceSource = TraceSource(trace, 0, "synthetic"),
+            classifierFactory = { fake },
+            modelFileProvider = { java.io.File("/fake/model.litertlm") },
+            noteGeneratorFactory = { gen },
+            explainDispatcher = dispatcher,
+        )
+        assertEquals(ExplainerState.Ready, vm.explainerState.value)
+        vm.onPlayPause()
+        advanceTimeBy(12 * 5_000L); runCurrent()   // prediction exists now
+        vm.onExplain()
+        advanceUntilIdle()
+        assertEquals(ExplainerState.Note("A calm, factual note."), vm.explainerState.value)
+        // Prompt was built from replayed-data facts via PromptBuilder:
+        assert(gen.prompts.single().contains("predicted trend for the next 15 minutes is \"stable\""))
+        assert(gen.prompts.single().contains("Do not give advice"))
+    }
+
+    @Test fun explainSurfacesErrorsWithoutCrashing() = runTest(dispatcher) {
+        val vm = MainViewModel(
+            traceSource = TraceSource(trace, 0, "synthetic"),
+            classifierFactory = { fake },
+            modelFileProvider = { java.io.File("/fake/model.litertlm") },
+            noteGeneratorFactory = { FakeGenerator(fail = true) },
+            explainDispatcher = dispatcher,
+        )
+        vm.onPlayPause()
+        advanceTimeBy(12 * 5_000L); runCurrent()
+        vm.onExplain()
+        advanceUntilIdle()
+        assert(vm.explainerState.value is ExplainerState.Error)
+    }
+
+    @Test fun explainDoesNothingWithoutPrediction() = runTest(dispatcher) {
+        val vm = MainViewModel(
+            traceSource = TraceSource(trace, 0, "synthetic"),
+            classifierFactory = { fake },
+            modelFileProvider = { java.io.File("/fake/model.litertlm") },
+            noteGeneratorFactory = { FakeGenerator() },
+        )
+        vm.onExplain()
+        advanceUntilIdle()
+        assertEquals(ExplainerState.Ready, vm.explainerState.value)
+    }
+}
+
+private class FakeGenerator(
+    private val result: String = "A calm, factual note.",
+    private val fail: Boolean = false,
+) : NoteGenerator {
+    override var isInitialized = false
+    var prompts = mutableListOf<String>()
+    override suspend fun generate(prompt: String, onToken: (String) -> Unit): String {
+        isInitialized = true
+        prompts.add(prompt)
+        if (fail) throw RuntimeException("engine broke")
+        onToken(result)
+        return result
+    }
+    override fun close() {}
 }

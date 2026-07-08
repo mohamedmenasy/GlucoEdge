@@ -27,6 +27,10 @@ class MainActivity : ComponentActivity() {
                 return MainViewModel(
                     traceSource = TraceSource(loaded.readings, loaded.skippedRows, label),
                     classifierFactory = { model -> TrendClassifier.create(applicationContext, model) },
+                    modelFileProvider = { com.glucoedge.app.explain.ModelLocator.findModel(getExternalFilesDir(null)) },
+                    noteGeneratorFactory = { file ->
+                        com.glucoedge.app.explain.LitertLmExplainer(file, cacheDirPath = cacheDir.path)
+                    },
                 ) as T
             }
         }
