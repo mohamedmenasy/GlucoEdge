@@ -16,6 +16,11 @@ venv/
 *.pt
 *.pth
 *.tflite
+# Exception: the Android app's bundled model assets and synthetic trace are
+# committed (our own trained weights / generated data, not GlucoBench data).
+!android/app/src/main/assets/trend_float.tflite
+!android/app/src/main/assets/trend_int8.tflite
+!android/app/src/main/assets/synthetic_trace.csv
 *.onnx
 results/
 

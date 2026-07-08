@@ -18,10 +18,16 @@ last hour of continuous glucose monitor readings. It's a genuine forecast —
 the label is computed from a point after the input window ends, not
 recomputed from data the model can already see.
 
-Currently built: the training pipeline (`training/`) and the decision on
-how many output classes the model needs. Not yet built: on-device model
-conversion/quantization, the Android app, and the on-device explanation
-stretch goal — see [Roadmap](#roadmap).
+Currently built: the training pipeline (`training/`), the decision on how
+many output classes the model needs, LiteRT conversion + INT8 quantization
+(with a measured size/accuracy tradeoff — see
+[the results doc](docs/superpowers/specs/2026-07-01-litert-conversion-results.md)),
+and the Android app itself (a replay demo bundling both the float and INT8
+models — see [Android app](#android-app-android) below). Not yet built:
+this README's own quantization tradeoff table, the on-device explanation
+stretch goal, and verifying the app's `CompiledModel` inference path on a
+physical device (so far it's only run on the `Interpreter` emulator
+fallback) — see [Roadmap](#roadmap).
 
 **The 5-class question is settled with real data, not assumed.** On
 GlucoBench's small 4-patient iglu config, the two "fast" trend classes had
@@ -78,24 +84,62 @@ majority of the data, so a model that always predicts `stable` beats a
 real classifier on raw accuracy while being useless for the actual
 product. Per-class recall is the metric that matters.)
 
+## Android app (`android/`)
+
+Kotlin + Jetpack Compose app that replays a CGM trace through LiteRT
+entirely on-device. On real hardware it runs inference via the LiteRT
+**CompiledModel** API; on emulators it falls back to the classic
+`Interpreter` (XNNPACK off), because `CompiledModel` natively crashes
+(SIGILL, in a CPU feature-probe instruction) on Apple-Silicon-hosted AVDs.
+The UI shows which engine and which environment (emulator/device) are
+active. The manifest requests **no INTERNET permission** — the OS itself
+guarantees no network calls for inference, and CI fails if any dependency
+tries to merge that permission in.
+
+- Bundled models: `trend_float.tflite` (default) and `trend_int8.tflite`
+  (toggle in-app) — provenance and hashes in
+  `android/app/src/main/assets/MODELS.md`.
+- Replay data: a committed synthetic trace; optionally extract a real
+  GlucoBench segment locally (never committed) with
+  `python -m conversion.export_replay_trace`. An APK built on a machine
+  where `real_trace.csv` has been extracted bundles that (GlucoBench-derived)
+  file as an asset — don't distribute such builds; the committed repo and CI
+  builds contain only the synthetic trace.
+- Build: `cd android && ./gradlew :app:assembleDebug`
+- Unit tests (run in CI): `./gradlew :app:testDebugUnitTest`
+- **Parity tests (local-only gate, needs an emulator/device):**
+  `./gradlew :app:connectedDebugAndroidTest` — proves the Kotlin inference
+  path reproduces the Python benchmark's outputs (golden vectors) for both
+  models, including round-and-clip INT8 input quantization. This currently
+  runs against the emulator fallback path; the CompiledModel path is
+  compile-verified but stays unverified until this suite runs on a physical
+  device.
+
+The app shows measured on-device inference latency; numbers from an
+emulator are labeled as such and are not device measurements.
+
 ## Roadmap
 
 Per the original project plan, in order:
 
 1. ~~Rebuild the training pipeline; resolve 5-class vs 3-class on
    weinstock~~ — done, see above.
-2. Convert the trained model to [LiteRT](https://ai.google.dev/edge/litert)
+2. ~~Convert the trained model to [LiteRT](https://ai.google.dev/edge/litert)
    (the current name for what used to be called TFLite) and post-training
-   quantize to INT8. Report the size/latency/accuracy tradeoff, since that
-   comparison matters more to this project's story than squeezing out
-   extra accuracy. *Not started — this run kept no checkpoint or fixed
-   seed, so it starts with a fresh, reproducible retrain.*
-3. Scaffold an Android app (Kotlin + Jetpack Compose) that loads the
-   quantized model via LiteRT's `CompiledModel` API and runs inference
-   against a replayed CGM stream (a CSV replayed at real or sped-up
-   5-minute intervals — no real sensor, no network calls, ever).
+   quantize to INT8, reporting the size/latency/accuracy tradeoff~~ — done:
+   float conversion is lossless, INT8 is ~31% smaller with no measurable
+   latency change but a real macro-avg-recall cost from majority-class
+   bias. Full numbers:
+   [`docs/superpowers/specs/2026-07-01-litert-conversion-results.md`](docs/superpowers/specs/2026-07-01-litert-conversion-results.md).
+3. ~~Build an Android app (Kotlin + Jetpack Compose) that runs inference
+   against a replayed CGM stream~~ — done, see
+   [Android app](#android-app-android) above.
 4. Expand this README with the quantization tradeoff table and finalize
    the disclaimer for the shipped app.
+5. Verify the app's `CompiledModel` inference path on a physical device —
+   it's currently compile-verified but only exercised on the `Interpreter`
+   emulator fallback (real Android hardware crashes on Apple-Silicon-hosted
+   AVDs specifically, not on the fallback path itself).
 
 Optional stretch, once the above works end to end: a fully local
 on-device explanation layer (LiteRT-LM + a small open-weight model) that
