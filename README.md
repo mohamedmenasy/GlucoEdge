@@ -24,9 +24,8 @@ many output classes the model needs, LiteRT conversion + INT8 quantization
 [the results doc](docs/superpowers/specs/2026-07-01-litert-conversion-results.md)),
 and the Android app itself (a replay demo bundling both the float and INT8
 models — see [Android app](#android-app-android) below, with the
-`CompiledModel` path verified on a physical device). Not yet built:
-this README's own quantization tradeoff table and the on-device
-explanation stretch goal — see [Roadmap](#roadmap).
+`CompiledModel` path verified on a physical device). Not yet built: the
+on-device explanation stretch goal — see [Roadmap](#roadmap).
 
 **The 5-class question is settled with real data, not assumed.** On
 GlucoBench's small 4-patient iglu config, the two "fast" trend classes had
@@ -117,6 +116,55 @@ tries to merge that permission in.
 The app shows measured on-device inference latency; numbers from an
 emulator are labeled as such and are not device measurements.
 
+## The quantization tradeoff, measured
+
+The headline comparison across the three model artifacts, on the full
+127,165-window weinstock test set (accuracy/recall) and a real phone
+(latency):
+
+| | Size | Latency mean / p95 (device) | Accuracy | Macro-avg recall |
+|---|---|---|---|---|
+| PyTorch checkpoint | 14.4 KB | — (not deployable) | 0.5184 | 0.5060 |
+| Float `.tflite` (shipped default) | 16.95 KB | 0.334 ms / 0.540 ms | 0.5184 | 0.5060 |
+| INT8 `.tflite` | 11.70 KB | 0.484 ms / 0.665 ms | 0.5866 | 0.4135 |
+
+Latency is measured in-app on a Samsung Galaxy S22 Ultra (Android 16) via
+the CompiledModel path — the full Kotlin classify path (buffer writes,
+quantization, softmax), not just kernel invoke; float over a full
+100-inference rolling window, INT8 over a 21-inference window. The
+conversion phase's dev-machine CPU proxy reached the same qualitative
+conclusion: INT8 is not faster at this model size — per-call overhead
+dominates a ~2,900-parameter network.
+
+Float conversion is exactly lossless: its classification report is
+byte-identical to the PyTorch checkpoint's. INT8's *higher* accuracy is
+not an improvement — it's majority-class bias, visible immediately in
+per-class recall:
+
+| Class | Support (% of test) | Float recall | INT8 recall | Change |
+|---|---|---|---|---|
+| `falling_fast` | 3,692 (2.9%) | 0.5119 | 0.1907 | −0.3212 (−62.7% relative) |
+| `falling` | 11,387 (9.0%) | 0.5484 | 0.4306 | −0.1178 |
+| `stable` | 95,998 (75.5%) | 0.5225 | 0.6529 | +0.1304 |
+| `rising` | 11,012 (8.7%) | 0.4761 | 0.3845 | −0.0916 |
+| `rising_fast` | 5,076 (4.0%) | 0.4712 | 0.4090 | −0.0622 |
+
+`stable` — 75.5% of the test set — is the only class INT8 helps;
+`falling_fast`, the rarest class and half the reason a trend classifier
+exists, loses 62.7% of its recall. (A degenerate model that always
+predicts `stable` scores ~75.5% accuracy with a macro-avg recall of
+exactly 0.20 — which is why this project never reports accuracy alone.)
+Part of the INT8 degradation is calibration coverage: static quantization
+calibrated on 200 validation windows learned an input ceiling of
+~240 mg/dL while the test data reaches 401 mg/dL, so ~28% of test windows
+saturate at the INT8 input boundary even with correct clipping.
+
+So the measured tradeoff is: INT8 buys a ~31% smaller file (5.25 KB) and
+costs 9.25 macro-recall points, with no latency benefit — which is why
+the app ships float as its default and offers INT8 as a toggle. Full
+analysis:
+[`docs/superpowers/specs/2026-07-01-litert-conversion-results.md`](docs/superpowers/specs/2026-07-01-litert-conversion-results.md).
+
 ## Roadmap
 
 Per the original project plan, in order:
@@ -133,8 +181,10 @@ Per the original project plan, in order:
 3. ~~Build an Android app (Kotlin + Jetpack Compose) that runs inference
    against a replayed CGM stream~~ — done, see
    [Android app](#android-app-android) above.
-4. Expand this README with the quantization tradeoff table and finalize
-   the disclaimer for the shipped app.
+4. ~~Expand this README with the quantization tradeoff table and finalize
+   the disclaimer for the shipped app~~ — done, see
+   [The quantization tradeoff, measured](#the-quantization-tradeoff-measured)
+   and [Disclaimer](#disclaimer) above.
 5. ~~Verify the app's `CompiledModel` inference path on a physical
    device~~ — done: golden-vector parity 3/3 on a Galaxy S22 Ultra
    (Android 16) via `CompiledModel`, no SIGILL; in-app latency float
@@ -146,6 +196,18 @@ Optional stretch, once the above works end to end: a fully local
 on-device explanation layer (LiteRT-LM + a small open-weight model) that
 turns a raw trend prediction into a plain-language note — labeled clearly
 as a demo feature, not medical guidance.
+
+## Disclaimer
+
+GlucoEdge is a portfolio demonstration of on-device ML engineering. It is
+**not a medical device**: it does not diagnose, monitor, or advise on
+diabetes management, and no output may inform a treatment decision. No
+reported number has been clinically validated — accuracy and recall
+figures describe performance on a public research benchmark, nothing
+more. The app states this on-screen, verbatim: *"Portfolio demo on public
+research data — not a medical device, not treatment guidance."* All data
+comes from the public GlucoBench research benchmark; no proprietary data,
+schemas, or algorithms are used anywhere in the project.
 
 ## Data attribution
 
