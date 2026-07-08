@@ -51,10 +51,9 @@ private data class QuantParams(val scale: Float, val zeroPoint: Int)
  * caught at runtime, the engine is chosen statically at load time from [isEmulator], not via
  * try/catch around `CompiledModel.create()`.
  *
- * **The `CompiledModel` branch is UNVERIFIED on real hardware.** It compiles and its API
- * surface matches the brief exactly (confirmed via `javap` against litert 2.1.0), but it has
- * never been executed - this environment only has the SIGILL-affected emulator available. It
- * stays unverified until the golden-vector parity suite is run on a physical device.
+ * The `CompiledModel` branch is verified on real hardware: the golden-vector parity suite
+ * passed 3/3 on a Galaxy S22 Ultra (Android 16) with this gate routing to `CompiledModel`
+ * (2026-07-07) - no SIGILL, float logits within 1e-5, INT8 outputs bit-exact.
  */
 class TrendClassifier private constructor(private val engine: Engine) : Classifier {
 
@@ -84,7 +83,7 @@ class TrendClassifier private constructor(private val engine: Engine) : Classifi
         fun close()
     }
 
-    /** Real-hardware hot path: LiteRT's `CompiledModel` API. Unverified - see class KDoc. */
+    /** Real-hardware hot path: LiteRT's `CompiledModel` API. Device-verified - see class KDoc. */
     private class CompiledModelEngine(
         private val compiledModel: CompiledModel,
         private val inputQuant: QuantParams?,

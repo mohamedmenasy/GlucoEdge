@@ -36,9 +36,17 @@ build-time device signal (`isEmulator()` — `Build.HARDWARE` is `ranchu` or
 Emulators matching that signal run the classic `org.tensorflow.lite.
 Interpreter` with `setUseXNNPACK(false)`, which avoids the crashing probe.
 `CompiledModel` remains the intended real-hardware path — it compiles and
-its API surface is `javap`-verified against the actual litert 2.1.0 jar,
-but it is **unverified on real hardware**: no physical device was
-available in this environment, so the `CompiledModel` branch has never
-actually executed. It stays unverified until the golden-vector parity
-suite (`GoldenParityTest`, `connectedDebugAndroidTest`) is run on a
-physical Android device.
+its API surface is `javap`-verified against the actual litert 2.1.0 jar.
+
+**Update 2026-07-07 — verified on real hardware.** The golden-vector
+parity suite (`GoldenParityTest`, `connectedDebugAndroidTest`) was run on
+a physical Samsung Galaxy S22 Ultra (SM-S908E, Android 16): 3/3 tests
+passed with the device gate routing to `CompiledModel` — no SIGILL, float
+logits matched Python within 1e-5 and INT8 dequantized outputs matched
+bit-exactly across all 20 vectors. In-app latency on the same device
+(full Kotlin `classify()` path, including buffer writes, quantization,
+and softmax — a wider measurement than the conversion phase's
+invoke-only CPU proxy): float mean 0.334 ms / p95 0.540 ms over a full
+100-inference window; INT8 mean 0.484 ms / p95 0.665 ms over 21
+inferences. INT8 showed no latency advantage on-device, consistent with
+the CPU-proxy conclusion.

@@ -23,11 +23,10 @@ many output classes the model needs, LiteRT conversion + INT8 quantization
 (with a measured size/accuracy tradeoff — see
 [the results doc](docs/superpowers/specs/2026-07-01-litert-conversion-results.md)),
 and the Android app itself (a replay demo bundling both the float and INT8
-models — see [Android app](#android-app-android) below). Not yet built:
-this README's own quantization tradeoff table, the on-device explanation
-stretch goal, and verifying the app's `CompiledModel` inference path on a
-physical device (so far it's only run on the `Interpreter` emulator
-fallback) — see [Roadmap](#roadmap).
+models — see [Android app](#android-app-android) below, with the
+`CompiledModel` path verified on a physical device). Not yet built:
+this README's own quantization tradeoff table and the on-device
+explanation stretch goal — see [Roadmap](#roadmap).
 
 **The 5-class question is settled with real data, not assumed.** On
 GlucoBench's small 4-patient iglu config, the two "fast" trend classes had
@@ -110,10 +109,10 @@ tries to merge that permission in.
 - **Parity tests (local-only gate, needs an emulator/device):**
   `./gradlew :app:connectedDebugAndroidTest` — proves the Kotlin inference
   path reproduces the Python benchmark's outputs (golden vectors) for both
-  models, including round-and-clip INT8 input quantization. This currently
-  runs against the emulator fallback path; the CompiledModel path is
-  compile-verified but stays unverified until this suite runs on a physical
-  device.
+  models, including round-and-clip INT8 input quantization. On an emulator
+  this exercises the `Interpreter` fallback; on a physical device it
+  exercises `CompiledModel` — verified 3/3 on a Galaxy S22 Ultra
+  (Android 16): float logits within 1e-5, INT8 outputs bit-exact.
 
 The app shows measured on-device inference latency; numbers from an
 emulator are labeled as such and are not device measurements.
@@ -136,10 +135,12 @@ Per the original project plan, in order:
    [Android app](#android-app-android) above.
 4. Expand this README with the quantization tradeoff table and finalize
    the disclaimer for the shipped app.
-5. Verify the app's `CompiledModel` inference path on a physical device —
-   it's currently compile-verified but only exercised on the `Interpreter`
-   emulator fallback (real Android hardware crashes on Apple-Silicon-hosted
-   AVDs specifically, not on the fallback path itself).
+5. ~~Verify the app's `CompiledModel` inference path on a physical
+   device~~ — done: golden-vector parity 3/3 on a Galaxy S22 Ultra
+   (Android 16) via `CompiledModel`, no SIGILL; in-app latency float
+   mean 0.334 ms / INT8 mean 0.484 ms (full Kotlin classify path — INT8
+   is again not faster). Details appended to
+   [the SIGILL decision record](docs/superpowers/specs/2026-07-05-emulator-compiledmodel-sigill.md).
 
 Optional stretch, once the above works end to end: a fully local
 on-device explanation layer (LiteRT-LM + a small open-weight model) that
