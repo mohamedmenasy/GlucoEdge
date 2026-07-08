@@ -38,7 +38,7 @@ parity suite. This is not a defect in the int8 `TensorBuffer` buffer API - `writ
 `readInt8` are real methods (confirmed via `javap`) and the `CompiledModel`-based
 implementation compiles cleanly.
 
-**The `CompiledModel` branch is UNVERIFIED on real hardware.** It compiles and its API surface
-matches the project brief exactly, but no physical device was available in this environment to
-run the golden-vector parity suite against it - the only device available is the
-SIGILL-affected emulator. It stays unverified until that parity test is run on a real phone.
+**The `CompiledModel` branch is verified on real hardware** (2026-07-07): the golden-vector
+parity suite passed 3/3 on a Samsung Galaxy S22 Ultra (SM-S908E, Android 16) with the device
+gate routing to `CompiledModel` - no SIGILL, float logits within 1e-5 of the Python benchmark,
+INT8 dequantized outputs bit-exact across all 20 vectors.
