@@ -6,6 +6,10 @@ import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.litertlm.EngineConfig
 import com.google.ai.edge.litertlm.SamplerConfig
 import java.io.File
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.flow.takeWhile
+import kotlinx.coroutines.isActive
 
 interface NoteGenerator {
     val isInitialized: Boolean
@@ -37,16 +41,48 @@ class LitertLmExplainer(
                 modelPath = modelFile.absolutePath,
                 backend = Backend.CPU(),
                 cacheDir = cacheDirPath,
+                // Bounds prompt + output tokens together (it's the kv-cache size;
+                // generation auto-stops once reached) - NOT an output-only cap.
+                // The prompt built by PromptBuilder runs ~150-200 tokens, so 512
+                // leaves ~300-350 tokens of headroom for the note itself, which
+                // MAX_NOTE_CHARS then trims further by characters. Deliberately
+                // higher than the design doc's "near 128": that figure assumed
+                // maxNumTokens was output-only, which would leave zero (or
+                // negative) budget once the prompt is counted against it and
+                // would break generation outright.
+                maxNumTokens = 512,
             )
         ).also { it.initialize(); engine = it }
 
         val sb = StringBuilder()
-        eng.createConversation(ConversationConfig(samplerConfig = SAMPLER)).use { conversation ->
-            conversation.sendMessageAsync(prompt).collect { token ->
-                val t = token.toString()
-                sb.append(t)
-                onToken(t)
-                if (sb.length >= MAX_NOTE_CHARS) return@collect // cap; flow completes naturally
+        // takeWhile checks the predicate before each emission is delivered to the
+        // collector, so collection - and therefore this JNI-backed generation
+        // stream - stops within one token of crossing MAX_NOTE_CHARS instead of
+        // running until the model decides it's done. Standard kotlinx.coroutines
+        // takeWhile swallows its internal short-circuit signal so this normally
+        // returns without throwing, but litertlm's Flow is backed by a native
+        // callback bridge we don't control; if cancelling it ever surfaces as a
+        // real CancellationException instead, that's still a successful
+        // stop-at-cap (not an error) as long as *this* coroutine wasn't the one
+        // being cancelled from outside - so only that case is swallowed below,
+        // and genuine outer cancellation is rethrown untouched.
+        try {
+            eng.createConversation(ConversationConfig(samplerConfig = SAMPLER)).use { conversation ->
+                conversation.sendMessageAsync(prompt)
+                    .takeWhile { sb.length < MAX_NOTE_CHARS }
+                    .collect { token ->
+                        val t = token.toString()
+                        sb.append(t)
+                        onToken(t)
+                    }
+            }
+        } catch (e: CancellationException) {
+            if (currentCoroutineContext().isActive) {
+                // Cap-triggered stop leaking as an exception rather than being
+                // absorbed internally - treat it as the successful completion it
+                // is and return what was captured so far.
+            } else {
+                throw e
             }
         }
         return sb.toString().take(MAX_NOTE_CHARS).trim()
