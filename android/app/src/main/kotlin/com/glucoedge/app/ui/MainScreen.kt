@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.glucoedge.app.explain.ExplainerState
 import com.glucoedge.app.inference.TrendClassifier
 import com.glucoedge.app.replay.Speed
 
@@ -83,6 +84,30 @@ fun MainScreen(viewModel: MainViewModel, deviceLabel: String) {
                     if (state.model.name == "FLOAT") "Switch to INT8 model" else "Switch to float model",
                     maxLines = 1
                 )
+            }
+        }
+
+        val explainer by viewModel.explainerState.collectAsState()
+        when (val ex = explainer) {
+            ExplainerState.Hidden -> {}
+            else -> {
+                OutlinedButton(
+                    onClick = viewModel::onExplain,
+                    enabled = ex !is ExplainerState.Generating && ex !is ExplainerState.LoadingModel,
+                ) { Text("Explain", maxLines = 1) }
+                when (ex) {
+                    ExplainerState.LoadingModel -> Text("loading model…", style = MaterialTheme.typography.bodySmall)
+                    ExplainerState.Generating -> Text("generating…", style = MaterialTheme.typography.bodySmall)
+                    is ExplainerState.Note -> Column {
+                        Text("On-device demo note — not medical guidance.",
+                             style = MaterialTheme.typography.labelSmall)
+                        Text(ex.text, style = MaterialTheme.typography.bodyMedium)
+                    }
+                    is ExplainerState.Error -> Text(ex.message,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall)
+                    else -> {}
+                }
             }
         }
 

@@ -22,10 +22,12 @@ Currently built: the training pipeline (`training/`), the decision on how
 many output classes the model needs, LiteRT conversion + INT8 quantization
 (with a measured size/accuracy tradeoff — see
 [the results doc](docs/superpowers/specs/2026-07-01-litert-conversion-results.md)),
-and the Android app itself (a replay demo bundling both the float and INT8
+the Android app itself (a replay demo bundling both the float and INT8
 models — see [Android app](#android-app-android) below, with the
-`CompiledModel` path verified on a physical device). Not yet built: the
-on-device explanation stretch goal — see [Roadmap](#roadmap).
+`CompiledModel` path verified on a physical device), and the optional
+on-device explanation layer (LiteRT-LM + Gemma 3 1B, fully offline — see
+[the setup notes](#optional-on-device-explanation-notes-litert-lm)). All
+planned pieces are built; see [Roadmap](#roadmap).
 
 **The 5-class question is settled with real data, not assumed.** On
 GlucoBench's small 4-patient iglu config, the two "fast" trend classes had
@@ -116,6 +118,34 @@ tries to merge that permission in.
 The app shows measured on-device inference latency; numbers from an
 emulator are labeled as such and are not device measurements.
 
+### Optional: on-device explanation notes (LiteRT-LM)
+
+With a Gemma 3 1B model pushed to the device, the app can generate a short
+plain-language note about the current prediction — fully offline (the app
+has no INTERNET permission), on-demand via an Explain button, and labeled
+on-screen as "On-device demo note — not medical guidance." Without the
+model file the feature is invisible and nothing else changes (CI and
+emulator builds are unaffected; no weights live in this repo). On a
+Galaxy S22 Ultra, a first tap in a fresh app process — engine
+initialization plus generation — rendered a note in about 8 seconds,
+and generation was demonstrated in airplane mode.
+
+Setup (once): download `gemma3-1b-it-int4.litertlm` from
+[litert-community/Gemma3-1B-IT](https://huggingface.co/litert-community/Gemma3-1B-IT)
+on your computer (Gemma license acceptance required), then:
+
+    adb push gemma3-1b-it-int4.litertlm /sdcard/Android/data/com.glucoedge.app/files/
+
+If the app is already running, back out and reopen it (or just resume it)
+after the push — the model check runs at startup and on resume.
+
+Adding the LiteRT-LM runtime grew the debug APK from 30.4 MB to 70.9 MB
+(30,355,314 → 70,853,447 bytes); the model file itself (~557 MB) never
+enters the repository. The build also gains a `checkNativeLibProvenance`
+guard: both LiteRT libraries bundle a `libLiteRt.so`, and the check fails
+CI if the packaged copy ever stops being the exact binary the classifier's
+parity suite was verified against.
+
 ## The quantization tradeoff, measured
 
 The headline comparison across the three model artifacts, on the full
@@ -192,10 +222,13 @@ Per the original project plan, in order:
    is again not faster). Details appended to
    [the SIGILL decision record](docs/superpowers/specs/2026-07-05-emulator-compiledmodel-sigill.md).
 
-Optional stretch, once the above works end to end: a fully local
+~~Optional stretch, once the above works end to end: a fully local
 on-device explanation layer (LiteRT-LM + a small open-weight model) that
 turns a raw trend prediction into a plain-language note — labeled clearly
-as a demo feature, not medical guidance.
+as a demo feature, not medical guidance~~ — done: Gemma 3 1B via
+LiteRT-LM, on-demand, offline-demonstrated, invisible without a
+user-supplied model file. See
+[the setup notes](#optional-on-device-explanation-notes-litert-lm).
 
 ## Disclaimer
 

@@ -32,4 +32,4 @@ jobs:
       - uses: android-actions/setup-android@v3
       - name: Build and unit-test the app
         working-directory: android
-        run: ./gradlew --no-daemon :app:assembleDebug :app:testDebugUnitTest :app:checkNoInternetPermission
+        run: ./gradlew --no-daemon :app:assembleDebug :app:testDebugUnitTest :app:checkNoInternetPermission :app:checkNativeLibProvenance

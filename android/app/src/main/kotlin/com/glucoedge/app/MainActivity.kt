@@ -27,6 +27,10 @@ class MainActivity : ComponentActivity() {
                 return MainViewModel(
                     traceSource = TraceSource(loaded.readings, loaded.skippedRows, label),
                     classifierFactory = { model -> TrendClassifier.create(applicationContext, model) },
+                    modelFileProvider = { com.glucoedge.app.explain.ModelLocator.findModel(getExternalFilesDir(null)) },
+                    noteGeneratorFactory = { file ->
+                        com.glucoedge.app.explain.LitertLmExplainer(file, cacheDirPath = cacheDir.path)
+                    },
                 ) as T
             }
         }
@@ -36,5 +40,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val deviceLabel = if (isEmulator()) "emulator" else "device"
         setContent { GlucoEdgeTheme { MainScreen(viewModel, deviceLabel) } }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.onResumeCheck()
     }
 }
