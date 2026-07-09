@@ -131,6 +131,37 @@ class MainViewModelTest {
         advanceUntilIdle()
         assertEquals(ExplainerState.Ready, vm.explainerState.value)
     }
+
+    @Test fun resumeCheckRevealsExplainWhenModelAppears() = runTest(dispatcher) {
+        var file: java.io.File? = null
+        val vm = MainViewModel(
+            traceSource = TraceSource(trace, 0, "synthetic"),
+            classifierFactory = { fake },
+            modelFileProvider = { file },
+        )
+        assertEquals(ExplainerState.Hidden, vm.explainerState.value)
+        file = java.io.File("/fake/model.litertlm")
+        vm.onResumeCheck()
+        assertEquals(ExplainerState.Ready, vm.explainerState.value)
+    }
+
+    @Test fun resumeCheckDoesNotClobberNote() = runTest(dispatcher) {
+        val gen = FakeGenerator()
+        val vm = MainViewModel(
+            traceSource = TraceSource(trace, 0, "synthetic"),
+            classifierFactory = { fake },
+            modelFileProvider = { java.io.File("/fake/model.litertlm") },
+            noteGeneratorFactory = { gen },
+            explainDispatcher = dispatcher,
+        )
+        vm.onPlayPause()
+        advanceTimeBy(12 * 5_000L); runCurrent()   // prediction exists now
+        vm.onExplain()
+        advanceUntilIdle()
+        assertEquals(ExplainerState.Note("A calm, factual note."), vm.explainerState.value)
+        vm.onResumeCheck()
+        assertEquals(ExplainerState.Note("A calm, factual note."), vm.explainerState.value)
+    }
 }
 
 private class FakeGenerator(

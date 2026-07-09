@@ -126,15 +126,18 @@ has no INTERNET permission), on-demand via an Explain button, and labeled
 on-screen as "On-device demo note — not medical guidance." Without the
 model file the feature is invisible and nothing else changes (CI and
 emulator builds are unaffected; no weights live in this repo). On a
-Galaxy S22 Ultra, a cold tap — including the first-time model load —
-produced a rendered note in ~8 seconds, and generation was demonstrated
-in airplane mode.
+Galaxy S22 Ultra, a first tap in a fresh app process — engine
+initialization plus generation — rendered a note in about 8 seconds,
+and generation was demonstrated in airplane mode.
 
 Setup (once): download `gemma3-1b-it-int4.litertlm` from
 [litert-community/Gemma3-1B-IT](https://huggingface.co/litert-community/Gemma3-1B-IT)
 on your computer (Gemma license acceptance required), then:
 
     adb push gemma3-1b-it-int4.litertlm /sdcard/Android/data/com.glucoedge.app/files/
+
+If the app is already running, back out and reopen it (or just resume it)
+after the push — the model check runs at startup and on resume.
 
 Adding the LiteRT-LM runtime grew the debug APK from 30.4 MB to 70.9 MB
 (30,355,314 → 70,853,447 bytes); the model file itself (~557 MB) never

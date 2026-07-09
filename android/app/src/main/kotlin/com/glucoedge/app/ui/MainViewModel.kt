@@ -152,6 +152,18 @@ class MainViewModel(
         }
     }
 
+    /** Re-detect the model file (spec: checked at startup AND on resume). */
+    fun onResumeCheck() {
+        val present = modelFileProvider() != null
+        _explainerState.update { state ->
+            when {
+                !present -> ExplainerState.Hidden
+                state is ExplainerState.Hidden -> ExplainerState.Ready
+                else -> state // never clobber an in-flight generation or a shown note
+            }
+        }
+    }
+
     override fun onCleared() {
         classifier?.close()
         noteGenerator?.close()

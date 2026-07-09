@@ -41,4 +41,9 @@ class MainActivity : ComponentActivity() {
         val deviceLabel = if (isEmulator()) "emulator" else "device"
         setContent { GlucoEdgeTheme { MainScreen(viewModel, deviceLabel) } }
     }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.onResumeCheck()
+    }
 }
