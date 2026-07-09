@@ -106,6 +106,8 @@ androidComponents {
                 }
             }.files
         val litertVersion = libs.versions.litert.get()
+        // Guard scope: arm64-v8a only (the ABI covered by device parity verification).
+        // x86_64 (emulator) uses Interpreter fallback, resolves from same dependency order.
         val provenanceTask = project.tasks.register("checkNativeLibProvenance") {
             inputs.dir(mergedNativeLibsDir)
             inputs.files(litertAarFiles)
