@@ -8,7 +8,7 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{tikz}
-\usepackage{url}
+\usepackage{xurl}
 \usepackage{xspace}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage[hidelinks]{hyperref}
@@ -28,10 +28,10 @@ Independent Researcher\\
 \maketitle
 
 \begin{abstract}
-Continuous glucose monitor (CGM) forecasting is commonly studied as a
-server-side regression problem, while practical edge deployment also requires
-small artifacts, deterministic preprocessing, cross-runtime numerical parity,
-and measurements on real hardware. This paper presents \project, an
+Published evaluations of continuous glucose monitor (CGM) forecasting largely
+emphasize offline predictive accuracy, while edge deployment also requires small
+artifacts, deterministic preprocessing, cross-runtime numerical parity, and
+measurements on real hardware. This paper presents \project, an
 open-source Android prototype that maps the previous hour of 5-minute CGM
 readings to one of five rate-of-change classes 15 minutes ahead. A 2,909-
 parameter one-dimensional convolutional neural network was trained with
@@ -46,45 +46,62 @@ prediction of the 75.5\%-prevalence \texttt{stable} class; recall decreased for
 all four minority classes, including a 62.7\% relative reduction for
 \texttt{falling\_fast}. On a Samsung Galaxy S22 Ultra, the full float
 classification path measured 0.334 ms mean and 0.540 ms p95 latency, compared
-with 0.484 ms and 0.665 ms for INT8. These device observations and the narrow
-INT8 calibration range show that quantization benefits must be measured rather
-than inferred from model size or aggregate accuracy. \project is a research
-and engineering demonstration, not a medical device or treatment system.
+with 0.484 ms and 0.665 ms for INT8. In this case study, the device observations
+and the narrow INT8 calibration range show why quantization outcomes must be
+measured for a given model--runtime--hardware path rather than inferred from
+model size or aggregate accuracy. \project is a research and engineering
+demonstration, not a medical device or treatment system.
 \end{abstract}
 
 \section{Introduction}
 
-Continuous glucose monitors provide dense longitudinal measurements that make
-short-horizon forecasting possible. The literature includes statistical,
-recurrent, convolutional, and attention-based forecasting methods, but
-comparisons have often been limited by private data, inconsistent preprocessing,
-and heterogeneous evaluation protocols \cite{liu2023systematic,
-sergazinov2024glucobench}. GlucoBench addresses part of this problem through a
-curated collection of public CGM data and a common preprocessing and evaluation
-framework \cite{sergazinov2024glucobench}.
+A five-minute CGM cadence yields 12 observations per hour. The resulting dense
+time series supports computational estimates of a near-future value, event, or
+trend \cite{sergazinov2024glucobench}. This paper treats those estimates as
+research outputs, not treatment inputs.
 
-Deployment introduces a separate set of questions. A model that performs well
-in a desktop framework may change numerically after conversion, may require
-incorrect input quantization in the client, or may not gain latency from lower
-precision on a real device. These questions are particularly important for
-imbalanced trend classification: conventional accuracy can increase when a
-model becomes more biased toward a majority class, even while performance on
-minority trends deteriorates \cite{brodersen2010balanced}.
+These targets define different learning problems. Value regression estimates a
+future glucose level, event prediction asks whether a glycemic event will occur,
+and trend classification assigns a directional rate category. Published studies
+also differ in prediction horizon, CGM-only versus contextual inputs, cohort,
+split construction, and metric. Reviews and comparison indices document this
+heterogeneity, while public benchmarks and cross-dataset experiments expose how
+strongly evaluation scope shapes the question being answered
+\cite{liu2023systematic,facchinetti2011index,
+sergazinov2024glucobench,ghimire2024generalize}. Headline metric values from
+incompatible protocols should therefore not be compared directly.
 
-This work studies the complete path from a public CGM data frame to an offline
-Android replay application. It does not propose a state-of-the-art clinical
-forecasting model. Its contributions are instead:
+Commercial CGM trend arrows are related but not equivalent targets. They
+summarize recent or current glucose direction and rate using device-specific
+definitions \cite{pettus2017recommendations,rodacki2021trend}. In contrast,
+\project derives each label from the change between the current sample and the
+sample 15 minutes later. The arrow-like rate bands provide a compact research
+representation, but the future-derived label neither reproduces a manufacturer's
+algorithm nor supplies a dosing rule.
+
+Deployment adds another evaluation layer. A model that performs well in a
+desktop framework may change numerically after conversion, require different
+input handling in the client, or fail to gain latency from lower precision on a
+particular device. Class imbalance makes conversion errors easy to conceal:
+accuracy can increase as predictions concentrate on a majority class even while
+minority-class recall declines \cite{brodersen2010balanced}.
+
+This work provides a reproducible offline replay path from a public CGM data
+frame through training and conversion to measured Android execution. It does
+not claim clinical forecasting performance or treatment utility. Its
+contributions are:
 \begin{itemize}
-    \item a segment-aware construction of one-hour CGM windows and genuinely
-    future, five-class 15-minute trend labels;
+    \item a segment-aware construction of one-hour CGM windows and
+    future-derived, five-class 15-minute trend labels;
     \item an empirical test of whether the two rare ``fast'' classes have
     sufficient support to retain a five-class formulation;
     \item matched evaluation of PyTorch, float LiteRT, and static INT8 LiteRT
     artifacts on the same aggregate test frame;
     \item cross-runtime golden-vector tests and physical-device latency
     observations for an Android \texttt{CompiledModel} implementation; and
-    \item a failure analysis showing that a 31.0\% size reduction coincided
-    with a 9.25-point decrease in macro recall and no latency advantage.
+    \item a case-study failure analysis showing that a 31.0\% size reduction
+    coincided with a 9.25-point decrease in macro recall and no latency
+    advantage on the measured device.
 \end{itemize}
 
 All source code, tests, synthetic replay data, and shipped model artifacts are
@@ -92,36 +109,112 @@ available in the project repository.\footnote{\url{https://github.com/mohamedmen
 
 \section{Related Work}
 
-\subsection{CGM forecasting and trend arrows}
+\subsection{Forecasting tasks, horizons, and inputs}
 
-Short-horizon glucose prediction has been formulated as value regression,
-hypoglycemia-event prediction, and trend classification. Deep sequence models
-can learn from CGM alone or combine it with insulin, meals, and other covariates
-\cite{mirshekarian2019lstm,liu2023systematic}. GlucoBench provides five public
-datasets, common interpolation and splitting logic, and baselines spanning
-statistical and deep models \cite{sergazinov2024glucobench}. \project uses its
-largest type-1 diabetes cohort, referred to as Weinstock, whose source study
-collected blinded CGM from older adults with long-standing type-1 diabetes
-\cite{weinstock2016risk}.
+CGM forecasting has expanded from autoregressive value prediction using sensor
+history \cite{reifman2007predictive} to recurrent and attention models trained
+with CGM and contextual variables \cite{mirshekarian2019lstm}. Recurrent models
+have also been used to estimate predictive variance rather than only a point
+value \cite{martinsson2020variance}, while convolutional--recurrent models fuse
+CGM, insulin, and meal sequences before predicting 30- or 60-minute values
+\cite{li2020crnn}. Architecture and input modality change together across these
+studies, so their results do not isolate the effect of model family alone.
+Cross-dataset evaluation asks a different question: whether a trained model
+generalizes when the source dataset, cohort, and collection process change
+\cite{ghimire2024generalize}.
 
-Commercial systems expose direction and rate through trend arrows, but arrow
-definitions and the time intervals behind them differ across devices
-\cite{pettus2017recommendations,rodacki2021trend}. The five labels in this work
-are therefore a simplified research abstraction, not a reproduction of a
-manufacturer's algorithm and not a dosing rule.
+Table~\ref{tab:relatedwork} records these design differences without placing
+incompatible metric values side by side. It also separates offline evaluation
+from reported device execution, a distinction that predictive scores alone do
+not capture.
 
-\subsection{Compact models and quantization}
+\subsection{Benchmarks and evaluation protocols}
 
-One-dimensional convolutional networks are a natural compact architecture for
-short sensor sequences and avoid recurrent state in the deployed interface
-\cite{kiranyaz2021survey}. Integer quantization can reduce neural-network
-storage and may accelerate inference on suitable hardware
-\cite{jacob2018quantization}. Post-training static quantization estimates tensor
-ranges from a representative calibration set; the coverage of this set is
-therefore part of the model, not an incidental conversion detail
-\cite{googleRepresentativeData}. LiteRT supplies both conversion tooling and a
-Kotlin \texttt{CompiledModel} interface for Android execution
-\cite{googleLiteRTQuantization,googleLiteRTCompiledModel}.
+Evaluation scope determines the generalization claim. Subject-dependent splits
+estimate performance for people represented during training, held-out-
+participant splits test transfer to unseen people within a dataset, and
+cross-dataset evaluation adds changes in cohort and data pipeline. GlucoBench
+standardizes preprocessing, splits, and baselines over five public datasets to
+support comparisons within a declared protocol
+\cite{sergazinov2024glucobench}; experiments across four datasets directly test
+changes in data source \cite{ghimire2024generalize}.
+
+\project uses GlucoBench's largest type-1 diabetes cohort, referred to as
+Weinstock. Its source study collected blinded CGM from older adults with
+long-standing type-1 diabetes \cite{weinstock2016risk}.
+
+Time-series splitting also requires care because nearby and overlapping windows
+are dependent. The validity of cross-validation for autoregressive prediction
+depends on the residual structure rather than a generic random-split rule
+\cite{bergmeir2018crossvalidation}, and leakage can produce answers to a less
+demanding problem than the one a study claims to test
+\cite{kapoor2023leakage}. Even with a fixed split, training and implementation
+choices contribute benchmark variance \cite{bouthillier2021variance}. Reporting
+participant, temporal, and dataset boundaries is therefore part of the result,
+not merely a preprocessing detail.
+
+\begin{table*}[t]
+\centering
+\caption{Representative CGM forecasting studies and evaluation scope. Metrics
+are not compared across rows because datasets and protocols differ.}
+\label{tab:relatedwork}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llllll@{}}
+\toprule
+Study & Target & Horizon & Inputs & Evaluation scope & Device evidence \\
+\midrule
+Reifman et al. \cite{reifman2007predictive} & Value & 30 min & CGM & 9 participants & None reported \\
+Mirshekarian et al. \cite{mirshekarian2019lstm} & Value & 30/60 min & CGM + context & OhioT1DM/synthetic & None reported \\
+Martinsson et al. \cite{martinsson2020variance} & Value + variance & 30/60 min & CGM & OhioT1DM & None reported \\
+Li et al. \cite{li2020crnn} & Value & 30/60 min & CGM, insulin, meals & 10 real + 10 simulated & Android timing \\
+GlucoBench \cite{sergazinov2024glucobench} & Value & Multiple & Dataset-dependent & Five public datasets & None reported \\
+Ghimire et al. \cite{ghimire2024generalize} & Value & 30/60 min & CGM & Four datasets & None reported \\
+\project (this work) & Trend class & 15 min & CGM & Weinstock aggregate test & Android replay timing \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+\subsection{Trend representations and class imbalance}
+
+Commercial trend arrows condense retrospective or current movement into
+device-specific categories whose rate bands and look-back intervals differ
+\cite{pettus2017recommendations,rodacki2021trend}. A future label instead asks
+whether the trajectory after the input window falls, remains stable, or rises.
+\project borrows rate bands as a research representation but computes them from
+the sample 15 minutes after the window; it neither emulates a commercial arrow
+algorithm nor supports treatment decisions.
+
+In the Weinstock windows used here, most labels are stable and faster changes
+are relatively rare. Overall accuracy therefore weights the stable class in
+proportion to its prevalence. Macro-averaged recall, equivalent to balanced
+accuracy for this single-label setting, gives each class equal weight and makes
+minority-class degradation visible \cite{brodersen2010balanced}. Macro recall
+still does not establish event-level or clinical performance.
+
+\subsection{Edge inference and quantization}
+
+Mobile inference systems can reduce neural-network execution cost through
+compression and runtime-specific scheduling \cite{lane2016deepx}, but latency is
+a property of the model, runtime, and hardware together. Li et al. reported
+Android timing for a glucose forecasting model \cite{li2020crnn}; broader
+smartphone and tiny-device benchmarks likewise measure defined workloads on
+specified platforms rather than treating artifact size as a speed proxy
+\cite{ignatov2019aibenchmark,banbury2021mlperftiny}.
+
+Integer post-training quantization maps floating-point tensors into finite
+ranges selected from calibration data \cite{jacob2018quantization}. Low-bit
+studies show that clipping, range estimation, and rounding choices can determine
+the resulting error \cite{banner2019ptq,nagel2020adaround}; calibration-data
+selection becomes more influential when only a small sample is available
+\cite{hubara2021smallcalibration}. These findings motivate checking converted
+outputs and class-wise metrics before drawing conclusions from reduced model
+size.
+
+\project connects public preprocessing with conversion parity, class-wise
+evaluation, and offline replay on one Android device; it does not establish
+live-sensor, clinical, or cross-hardware performance.
 
 \section{Problem Formulation}
 
