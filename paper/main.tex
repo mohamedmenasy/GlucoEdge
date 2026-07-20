@@ -203,14 +203,16 @@ smartphone and tiny-device benchmarks likewise measure defined workloads on
 specified platforms rather than treating artifact size as a speed proxy
 \cite{ignatov2019aibenchmark,banbury2021mlperftiny}.
 
-Integer post-training quantization maps floating-point tensors into finite
-ranges selected from calibration data \cite{jacob2018quantization}. Low-bit
-studies show that clipping, range estimation, and rounding choices can determine
-the resulting error \cite{banner2019ptq,nagel2020adaround}; calibration-data
-selection becomes more influential when only a small sample is available
-\cite{hubara2021smallcalibration}. These findings motivate checking converted
-outputs and class-wise metrics before drawing conclusions from reduced model
-size.
+Integer quantization approximates floating-point tensors with discrete values
+parameterized by a scale and zero point \cite{jacob2018quantization}. Static
+post-training quantization estimates activation ranges from calibration inputs
+before conversion \cite{pytorchPT2E2026,googleRepresentativeData}. Low-bit
+studies show that clipping, range estimation, and rounding choices can
+determine the resulting error \cite{banner2019ptq,nagel2020adaround};
+specialized methods have also been proposed to improve post-training accuracy
+when calibration sets are small \cite{hubara2021smallcalibration}. These
+findings motivate checking converted outputs and class-wise metrics before
+drawing conclusions from reduced model size.
 
 \project connects public preprocessing with conversion parity, class-wise
 evaluation, and offline replay on one Android device; it does not establish
