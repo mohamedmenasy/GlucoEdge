@@ -518,11 +518,12 @@ simultaneously reduces sensitivity to every directional class. Selecting INT8
 from accuracy alone would therefore reverse the model choice implied by the
 task's stated objective. \project ships float by default for this reason.
 
-The saturation analysis also shows why ``200 representative samples'' should
-not be treated as a sufficient protocol by itself. Official guidance describes
-a few hundred samples as typical for range calibration
-\cite{googleRepresentativeData}, but representativeness depends on tails and
-subgroups, not only sample count. Prior PTQ work identifies clipping and range
+The saturation analysis shows why a nominal calibration-sample count was
+insufficient in this conversion. Official guidance describes a few hundred
+randomly selected samples as typical for range calibration
+\cite{googleRepresentativeData}; here, the first 200 validation windows were
+nonrandom and did not span the observed test-input range.
+Prior PTQ work identifies clipping and range
 estimation as accuracy concerns \cite{banner2019ptq}, treats rounding as a
 separate optimization problem \cite{nagel2020adaround}, and develops methods for
 limited calibration data \cite{hubara2021smallcalibration}. Stratified calibration
@@ -546,8 +547,9 @@ This study has several limitations that constrain interpretation.
     \item The deployable checkpoint is a single seed; training and implementation
     choices can contribute benchmark variance \cite{bouthillier2021variance}.
     No across-seed variability or confidence intervals are reported. The study
-    omits probability calibration, event-level evaluation, and simple predictive
-    baselines.
+    omits probability calibration, event-level evaluation, and
+    input-dependent temporal baselines beyond the constant-\texttt{stable}
+    comparator.
     \item Stride-one windows are overlapping and statistically dependent, so
     their totals are not independent event counts
     \cite{bergmeir2018crossvalidation}. Because GlucoBench interpolates before
@@ -614,7 +616,8 @@ conversion, integer input handling, artifact provenance, cross-runtime parity,
 and physical-device execution. Float LiteRT preserved the checkpoint metrics
 and ran in under one millisecond on the tested phone. Static INT8 reduced the
 already-small artifact by 31.0\%, but worsened macro recall, saturated high-valued
-inputs, and showed no latency advantage. The broader engineering lesson is that
+inputs, and showed no observed latency advantage in this single unequal-sample
+device run. The broader engineering lesson is that
 edge-model selection must jointly report class-wise predictive behavior,
 calibration coverage, artifact size, runtime parity, and real-device
 measurements. Before any scientific or clinical performance claim, the
