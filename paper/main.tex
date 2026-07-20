@@ -240,6 +240,10 @@ y_t =
 \texttt{rising\_fast}, & r_t \geq 2.
 \end{cases}
 \end{equation}
+The 60-minute history and 15-minute horizon are fixed engineering choices for
+this prototype, not optimized clinical values. The five-class target is a
+simplified future-rate abstraction based on two samples rather than a complete
+description of the intervening trajectory.
 The boundaries use rate bands commonly represented by CGM trend arrows, while
 collapsing device-specific arrow taxonomies into five classes
 \cite{pettus2017recommendations,rodacki2021trend}. No threshold was optimized on
@@ -250,28 +254,36 @@ the test labels.
 \subsection{Dataset and preprocessing}
 
 The experiments use the Weinstock data distributed through GlucoBench. The
-GlucoBench release reports 200 participants and a five-minute sampling interval
+source cohort comprised older adults with long-standing type-1 diabetes and
+blinded CGM collection \cite{weinstock2016risk}. The GlucoBench release reports
+200 participants and a five-minute sampling interval
 \cite{sergazinov2024glucobench}. Its formatter retains glucose in raw \mgdl,
 interpolates within gaps of at most 45 minutes, drops short segments, and tags
-each contiguous result with an \texttt{id\_segment}. The configured split holds
-out 10\% of participants for an out-of-distribution component and forms temporal
-validation and test components from the remaining participants. The formatter's
-reported test frame concatenates these components; the present work reports
-that aggregate rather than separate in- and out-of-distribution metrics.
+each contiguous result with an \texttt{id\_segment}. Because interpolation
+precedes windowing, generated values may occur among the inputs or at samples
+used to form targets. The configured split holds out 10\% of participants for
+an out-of-distribution component and forms temporal validation and test
+components from the remaining participants. The formatter's reported test frame
+concatenates these components; the present work reports that aggregate rather
+than separate in- and out-of-distribution metrics.
 
 Windows are generated independently within each $(\texttt{id},
 \texttt{id\_segment})$ group and ordered by time. A window is emitted only when
 all 12 input points and the three following horizon steps fit in the same
 segment. The stride is one reading, matching an application that updates every
 five minutes. This rule prevents a sensor gap or participant boundary from
-being silently interpreted as a continuous trajectory.
+being silently interpreted as a continuous trajectory. Adjacent stride-one
+windows overlap heavily, so the window totals are dependent samples rather than
+independent event counts.
 
 Table~\ref{tab:distribution} shows the resulting class imbalance. Both fast
 classes exceed 13,000 training windows. A preliminary 20-epoch run obtained
 test recalls of 0.5333 and 0.5380 for \texttt{falling\_fast} and
 \texttt{rising\_fast}, respectively, so a predeclared collapse trigger of fewer
 than 200 training examples or recall below 0.30 did not fire. The deployed
-model therefore retains all five classes.
+artifact therefore retains all five classes. Because test recall informed this
+five-versus-three decision, it was an exploratory, test-informed development
+choice rather than unbiased validation evidence.
 
 \begin{table}[t]
 \centering
@@ -370,6 +382,12 @@ claim.
 
 \section{Experimental Protocol}
 
+The aggregate test frame combines temporal and held-out-participant components.
+As detailed in Section~\ref{sec:limitations}, context-prefix rows were not
+masked as target starts in this implementation; the resulting metrics document
+the shipped artifact but are not a leakage-free estimate of participant-level
+generalization.
+
 The same 127,165 aggregate test windows and labels were passed through the
 PyTorch checkpoint, float LiteRT model, and INT8 LiteRT model. Accuracy,
 per-class recall, and macro recall were computed from each prediction set. A
@@ -450,17 +468,18 @@ artifact by 5,376 bytes, or 31.0\%, but did not reduce observed on-device
 latency. The unequal sample counts do not support a formal latency comparison;
 they do rule out claiming an observed INT8 speedup in this run.
 
-The calibration sample explains part of the predictive degradation. Its learned
-input ceiling was approximately 240 \mgdl, whereas the test data reached
-401 \mgdl. Approximately 28\% of test windows therefore contained at least one
-value that saturated at the INT8 boundary. Correct clipping prevents integer
-overflow but cannot recover information outside the calibrated range.
+The calibration sample provides one plausible mechanism for part of the
+predictive degradation. Its learned input ceiling was approximately 240 \mgdl,
+whereas the test data reached 401 \mgdl. Approximately 28\% of test windows
+therefore contained at least one value that saturated at the INT8 boundary.
+Correct clipping prevents integer overflow but cannot recover information
+outside the calibrated range.
 
 All three Android instrumentation tests passed on the physical device. The
 \texttt{CompiledModel} path loaded both artifact hashes, matched float logits
 within $10^{-5}$ on all 20 windows, and matched INT8 dequantized outputs exactly.
-Thus the measured INT8 behavior is attributable to the converted artifact and
-its calibration, rather than divergent Kotlin quantization arithmetic.
+Thus the parity result excludes divergent Kotlin quantization arithmetic as an
+explanation for the measured INT8 behavior.
 
 \begin{table}[t]
 \centering
@@ -486,8 +505,11 @@ The central result is not that quantization is uniformly harmful, but that its
 trade-off depends on the model, calibration set, runtime, and metric. Integer
 arithmetic often reduces memory and can improve latency for compute-heavy
 networks \cite{jacob2018quantization}; here the network is only 2,909 parameters,
-so fixed invocation and data-movement costs are substantial. The only clear
-benefit was a 5.25-KiB file reduction, an immaterial saving for most phones.
+so fixed invocation and data-movement costs may dominate the measured path.
+Mobile acceleration and device benchmarks likewise make performance specific
+to the model, runtime, and hardware
+\cite{lane2016deepx,ignatov2019aibenchmark,banbury2021mlperftiny}. The observed
+artifact-size benefit was a 5.25-KiB file reduction.
 
 The accuracy increase is an instance of the class-imbalance problem that macro
 recall is designed to reveal. A shift toward \texttt{stable} correctly labels
@@ -500,38 +522,60 @@ The saturation analysis also shows why ``200 representative samples'' should
 not be treated as a sufficient protocol by itself. Official guidance describes
 a few hundred samples as typical for range calibration
 \cite{googleRepresentativeData}, but representativeness depends on tails and
-subgroups, not only sample count. Stratified calibration over glucose ranges and
-trend classes, a larger calibration set, percentile-based range selection,
-quantization-aware training, or float16/dynamic-range alternatives should be
-compared before rejecting quantization generally.
+subgroups, not only sample count. Prior PTQ work identifies clipping and range
+estimation as accuracy concerns \cite{banner2019ptq}, treats rounding as a
+separate optimization problem \cite{nagel2020adaround}, and develops methods for
+limited calibration data \cite{hubara2021smallcalibration}. Stratified calibration
+over glucose ranges and trend classes, a larger calibration set,
+percentile-based range selection, quantization-aware training, or
+float16/dynamic-range alternatives should be compared before rejecting
+quantization generally.
 
 Finally, numerical parity tests are necessary but not sufficient. They verify
-that Python and Android execute the same artifacts and preprocessing. They do
-not validate the labels, the cohort split, clinical safety, calibration of
-probabilities, or usefulness to a person with diabetes.
+that Python and Android execute the same artifacts and preprocessing, excluding
+divergent client arithmetic, but they do not isolate calibration from every
+other quantization effect. They also do not validate the labels, the cohort
+split, clinical safety, calibration of probabilities, or usefulness to a person
+with diabetes.
 
 \section{Limitations}
+\label{sec:limitations}
 
 This study has several limitations that constrain interpretation.
 \begin{enumerate}
-    \item The deployable checkpoint is a single seed and no confidence intervals
-    or across-seed variability are reported. Overlapping stride-one windows are
-    also statistically dependent.
+    \item The deployable checkpoint is a single seed; training and implementation
+    choices can contribute benchmark variance \cite{bouthillier2021variance}.
+    No across-seed variability or confidence intervals are reported. The study
+    omits probability calibration, event-level evaluation, and simple predictive
+    baselines.
+    \item Stride-one windows are overlapping and statistically dependent, so
+    their totals are not independent event counts
+    \cite{bergmeir2018crossvalidation}. Because GlucoBench interpolates before
+    window construction, generated values may occur in model inputs or in
+    samples used to form targets; results are not stratified by interpolation
+    status.
     \item GlucoBench adds prefix context to validation and in-distribution test
     frames so sequence models can form initial histories. The current
     \project dataset builder treats all prefix rows as eligible window starts
     rather than masking context-only targets. Some aggregate validation/test
-    windows can therefore reuse temporal context from an adjacent split. The
-    reported figures are appropriate for documenting the built engineering
-    artifact, but they are not a leakage-free estimate of patient-level
-    generalization. A corrected evaluation must mask context-only targets and
-    report in- and out-of-distribution components separately.
+    windows can therefore reuse temporal context from an adjacent split. This
+    context-prefix leakage risk can make evaluation answer a less demanding
+    question \cite{kapoor2023leakage}. The reported figures document the built
+    engineering artifact, but they are not a leakage-free estimate of
+    participant-level generalization. A corrected evaluation must mask
+    context-only targets and report in- and out-of-distribution components
+    separately.
     \item The aggregate test frame mixes temporal holdouts with participants
-    held out by GlucoBench. No patient-stratified, demographic, daytime/nighttime,
-    or subgroup results are available.
+    held out by GlucoBench. The source cohort comprised older adults with
+    long-standing type-1 diabetes and blinded CGM collection
+    \cite{weinstock2016risk}, and no cross-dataset validation was performed.
+    Transfer across cohorts and collection pipelines therefore remains
+    unmeasured \cite{ghimire2024generalize}. No participant-stratified,
+    demographic, daytime/nighttime, or subgroup results are available.
     \item The five labels are deterministic transformations of a future CGM
     point, not expert annotations. Their thresholds simplify heterogeneous
-    commercial trend-arrow conventions.
+    commercial trend-arrow conventions. The CGM-only model omits meal, insulin,
+    activity, illness, and other covariates.
     \item The INT8 calibration set consists of the first 200 validation windows,
     not a randomized or stratified sample. The observed saturation is therefore
     a property of this conversion protocol, not of INT8 in general.
@@ -564,17 +608,18 @@ The application displays this restriction in the primary interface.
 
 \section{Conclusion}
 
-\project demonstrates a complete offline Android path for a compact five-class
-CGM trend model, including segment-aware windows, fixed-shape conversion,
-integer input handling, artifact provenance, cross-runtime parity, and physical-
-device execution. Float LiteRT preserved the checkpoint metrics and ran in
-under one millisecond on the tested phone. Static INT8 reduced the already-small
-artifact by 31.0\%, but worsened macro recall, saturated high-valued inputs, and
-showed no latency advantage. The broader engineering lesson is that edge-model
-selection must jointly report class-wise predictive behavior, calibration
-coverage, artifact size, runtime parity, and real-device measurements. Before
-any scientific or clinical performance claim, the split-context issue, repeated
-seeds, patient-level evaluation, and external validation must be addressed.
+\project is an engineering case study of an offline Android path for a compact
+five-class CGM trend model, including segment-aware windows, fixed-shape
+conversion, integer input handling, artifact provenance, cross-runtime parity,
+and physical-device execution. Float LiteRT preserved the checkpoint metrics
+and ran in under one millisecond on the tested phone. Static INT8 reduced the
+already-small artifact by 31.0\%, but worsened macro recall, saturated high-valued
+inputs, and showed no latency advantage. The broader engineering lesson is that
+edge-model selection must jointly report class-wise predictive behavior,
+calibration coverage, artifact size, runtime parity, and real-device
+measurements. Before any scientific or clinical performance claim, the
+context-prefix issue must be corrected and repeated seeds, participant-level
+evaluation, and external validation must be added.
 
 \bibliographystyle{unsrtnat}
 \bibliography{references}
