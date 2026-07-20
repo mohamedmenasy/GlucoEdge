@@ -26,6 +26,7 @@
 
 **Files:**
 - Modify: `references.bib:1-141`
+- Modify: `main.tex:61,100`
 
 **Interfaces:**
 - Consumes: DOI, publisher, proceedings, and official documentation records.
@@ -35,7 +36,9 @@
 
 Make these exact repairs:
 
-- Rename `wang2023systematic` to `liu2023systematic`.
+- Rename `wang2023systematic` to `liu2023systematic` and update both uses in
+  `main.tex` in the same change so the intermediate build has no undefined
+  citation.
 - Add `Marling, Colleen` as the fourth author of `mirshekarian2019lstm`.
 - Include `(rtCGM)` in the Pettus title.
 - Update all Google records to their canonical `developers.google.com` URLs,
@@ -89,7 +92,7 @@ Expected: Tectonic exits 0, the diff check is silent, and the bibliography has
 - [ ] **Step 5: Commit**
 
 ```bash
-git add paper/references.bib
+git add paper/references.bib paper/main.tex
 git commit -m "docs: expand paper bibliography"
 ```
 
