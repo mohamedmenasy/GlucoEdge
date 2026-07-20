@@ -39,7 +39,7 @@ Make these exact repairs:
 - Rename `wang2023systematic` to `liu2023systematic` and update both uses in
   `main.tex` in the same change so the intermediate build has no undefined
   citation.
-- Add `Marling, Colleen` as the fourth author of `mirshekarian2019lstm`.
+- Add `Marling, Cindy` as the fourth author of `mirshekarian2019lstm`.
 - Include `(rtCGM)` in the Pettus title.
 - Update all Google records to their canonical `developers.google.com` URLs,
   year 2026, and access date 2026-07-20.
