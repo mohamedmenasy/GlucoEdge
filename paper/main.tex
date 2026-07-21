@@ -195,6 +195,9 @@ still does not establish event-level or clinical performance.
 
 \subsection{Edge inference and quantization}
 
+One-dimensional CNNs provide local temporal feature extraction through compact
+feed-forward interfaces \cite{kiranyaz2021survey}.
+
 Mobile inference systems can reduce neural-network execution cost through
 compression and runtime-specific scheduling \cite{lane2016deepx}, but latency is
 a property of the model, runtime, and hardware together. Li et al. reported
@@ -372,7 +375,8 @@ Android manifest is tested to ensure it does not request the
 \texttt{INTERNET} permission. The float artifact is the default and INT8 can be
 selected for comparison.
 
-Real devices use LiteRT 2.1.0 \texttt{CompiledModel} on CPU. On the tested
+Real devices use LiteRT 2.1.0 \texttt{CompiledModel} on CPU
+\cite{googleLiteRTCompiledModel}. On the tested
 Apple-Silicon-hosted Android emulator, native model creation terminated with an
 illegal-instruction fault during an ARM SVE feature probe. Because this fault
 cannot be caught by Kotlin, emulators are selected before runtime initialization
@@ -529,8 +533,8 @@ separate optimization problem \cite{nagel2020adaround}, and develops methods for
 limited calibration data \cite{hubara2021smallcalibration}. Stratified calibration
 over glucose ranges and trend classes, a larger calibration set,
 percentile-based range selection, quantization-aware training, or
-float16/dynamic-range alternatives should be compared before rejecting
-quantization generally.
+float16/dynamic-range alternatives \cite{googleLiteRTQuantization} should be
+compared before rejecting quantization generally.
 
 Finally, numerical parity tests are necessary but not sufficient. They verify
 that Python and Android execute the same artifacts and preprocessing, excluding
