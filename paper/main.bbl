@@ -44,7 +44,7 @@ Sarala Ghimire, Turgay Celik, Martin Gerdes, and Christian~W. Omlin.
 \bibitem[Pettus and Edelman(2017)]{pettus2017recommendations}
 Jeremy Pettus and Steven~V. Edelman.
 \newblock Recommendations for using real-time continuous glucose monitoring
-  (rtcgm) data for insulin adjustments in type 1 diabetes.
+  ({rtCGM}) data for insulin adjustments in type 1 diabetes.
 \newblock \emph{Journal of Diabetes Science and Technology}, 11\penalty0
   (1):\penalty0 138--147, 2017.
 \newblock \doi{10.1177/1932296816663747}.
@@ -181,8 +181,9 @@ Benoit Jacob, Skirmantas Kligys, Bo~Chen, Menglong Zhu, Matthew Tang, Andrew
   Pattern Recognition}, pages 2704--2713, 2018.
 \newblock \doi{10.1109/CVPR.2018.00286}.
 
-\bibitem[pyt(2026)]{pytorchPT2E2026}
-{PT2E} quantization, 2026.
+\bibitem[{PyTorch}(2026)]{pytorchPT2E2026}
+{PyTorch}.
+\newblock {PT2E} quantization, 2026.
 \newblock URL
   \url{https://docs.pytorch.org/ao/stable/pt2e_quantization/index.html}.
 \newblock Accessed 2026-07-20.
