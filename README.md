@@ -10,6 +10,16 @@ Built entirely on [GlucoBench](https://github.com/IrinaStatsLab/GlucoBench),
 a public academic CGM research benchmark — no proprietary data, schemas,
 or algorithms.
 
+## Paper
+
+The engineering write-up behind this repo, covering segment-aware
+windowing, float/INT8 LiteRT conversion, per-class recall under
+quantization, cross-runtime parity, and on-device latency:
+
+> Mohamed Menasy. *GlucoEdge: An Engineering Study of On-Device Five-Class
+> Glucose Trend Forecasting and INT8 Quantization.* 2026.
+> [PDF](docs/paper/glucoedge-paper.pdf)
+
 ## What this is, right now
 
 The task: predict a 5-class glucose trend arrow (`falling_fast` /
