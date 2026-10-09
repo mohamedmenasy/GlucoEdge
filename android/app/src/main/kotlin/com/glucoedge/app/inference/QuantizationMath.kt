@@ -1,6 +1,7 @@
 package com.glucoedge.app.inference
 
 import kotlin.math.exp
+import kotlin.math.round
 import kotlin.math.roundToInt
 
 object QuantizationMath {
@@ -9,11 +10,13 @@ object QuantizationMath {
      * [-128, 127]. The clip is load-bearing: without it, glucose readings
      * above the representable ceiling wrap around int8 (260 mg/dL would
      * become ~19 mg/dL) - the exact bug the conversion-phase review caught
-     * in the Python benchmark.
+     * in the Python benchmark. Ties round half to even, like the benchmark's
+     * np.round, so both clients produce identical codes for every reading;
+     * roundToInt() then only converts (and still rejects NaN).
      */
     fun quantizeInt8(values: FloatArray, scale: Float, zeroPoint: Int): ByteArray =
         ByteArray(values.size) { i ->
-            val q = (values[i] / scale).roundToInt() + zeroPoint
+            val q = round(values[i] / scale).roundToInt() + zeroPoint
             q.coerceIn(-128, 127).toByte()
         }
 
