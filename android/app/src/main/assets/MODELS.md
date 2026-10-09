@@ -22,7 +22,7 @@ per the project brief. Emulators get a separate `Interpreter` fallback.
 Why the gate exists: on the dev/test AVD (`Medium_Phone_API_35`, Apple Silicon host),
 `CompiledModel.create()` unconditionally SIGILL-crashes the process for both
 `trend_float.tflite` and `trend_int8.tflite`, on both litert 2.1.0 and 2.1.6 - a native
-CPU-feature probe (`rdsvl`, ARM SVE) inside `libLiteRt.so` runs before any accelerator option
+CPU-feature probe (`rdsvl`, Arm SME) inside `libLiteRt.so` runs before any accelerator option
 takes effect, and this guest's virtual CPU advertises SVE2/SME2 in `/proc/cpuinfo` without
 actually supporting execution of those instructions. A SIGILL is not a catchable JVM
 exception, so there is no runtime try/fallback available - the engine is chosen statically at

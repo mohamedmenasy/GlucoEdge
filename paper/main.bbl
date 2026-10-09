@@ -255,13 +255,13 @@ Fabian Pedregosa, Gael Varoquaux, Alexandre Gramfort, et~al.
   \url{https://numpy.org/doc/stable/reference/generated/numpy.round.html}.
 \newblock Accessed 2026-09-19.
 
-\bibitem[{JetBrains}(2026)]{kotlinRoundToInt}
+\bibitem[{JetBrains}(2026)]{kotlinRound}
 {JetBrains}.
-\newblock {roundToInt}.
+\newblock {kotlin.math.round}.
 \newblock Kotlin standard library reference, 2026.
 \newblock URL
-  \url{https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.math/round-to-int.html}.
-\newblock Accessed 2026-09-19.
+  \url{https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.math/round.html}.
+\newblock Accessed 2026-10-09.
 
 \bibitem[{Google AI Edge}(2026{\natexlab{b}})]{googleLiteRTCompiledModel}
 {Google AI Edge}.

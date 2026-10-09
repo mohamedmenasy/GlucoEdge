@@ -8,8 +8,8 @@ Status: settled (real-hardware verification pending)
 `CompiledModel.create()` unconditionally SIGILL-crashes the process on the
 project's arm64 AVD (`Medium_Phone_API_35`, Apple-Silicon host), for both
 `trend_float.tflite` and `trend_int8.tflite`, on litert 2.1.0 and 2.1.6
-alike. The faulting instruction is the sole `rdsvl` (an ARM SVE "read
-streaming vector length" instruction — a CPU feature probe) inside
+alike. The faulting instruction is the sole `rdsvl` (an Arm SME instruction
+that reads the Streaming SVE vector length — a CPU feature probe) inside
 `libLiteRt.so`, disassembled at PC `0x4a2324`. The guest kernel's
 `/proc/cpuinfo` advertises `sve2`/`sme2` support (inherited from the host
 Apple Silicon chip via Hypervisor.framework passthrough), but the
@@ -44,9 +44,17 @@ a physical Samsung Galaxy S22 Ultra (SM-S908E, Android 16): 3/3 tests
 passed with the device gate routing to `CompiledModel` — no SIGILL, float
 logits matched Python within 1e-5 and INT8 dequantized outputs matched
 bit-exactly across all 20 vectors. In-app latency on the same device
-(full Kotlin `classify()` path, including buffer writes, quantization,
-and softmax — a wider measurement than the conversion phase's
-invoke-only CPU proxy): float mean 0.334 ms / p95 0.540 ms over a full
+(the Kotlin inference path inside `classify()`: buffer writes, input
+quantization, model execution and output dequantization, but not softmax
+or class selection — still wider than the conversion phase's invoke-only
+CPU proxy): float mean 0.334 ms / p95 0.540 ms over a full
 100-inference window; INT8 mean 0.484 ms / p95 0.665 ms over 21
 inferences. INT8 showed no latency advantage on-device, consistent with
 the CPU-proxy conclusion.
+
+**Correction 2026-10-09.** Two statements above were corrected in place.
+`rdsvl` was first described as an SVE instruction; it belongs to SME (the
+Scalable Matrix Extension) and reads the Streaming SVE vector length. The
+2026-07-07 latency was first described as covering softmax; the timer in
+`TrendClassifier.classify()` stops before softmax and class selection.
+Neither correction changes the decision or the measured numbers.

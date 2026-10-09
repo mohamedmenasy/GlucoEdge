@@ -19,6 +19,11 @@ reruns only GlucoBench's formatter and the window construction. It reads no
 labels, held-out glucose values, or predictions, and trains or evaluates no
 model.
 
+A follow-up correction pass dates the manuscript October 2026. It also
+describes `rdsvl` as an SME instruction (it had been called SVE) and
+updates the rounding text to match the Kotlin client, which now rounds
+ties half to even like `numpy.round`.
+
 ## Build
 
 ```bash

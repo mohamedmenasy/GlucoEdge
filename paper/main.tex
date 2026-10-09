@@ -22,7 +22,7 @@ Glucose Trend Forecasting and INT8 Quantization}
 \author{Mohamed Menasy\\
 Independent Researcher\\
 \texttt{mohamedmenasy@gmail.com}}
-\date{July 2026}
+\date{October 2026}
 
 \begin{document}
 \maketitle
@@ -399,12 +399,13 @@ For input scale $s$ and zero point $z$, both clients use the affine form
     -128,127\right), \qquad \hat{x}=s(q-z).
 \end{equation}
 Quantization parameters are read from the model metadata rather than hardcoded.
-The implementations differ at rounding ties. Python uses
-\texttt{numpy.round}, which resolves exact half-way values to even integers,
-while Kotlin's \texttt{roundToInt} resolves them toward positive infinity
-\cite{numpyRound,kotlinRoundToInt}. The golden-vector tests below check
-agreement on selected inputs; they cannot prove that input quantization is
-identical for every possible value.
+Both clients divide in single precision and round exact half-way values to
+the even integer, Python with \texttt{numpy.round} and Kotlin with
+\texttt{kotlin.math.round} \cite{numpyRound,kotlinRound}, so they produce
+identical integer inputs for any glucose value. The July device tests ran an
+earlier Kotlin version that rounded ties toward positive infinity. The
+golden-vector inputs are given to 0.1~\mgdl, and none of those values is a
+tie at the shipped input scale, so the expected outputs are unchanged.
 
 The Kotlin/Jetpack Compose application replays a bundled synthetic trace. A
 12-reading ring buffer resets after a cadence gap, mirroring training-time
@@ -416,7 +417,8 @@ selected for comparison.
 Real devices use LiteRT 2.1.0 \texttt{CompiledModel} on CPU
 \cite{googleLiteRTCompiledModel}. On the tested
 Apple-Silicon-hosted Android emulator, native model creation terminated with an
-illegal-instruction fault during an ARM SVE feature probe. Because this fault
+illegal-instruction fault during a CPU feature probe for the Arm Scalable
+Matrix Extension (SME). Because this fault
 cannot be caught by Kotlin, emulators are selected before runtime initialization
 and use the classic interpreter with XNNPACK disabled. This workaround applies
 to the tested environment; it does not establish performance across LiteRT
@@ -610,9 +612,10 @@ information outside the representable range.
 All three Android instrumentation tests passed on the physical device. The
 \texttt{CompiledModel} path loaded both artifact hashes, matched float logits
 within $10^{-5}$ on all 20 windows, and matched INT8 dequantized outputs exactly.
-The two runtimes therefore agreed on the tested vectors. Differences may still
-occur on untested inputs, including exact rounding ties. These tests also
-cannot establish whether calibration caused the predictive loss.
+The two runtimes therefore agreed on the tested vectors. Model outputs may
+still differ on untested inputs, although input quantization now follows the
+same rounding rule on both sides. These tests also cannot establish whether
+calibration caused the predictive loss.
 
 \begin{table}[t]
 \centering
@@ -697,8 +700,9 @@ need identical workloads and controlled repeated runs. These experiments
 remain to be done.
 
 The parity tests check agreement for particular inputs and artifact hashes.
-Tests of rounding ties, alongside out-of-range values, are needed before
-claiming broader arithmetic equivalence. Runtime agreement alone cannot
+Unit tests cover exact rounding ties and out-of-range values in the Kotlin
+quantizer, but model execution has been compared only on the tested vectors.
+Runtime agreement alone cannot
 separate calibration error from other quantization effects. It also does not
 validate the labels, cohort split, probability calibration, clinical safety,
 or usefulness to a person with diabetes.
@@ -818,8 +822,8 @@ We do not claim an institutional ethics determination for this work.
 OpenAI Codex assisted with language editing during the September manuscript
 revision, checked sources, and compared claims with repository code and
 recorded results. Claude Code (Anthropic) wrote the provenance audit script
-and drafted the corresponding manuscript edits. The draft requires author
-review.
+and the Kotlin rounding fix, and drafted the corresponding manuscript edits.
+The draft requires author review.
 Funding, competing interests, and CRediT author contributions remain to be
 confirmed by the author before submission.
 
