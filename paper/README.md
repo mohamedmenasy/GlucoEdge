@@ -11,6 +11,14 @@ A subsequent prose edit simplifies dense sentences and improves the flow of
 the abstract, results, and discussion. It preserves the reported numbers,
 equations, tables, citations, limitations, and July 2026 manuscript date.
 
+A provenance-audit revision replaces several "not recorded" caveats with
+measured split and calibration facts (a new Results subsection and table). The numbers
+come from `python -m experiments.split_audit`, run from the repository root,
+whose aggregate output is versioned in `results/split_audit.json`. The audit
+reruns only GlucoBench's formatter and the window construction. It reads no
+labels, held-out glucose values, or predictions, and trains or evaluates no
+model.
+
 ## Build
 
 ```bash
@@ -28,7 +36,7 @@ with the LaTeX sources in an arXiv submission.
 - **Author:** Mohamed Menasy
 - **Primary category:** `cs.LG`
 - **Possible cross-lists:** `eess.SP`, `q-bio.QM`
-- **Comments:** 9 pages, 1 figure, 5 tables. Source code and model artifacts are
+- **Comments:** 10 pages, 1 figure, 6 tables. Source code and model artifacts are
   available at <https://github.com/mohamedmenasy/GlucoEdge>.
 
 Before submission, confirm the author name, email, affiliation, category, and

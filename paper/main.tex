@@ -40,15 +40,18 @@ checkpoint's reported accuracy (0.5184) and macro recall (0.5060). Static INT8
 quantization using the first 200 validation windows reduced the artifact from
 16.95 to 11.70 KiB (31.0\%). Accuracy rose to 0.5866, but macro recall fell to
 0.4135: stable-class recall improved while all four directional recalls
-declined. Their mean fell from 0.5019 to 0.3537. The recorded input ceiling
-near 240 \mgdl\ was below the test maximum of 401 \mgdl. Clipping is therefore
-a plausible source of error, but its contribution has not been isolated by
-comparing calibration selections. On a Galaxy S22 Ultra, timed inference-path
+declined. Their mean fell from 0.5019 to 0.3537. A provenance audit shows
+that the 200 calibration windows came from one participant's 17.5 hours of
+data and that the resulting INT8 input range ends at 239.9 \mgdl, below
+readings in 24.4\% of training windows. Clipping is therefore a plausible
+source of error, but its contribution has not been isolated by comparing
+calibration selections. On a Galaxy S22 Ultra, timed inference-path
 mean/p95 latencies were
 0.334/0.540 ms for float ($n=100$) and 0.484/0.665 ms for INT8 ($n=21$),
 excluding softmax and class selection. The unequal replay samples do not
-establish a latency benefit. Context-prefix overlap and test-informed class
-selection also limit the predictive conclusions. These results describe the
+establish a latency benefit. Context-prefix overlap (13.6\% of test windows
+score targets in validation rows; none score training rows) and test-informed
+class selection also limit the predictive conclusions. These results describe the
 converted models; they do not show whether broader calibration coverage would
 recover minority-class recall. \project is a
 research demonstration, not a medical device or treatment system.
@@ -92,9 +95,10 @@ affect minority-class performance and deployment cost in compact glucose trend
 classifiers?} Here, coverage refers to the input values and trajectories
 represented during quantizer calibration, not calibration of predicted
 probabilities. We have results from one trained checkpoint, one calibration
-selection, matched float/INT8 evaluations, and one phone. These results show
-the observed trade-off and an input-range limitation. They cannot establish
-what would change if calibration coverage alone were varied.
+selection, matched float/INT8 evaluations, and one phone, plus an audit of
+window provenance and calibration-set composition. These results show the
+observed trade-off and where the input-range limit came from. They cannot
+establish what would change if calibration coverage alone were varied.
 
 This paper follows the model from public CGM preprocessing through conversion
 to offline Android replay. It reports:
@@ -106,8 +110,9 @@ to offline Android replay. It reports:
     recall on the same aggregate test frame;
     \item cross-runtime golden-vector tests and physical-device latency
     observations for an Android \texttt{CompiledModel} implementation; and
-    \item an analysis of the observed quantization costs and a possible
-    calibration-range explanation, with the comparisons needed to test it.
+    \item a provenance audit of window splits and calibration inputs, which
+    traces the INT8 input range to a single participant's data, and the
+    comparisons needed to test whether that range explains the recall loss.
 \end{itemize}
 
 All source code, tests, synthetic replay data, and shipped model artifacts are
@@ -265,14 +270,19 @@ The experiments use the Weinstock data distributed through GlucoBench. The
 source cohort comprised older adults with long-standing type-1 diabetes and
 blinded CGM collection \cite{weinstock2016risk}. GlucoBench reports 200
 participants before preprocessing and 192 afterwards, with a five-minute
-sampling interval \cite{sergazinov2024glucobench}. These counts describe the
-benchmark; eligible participant counts for the \project window splits were not
-recorded. The configuration used here disables scaling and retains glucose in
-raw \mgdl. The formatter interpolates within gaps of at most 45 minutes,
-drops segments with fewer than 240 original readings, and tags
-each contiguous result with an \texttt{id\_segment}. Because interpolation
-precedes windowing, generated values may occur among the inputs or at samples
-used to form targets. The configured split holds out 10\% of participants for
+sampling interval \cite{sergazinov2024glucobench}; our audit of the formatter
+output reproduces both counts. The configuration used here disables scaling
+and retains glucose in raw \mgdl. The formatter rounds timestamps to the
+minute, splits each participant's record at gaps longer than 45 minutes, drops
+segments with fewer than 240 original readings, and linearly interpolates each
+remaining segment onto a five-minute grid that starts at its first reading.
+Each segment is tagged with an \texttt{id\_segment}. Of the 579,782 grid
+values, 75.8\% coincide with an original reading. A further 19.8\% fall
+between two consecutive readings no more than 7.5 minutes apart, because
+reading times drift relative to the grid; 4.4\% fill one or more missing
+readings. Because interpolation precedes windowing, interpolated values may
+occur among the inputs or at samples used to form targets. The configured
+split holds out 10\% of participants (20 people) for
 an out-of-distribution component and forms temporal validation and test
 components from the remaining participants. The formatter combines the test
 components into one frame. We report metrics for that aggregate without
@@ -285,7 +295,10 @@ segment. The stride is one reading, matching an application that updates every
 five minutes. This rule prevents a sensor gap or participant boundary from
 being treated as a continuous trajectory. Adjacent stride-one windows overlap
 heavily and are statistically dependent. The resulting frames yielded 424,462 training,
-55,289 validation, and 127,165 aggregate test windows.
+55,289 validation, and 127,165 aggregate test windows from 172, 127, and 186
+participants, respectively. The test windows comprise 57,068 from the 20
+held-out participants and 70,097 from temporal segments of 166 training
+participants.
 
 Table~\ref{tab:distribution} shows the resulting class imbalance. Both fast
 classes exceed 13,000 training windows. A preliminary 20-epoch run obtained
@@ -365,14 +378,20 @@ committed to the Android application.}
 \section{Conversion and Deployment}
 
 The seed-0 checkpoint was converted with LiteRT Torch. Float conversion uses a
-fixed $(1,1,12)$ input signature. INT8 conversion uses PyTorch 2 Export (PT2E),
-the quantizer's symmetric configuration helper with
-\texttt{is\_per\_channel=True} and \texttt{is\_dynamic=False}, and the first
-200 validation windows as calibration inputs. Selection follows the dataset's
-participant/segment and time order, with no randomization or attempt to balance
-input-range coverage. Because stride-one windows overlap, 200 windows
-need not represent 200 independent trajectories. The reported results do not
-retain counts of calibration participants or unique readings.
+fixed $(1,1,12)$ input signature. INT8 conversion uses PyTorch 2 Export (PT2E)
+with LiteRT Torch's \texttt{get\_symmetric\_quantization\_config} helper
+(\texttt{is\_per\_channel=True}, \texttt{is\_dynamic=False}). Despite the
+helper's name, only the weights are quantized symmetrically, per channel.
+Activations, including the model input, use per-tensor affine quantization
+whose ranges a histogram observer selects to minimize quantization error
+\cite{pytorchPT2E2026}. The first 200 validation windows serve as calibration
+inputs. Selection follows the dataset's participant/segment and time order,
+with no randomization or attempt to balance input-range coverage;
+Section~\ref{sec:provenance} shows that all 200 windows come from one
+participant. The converted model's input scale is 0.9408~\mgdl\ per code with
+zero point $-128$, so its representable input range is 0--239.9~\mgdl. The
+range starts at zero because the observer always includes zero, which leaves
+the codes below the lowest CGM reading unused.
 
 For input scale $s$ and zero point $z$, both clients use the affine form
 \begin{equation}
@@ -406,10 +425,19 @@ configurations.
 \section{Experimental Protocol}
 
 The aggregate test frame combines temporal and held-out-participant components.
-As detailed in Section~\ref{sec:limitations}, the implementation did not exclude
-context-prefix rows from eligible target starts. The metrics therefore
-describe the shipped model under this protocol and should not be treated as
-leakage-free estimates of participant-level generalization.
+The implementation did not exclude context-prefix rows from eligible targets;
+Section~\ref{sec:provenance} quantifies the resulting overlap, which involves
+validation rows but no training rows. The metrics therefore describe the
+shipped model under this protocol rather than separate temporal and
+participant-level generalization.
+
+A provenance audit (\texttt{experiments/split\_audit.py}) maps every window to
+the formatter rows it uses and assigns each row to the earliest split that
+lists it, because GlucoBench repeats rows from a preceding split as context.
+It reads row identities and timestamps for all splits but glucose values only
+from training and validation rows; it does not read labels, held-out glucose
+values, or predictions. It also records the composition of the calibration
+set and the INT8 model's input quantization parameters.
 
 The same 127,165 aggregate test windows and labels were passed through the
 PyTorch checkpoint, float LiteRT model, and INT8 LiteRT model. Accuracy,
@@ -453,6 +481,52 @@ required to match bit-for-bit because both sides dequantize identical integer
 outputs with the same float32 operation.
 
 \section{Results}
+
+\subsection{Split and calibration provenance}
+\label{sec:provenance}
+
+Table~\ref{tab:provenance} summarizes the audit. No test window has a target
+in a training row, and none repeats a training window. The context-prefix
+overlap instead affects 17,266 test windows (13.6\%) whose targets fall in rows
+that GlucoBench assigns to validation; validation labels were not used for
+fitting or checkpoint selection. Most validation frames begin with 192
+training rows of model context, so 19,402 validation windows (35.1\%) repeat
+training windows exactly.
+
+The calibration set is narrower than its size suggests. Its 200 overlapping
+windows come from one participant and one segment: 211 distinct readings
+spanning 17.5 hours, with 178 windows repeating training windows. The largest
+calibration input, 240.0~\mgdl, matches the upper end of the INT8 input range,
+239.9~\mgdl. In development data, 24.4\% of training windows and 26.3\% of
+validation windows contain at least one reading above that range.
+
+\begin{table}[t]
+\centering
+\caption{Window provenance and calibration-set composition from the audit.
+Shares are within each split.}
+\label{tab:provenance}
+\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Window source & Windows & Share \\
+\midrule
+Validation, target in validation rows & 35,887 & 64.9\% \\
+Validation, copy of a training window & 19,402 & 35.1\% \\
+Test, held-out participants & 57,068 & 44.9\% \\
+Test, target in test rows & 52,831 & 41.5\% \\
+Test, target in validation rows & 17,266 & 13.6\% \\
+Test, target in training rows & 0 & 0.0\% \\
+\midrule
+\multicolumn{3}{@{}l}{INT8 calibration set (first 200 validation windows)} \\
+\midrule
+Participants; segments & \multicolumn{2}{r}{1; 1} \\
+Distinct input readings; span & \multicolumn{2}{r}{211; 17.5 h} \\
+Copies of training windows & \multicolumn{2}{r}{178 of 200} \\
+Maximum input & \multicolumn{2}{r}{240.0 \mgdl} \\
+INT8 input range & \multicolumn{2}{r}{0--239.9 \mgdl} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Predictive performance}
 
@@ -524,12 +598,13 @@ The unequal sample counts prevent a formal comparison, so these measurements
 cannot establish a speed advantage for either model.
 
 The July conversion record\footnote{\url{https://github.com/mohamedmenasy/GlucoEdge/blob/513e940/docs/superpowers/specs/2026-07-01-litert-conversion-results.md}}
-reports a learned input ceiling near 240 \mgdl,
-a test maximum of 401 \mgdl, and saturation in approximately 28\% of test
-windows. The figure is approximate: window-level clipping counts, class
-breakdowns, and calibration selections were not archived with the paper.
-Clipping could contribute to the recall loss, but this record cannot quantify
-its contribution for any class. Clipping prevents integer overflow but cannot recover
+reports a test maximum of 401 \mgdl\ and saturation in approximately 28\% of
+test windows. We did not recompute this figure, so that held-out glucose
+values stay unused until a locked re-evaluation;
+Section~\ref{sec:provenance} gives the corresponding development-data rates and
+the origin of the ceiling at 239.9~\mgdl. Test-set clipping counts and class
+breakdowns were not archived. Clipping could contribute to the recall loss,
+but these records cannot quantify its contribution for any class. Clipping prevents integer overflow but cannot recover
 information outside the representable range.
 
 All three Android instrumentation tests passed on the physical device. The
@@ -587,11 +662,11 @@ coverage would affect either preparation cost or runtime cost.
 
 \subsection{What the calibration evidence identifies}
 
-Using 200 calibration windows did not prevent the recorded range mismatch.
-Official guidance recommends small representative
-subsets of training or validation data to estimate tensor ranges
-\cite{googleRepresentativeData,googleLiteRTQuantization}; contiguous,
-overlapping validation windows may provide limited diversity. Prior PTQ work
+The 200 calibration windows were not the small representative subset of
+training or validation data that official guidance recommends for estimating
+tensor ranges \cite{googleRepresentativeData,googleLiteRTQuantization}. They
+cover one participant's 17.5 hours, and the input ceiling matches their
+maximum, below readings found in about a quarter of training windows. Prior PTQ work
 identifies clipping and range estimation as error sources
 \cite{banner2019ptq}, optimizes weight rounding
 \cite{nagel2020adaround}, and improves quantization with small calibration
@@ -614,7 +689,8 @@ must use development inputs without tuning to test labels or test ranges.
 Passing quantized and then dequantized inputs through the float model would
 measure input-only loss for comparison with full INT8 loss. The remaining
 difference could reflect internal quantization and its interaction with input
-error. Before this comparison, target overlap must be corrected. Evaluation
+error. Before this comparison, the validation-row targets must be removed
+from the test frame. Evaluation
 should then report each directional recall, paired participant-level
 uncertainty, and clipped-input fractions by class. Device measurements would
 need identical workloads and controlled repeated runs. These experiments
@@ -641,21 +717,21 @@ The results should be read with the following limitations in mind.
     \item Stride-one windows are overlapping and statistically dependent, so
     their totals are not independent event counts
     \cite{bergmeir2018crossvalidation}. Because GlucoBench interpolates before
-    window construction, generated values may occur in model inputs or in
-    samples used to form targets. Interpolated inputs can depend on later
+    window construction, only 56.1\% of test windows have all inputs and the
+    target endpoint on original readings, and 76.5\% contain no gap-filled
+    value. Interpolated inputs can depend on later
     readings, so this retrospective preprocessing may use information that
     would be unavailable in real time. Results are not stratified by interpolation
     status.
     \item GlucoBench adds prefix context to validation and in-distribution test
     frames so sequence models can form initial histories. The current
-    \project dataset builder allows every prefix row to start a window and
-    does not mask context-only targets. Some aggregate validation/test windows
-    can therefore score targets in an adjacent split's context region.
-    Using earlier readings as inputs can be legitimate; scoring targets from
-    context-only rows introduces a leakage risk and can make evaluation easier
-    than intended \cite{kapoor2023leakage}. The reported figures describe the
-    built model under this protocol. They are not leakage-free estimates of
-    participant-level generalization. A corrected evaluation must mask
+    \project dataset builder lets every prefix row start a window and does
+    not mask context-only targets. As a result, 17,266 test windows (13.6\%)
+    score targets in validation rows, and 19,402 validation windows (35.1\%)
+    repeat training windows (Table~\ref{tab:provenance}). Using earlier
+    readings as inputs can be legitimate. No test target lies in a training
+    row, but scoring context-only targets blurs the temporal boundary between
+    validation and test. A corrected evaluation must mask
     context-only targets, verify disjoint scored participant/segment/time
     keys, and report temporal and held-out-participant components separately.
     \item The aggregate test frame mixes temporal holdouts with participants
@@ -670,7 +746,8 @@ The results should be read with the following limitations in mind.
     commercial trend-arrow conventions. The CGM-only model omits meal, insulin,
     activity, illness, and other covariates.
     \item The INT8 calibration set consists of the first 200 validation windows,
-    not a randomized or stratified sample. The observed saturation is therefore
+    all from one participant's 17.5 hours, not a randomized or stratified
+    sample. The observed saturation is therefore
     specific to this conversion protocol. It should not be generalized to INT8.
     Without comparisons of calibration samplers or budgets, we cannot estimate
     the effect of coverage, a dose--response relation, or possible recall recovery.
@@ -695,7 +772,8 @@ code. The bundled artifacts were generated from repository commit
 \texttt{eb96c7e...08e6} (float) and \texttt{0dc35387...ea29} (INT8); full hashes
 are stored beside the assets and asserted by instrumentation tests. Python unit
 tests cover label boundaries, segment-aware windows, model shape, conversion
-helpers, and synthetic replay behavior. Android unit tests cover replay,
+helpers, synthetic replay behavior, and the provenance audit's split
+bookkeeping. Android unit tests cover replay,
 buffering, quantization, latency aggregation, and view-model behavior. A merged-
 manifest check enforces the absence of Internet permission.
 
@@ -713,6 +791,12 @@ models, rerun evaluation on the research data, or collect new phone timings.
 Machine-readable run reports and the training checkpoint can be regenerated
 locally, but are not versioned paper supplements. A fresh run may produce
 different numbers from those recorded here.
+
+A subsequent provenance audit reran only the GlucoBench formatter and window
+construction; it involved no
+training, model evaluation, or held-out glucose values. Its aggregate output,
+including the GlucoBench commit and a SHA-256 hash of the Weinstock data file,
+is versioned as \texttt{paper/results/split\_audit.json}.
 
 \subsection{Data availability and research-use scope}
 
@@ -733,7 +817,9 @@ We do not claim an institutional ethics determination for this work.
 
 OpenAI Codex assisted with language editing during the September manuscript
 revision, checked sources, and compared claims with repository code and
-recorded results. The draft requires author review.
+recorded results. Claude Code (Anthropic) wrote the provenance audit script
+and drafted the corresponding manuscript edits. The draft requires author
+review.
 Funding, competing interests, and CRediT author contributions remain to be
 confirmed by the author before submission.
 
@@ -746,7 +832,8 @@ and cross-runtime parity. Under the recorded calibration protocol, INT8
 saved 5.25 KiB while reducing five-class macro recall by 9.25 percentage
 points and mean directional recall by 14.82 points. Its higher accuracy
 comes from improved stable-class recall and that class's large share of the
-test windows. The input-range mismatch makes calibration coverage worth
+test windows. The INT8 input range was derived from calibration windows drawn
+from a single participant, which makes calibration coverage worth
 investigating, but this comparison cannot establish whether broader coverage
 would recover recall or how it would affect preparation and deployment cost.
 The phone measurements, taken with unequal sample counts, do not establish
