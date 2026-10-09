@@ -159,9 +159,10 @@ The headline comparison across the three model artifacts, on the full
 | INT8 `.tflite` | 11.70 KB | 0.484 ms / 0.665 ms | 0.5866 | 0.4135 |
 
 Latency is measured in-app on a Samsung Galaxy S22 Ultra (Android 16) via
-the CompiledModel path — the full Kotlin classify path (buffer writes,
-quantization, softmax), not just kernel invoke; float over a full
-100-inference rolling window, INT8 over a 21-inference window. The
+the CompiledModel path. The timer covers the Kotlin inference path (buffer
+writes, input quantization, model execution, output dequantization) but
+stops before softmax and class selection; float over a full 100-inference
+rolling window, INT8 over a 21-inference window. The
 conversion phase's dev-machine CPU proxy reached the same qualitative
 conclusion: INT8 is not faster at this model size — per-call overhead
 dominates a ~2,900-parameter network.
@@ -184,10 +185,13 @@ per-class recall:
 exists, loses 62.7% of its recall. (A degenerate model that always
 predicts `stable` scores ~75.5% accuracy with a macro-avg recall of
 exactly 0.20 — which is why this project never reports accuracy alone.)
-Part of the INT8 degradation is calibration coverage: static quantization
-calibrated on 200 validation windows learned an input ceiling of
-~240 mg/dL while the test data reaches 401 mg/dL, so ~28% of test windows
-saturate at the INT8 input boundary even with correct clipping.
+Calibration coverage is a plausible but untested contributor. All 200
+calibration windows came from one participant's 17.5 hours, so the INT8
+input range ends at 239.9 mg/dL; 24.4% of training windows contain a
+higher reading, and the conversion record found ~28% of test windows
+saturating at that boundary even with correct clipping. Whether the
+clipping causes the recall loss has not been isolated
+([provenance audit](paper/results/split_audit.json)).
 
 So the measured tradeoff is: INT8 buys a ~31% smaller file (5.25 KB) and
 costs 9.25 macro-recall points, with no latency benefit — which is why
@@ -218,8 +222,8 @@ Per the original project plan, in order:
 5. ~~Verify the app's `CompiledModel` inference path on a physical
    device~~ — done: golden-vector parity 3/3 on a Galaxy S22 Ultra
    (Android 16) via `CompiledModel`, no SIGILL; in-app latency float
-   mean 0.334 ms / INT8 mean 0.484 ms (full Kotlin classify path — INT8
-   is again not faster). Details appended to
+   mean 0.334 ms / INT8 mean 0.484 ms (Kotlin inference path, excluding
+   softmax — INT8 is again not faster). Details appended to
    [the SIGILL decision record](docs/superpowers/specs/2026-07-05-emulator-compiledmodel-sigill.md).
 
 ~~Optional stretch, once the above works end to end: a fully local

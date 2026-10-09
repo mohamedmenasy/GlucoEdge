@@ -1,0 +1,282 @@
+\begin{thebibliography}{32}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Sergazinov et~al.(2024)Sergazinov, Chun, Rogovchenko, Fernandes,
+  Kasman, and Gaynanova]{sergazinov2024glucobench}
+Renat Sergazinov, Elizabeth Chun, Valeriya Rogovchenko, Nathaniel Fernandes,
+  Nicholas Kasman, and Irina Gaynanova.
+\newblock {GlucoBench}: Curated list of continuous glucose monitoring datasets
+  with prediction benchmarks.
+\newblock In \emph{International Conference on Learning Representations}, 2024.
+\newblock URL \url{https://openreview.net/forum?id=cUSNs8nGaV}.
+
+\bibitem[Liu et~al.(2023)Liu, Li, Ma, Jiang, Liu, Ye, Liu, Pu, Chen, and
+  Wan]{liu2023systematic}
+Kui Liu, Linyi Li, Yifei Ma, Jun Jiang, Zhenhua Liu, Zichen Ye, Shuang Liu,
+  Chen Pu, Changsheng Chen, and Yi~Wan.
+\newblock Machine learning models for blood glucose level prediction in
+  patients with diabetes mellitus: Systematic review and network meta-analysis.
+\newblock \emph{JMIR Medical Informatics}, 11:\penalty0 e47833, 2023.
+\newblock \doi{10.2196/47833}.
+
+\bibitem[Facchinetti et~al.(2011)Facchinetti, Sparacino, Trifoglio, and
+  Cobelli]{facchinetti2011index}
+Andrea Facchinetti, Giovanni Sparacino, Emanuele Trifoglio, and Claudio
+  Cobelli.
+\newblock A new index to optimally design and compare continuous glucose
+  monitoring glucose prediction algorithms.
+\newblock \emph{Diabetes Technology \& Therapeutics}, 13\penalty0 (2):\penalty0
+  111--119, 2011.
+\newblock \doi{10.1089/dia.2010.0151}.
+
+\bibitem[Ghimire et~al.(2024)Ghimire, Celik, Gerdes, and
+  Omlin]{ghimire2024generalize}
+Sarala Ghimire, Turgay Celik, Martin Gerdes, and Christian~W. Omlin.
+\newblock Deep learning for blood glucose level prediction: How well do models
+  generalize across different data sets?
+\newblock \emph{{PLOS} ONE}, 19\penalty0 (9):\penalty0 e0310801, 2024.
+\newblock \doi{10.1371/journal.pone.0310801}.
+
+\bibitem[Pettus and Edelman(2017)]{pettus2017recommendations}
+Jeremy Pettus and Steven~V. Edelman.
+\newblock Recommendations for using real-time continuous glucose monitoring
+  ({rtCGM}) data for insulin adjustments in type 1 diabetes.
+\newblock \emph{Journal of Diabetes Science and Technology}, 11\penalty0
+  (1):\penalty0 138--147, 2017.
+\newblock \doi{10.1177/1932296816663747}.
+
+\bibitem[Rodacki et~al.(2021)Rodacki, Calliari, Ramalho,
+  et~al.]{rodacki2021trend}
+Melanie Rodacki, Luis~Eduardo Calliari, Antonio~Carlos Ramalho, et~al.
+\newblock Using trend arrows in continuous glucose monitoring systems for
+  insulin adjustment in clinical practice: Brazilian diabetes society position
+  statement.
+\newblock \emph{Diabetology \& Metabolic Syndrome}, 13\penalty0 (1):\penalty0
+  2, 2021.
+\newblock \doi{10.1186/s13098-020-00607-2}.
+
+\bibitem[Brodersen et~al.(2010)Brodersen, Ong, Stephan, and
+  Buhmann]{brodersen2010balanced}
+Kay~Henning Brodersen, Cheng~Soon Ong, Klaas~Enno Stephan, and Joachim~M.
+  Buhmann.
+\newblock The balanced accuracy and its posterior distribution.
+\newblock In \emph{20th International Conference on Pattern Recognition}, pages
+  3121--3124, 2010.
+\newblock \doi{10.1109/ICPR.2010.764}.
+
+\bibitem[Reifman et~al.(2007)Reifman, Rajaraman, Gribok, and
+  Ward]{reifman2007predictive}
+Jaques Reifman, Srinivasan Rajaraman, Andrei Gribok, and W.~Kenneth Ward.
+\newblock Predictive monitoring for improved management of glucose levels.
+\newblock \emph{Journal of Diabetes Science and Technology}, 1\penalty0
+  (4):\penalty0 478--486, 2007.
+\newblock \doi{10.1177/193229680700100405}.
+
+\bibitem[Mirshekarian et~al.(2019)Mirshekarian, Shen, Bunescu, and
+  Marling]{mirshekarian2019lstm}
+Sadegh Mirshekarian, Hui Shen, Razvan Bunescu, and Cindy Marling.
+\newblock {LSTM}s and neural attention models for blood glucose prediction:
+  Comparative experiments on real and synthetic data.
+\newblock In \emph{41st Annual International Conference of the IEEE Engineering
+  in Medicine and Biology Society}, pages 706--712, 2019.
+\newblock \doi{10.1109/EMBC.2019.8856940}.
+
+\bibitem[Martinsson et~al.(2020)Martinsson, Schliep, Eliasson, and
+  Mogren]{martinsson2020variance}
+John Martinsson, Alexander Schliep, Bj{\"o}rn Eliasson, and Olof Mogren.
+\newblock Blood glucose prediction with variance estimation using recurrent
+  neural networks.
+\newblock \emph{Journal of Healthcare Informatics Research}, 4\penalty0
+  (1):\penalty0 1--18, 2020.
+\newblock \doi{10.1007/s41666-019-00059-y}.
+
+\bibitem[Li et~al.(2020)Li, Daniels, Liu, Herrero, and Georgiou]{li2020crnn}
+Kezhi Li, John Daniels, Chengyuan Liu, Pau Herrero, and Pantelis Georgiou.
+\newblock Convolutional recurrent neural networks for glucose prediction.
+\newblock \emph{IEEE Journal of Biomedical and Health Informatics}, 24\penalty0
+  (2):\penalty0 603--613, 2020.
+\newblock \doi{10.1109/JBHI.2019.2908488}.
+
+\bibitem[Weinstock et~al.(2016)Weinstock, DuBose, Bergenstal,
+  et~al.]{weinstock2016risk}
+Ruth~S. Weinstock, Stephanie~N. DuBose, Richard~M. Bergenstal, et~al.
+\newblock Risk factors associated with severe hypoglycemia in older adults with
+  type 1 diabetes.
+\newblock \emph{Diabetes Care}, 39\penalty0 (4):\penalty0 603--610, 2016.
+\newblock \doi{10.2337/dc15-1426}.
+
+\bibitem[Bergmeir et~al.(2018)Bergmeir, Hyndman, and
+  Koo]{bergmeir2018crossvalidation}
+Christoph Bergmeir, Rob~J. Hyndman, and Bonsoo Koo.
+\newblock A note on the validity of cross-validation for evaluating
+  autoregressive time series prediction.
+\newblock \emph{Computational Statistics \& Data Analysis}, 120:\penalty0
+  70--83, 2018.
+\newblock \doi{10.1016/j.csda.2017.11.003}.
+
+\bibitem[Kapoor and Narayanan(2023)]{kapoor2023leakage}
+Sayash Kapoor and Arvind Narayanan.
+\newblock Leakage and the reproducibility crisis in machine-learning-based
+  science.
+\newblock \emph{Patterns}, 4\penalty0 (9):\penalty0 100804, 2023.
+\newblock \doi{10.1016/j.patter.2023.100804}.
+
+\bibitem[Bouthillier et~al.(2021)Bouthillier, Delaunay, Bronzi,
+  et~al.]{bouthillier2021variance}
+Xavier Bouthillier, Pierre Delaunay, Mirko Bronzi, et~al.
+\newblock Accounting for variance in machine learning benchmarks.
+\newblock In \emph{Proceedings of Machine Learning and Systems}, volume~3,
+  pages 747--769, 2021.
+\newblock URL
+  \url{https://proceedings.mlsys.org/paper_files/paper/2021/hash/0184b0cd3cfb185989f858a1d9f5c1eb-Abstract.html}.
+
+\bibitem[Kiranyaz et~al.(2021)Kiranyaz, Avci, Abdeljaber, Ince, Gabbouj, and
+  Inman]{kiranyaz2021survey}
+Serkan Kiranyaz, Onur Avci, Osama Abdeljaber, Turker Ince, Moncef Gabbouj, and
+  Daniel~J. Inman.
+\newblock {1D} convolutional neural networks and applications: A survey.
+\newblock \emph{Mechanical Systems and Signal Processing}, 151:\penalty0
+  107398, 2021.
+\newblock \doi{10.1016/j.ymssp.2020.107398}.
+
+\bibitem[Lane et~al.(2016)Lane, Bhattacharya, Georgiev, Forlivesi, Jiao,
+  Qendro, and Kawsar]{lane2016deepx}
+Nicholas~D. Lane, Sourav Bhattacharya, Petko Georgiev, Claudio Forlivesi, Lei
+  Jiao, Lorena Qendro, and Fahim Kawsar.
+\newblock {DeepX}: A software accelerator for low-power deep learning inference
+  on mobile devices.
+\newblock In \emph{2016 15th ACM/IEEE International Conference on Information
+  Processing in Sensor Networks (IPSN)}, pages 1--12, 2016.
+\newblock \doi{10.1109/IPSN.2016.7460664}.
+
+\bibitem[Ignatov et~al.(2019)Ignatov, Timofte, Kulik, Yang, Wang, Baum, Wu, Xu,
+  and Van~Gool]{ignatov2019aibenchmark}
+Andrey Ignatov, Radu Timofte, Andrei Kulik, Seungsoo Yang, Ke~Wang, Felix Baum,
+  Max Wu, Lirong Xu, and Luc Van~Gool.
+\newblock {AI} benchmark: All about deep learning on smartphones in 2019.
+\newblock In \emph{2019 IEEE/CVF International Conference on Computer Vision
+  Workshop (ICCVW)}, pages 3617--3635, 2019.
+\newblock \doi{10.1109/ICCVW.2019.00447}.
+
+\bibitem[Banbury et~al.(2021)Banbury, Reddi, Torelli,
+  et~al.]{banbury2021mlperftiny}
+Colby Banbury, Vijay~Janapa Reddi, Peter Torelli, et~al.
+\newblock {MLPerf} tiny benchmark.
+\newblock \emph{Proceedings of the Neural Information Processing Systems Track
+  on Datasets and Benchmarks}, 1, 2021.
+\newblock URL
+  \url{https://datasets-benchmarks-proceedings.neurips.cc/paper_files/paper/2021/hash/da4fb5c6e93e74d3df8527599fa62642-Abstract-round1.html}.
+
+\bibitem[Jacob et~al.(2018)Jacob, Kligys, Chen, Zhu, Tang, Howard, Adam, and
+  Kalenichenko]{jacob2018quantization}
+Benoit Jacob, Skirmantas Kligys, Bo~Chen, Menglong Zhu, Matthew Tang, Andrew
+  Howard, Hartwig Adam, and Dmitry Kalenichenko.
+\newblock Quantization and training of neural networks for efficient
+  integer-arithmetic-only inference.
+\newblock In \emph{Proceedings of the IEEE Conference on Computer Vision and
+  Pattern Recognition}, pages 2704--2713, 2018.
+\newblock \doi{10.1109/CVPR.2018.00286}.
+
+\bibitem[{PyTorch}(2026)]{pytorchPT2E2026}
+{PyTorch}.
+\newblock {PT2E} quantization, 2026.
+\newblock URL
+  \url{https://docs.pytorch.org/ao/stable/pt2e_quantization/index.html}.
+\newblock Accessed 2026-09-19.
+
+\bibitem[{Google AI Edge}(2026{\natexlab{a}})]{googleRepresentativeData}
+{Google AI Edge}.
+\newblock Representative dataset for model quantization.
+\newblock Google AI for Developers documentation, 2026{\natexlab{a}}.
+\newblock URL
+  \url{https://developers.google.com/edge/api/tflite/python/tf/lite/RepresentativeDataset}.
+\newblock Accessed 2026-09-19.
+
+\bibitem[Banner et~al.(2019)Banner, Nahshan, and Soudry]{banner2019ptq}
+Ron Banner, Yury Nahshan, and Daniel Soudry.
+\newblock Post training 4-bit quantization of convolutional networks for
+  rapid-deployment.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~32, 2019.
+\newblock URL
+  \url{https://proceedings.neurips.cc/paper/2019/hash/c0a62e133894cdce435bcb4a5df1db2d-Abstract.html}.
+
+\bibitem[Nagel et~al.(2020)Nagel, Amjad, Van~Baalen, Louizos, and
+  Blankevoort]{nagel2020adaround}
+Markus Nagel, Rana~Ali Amjad, Mart Van~Baalen, Christos Louizos, and Tijmen
+  Blankevoort.
+\newblock Up or down? adaptive rounding for post-training quantization.
+\newblock In \emph{Proceedings of the 37th International Conference on Machine
+  Learning}, volume 119 of \emph{Proceedings of Machine Learning Research},
+  pages 7197--7206, 2020.
+\newblock URL \url{https://proceedings.mlr.press/v119/nagel20a.html}.
+
+\bibitem[Hubara et~al.(2021)Hubara, Nahshan, Hanani, Banner, and
+  Soudry]{hubara2021smallcalibration}
+Itay Hubara, Yury Nahshan, Yair Hanani, Ron Banner, and Daniel Soudry.
+\newblock Accurate post training quantization with small calibration sets.
+\newblock In \emph{Proceedings of the 38th International Conference on Machine
+  Learning}, volume 139 of \emph{Proceedings of Machine Learning Research},
+  pages 4466--4475, 2021.
+\newblock URL \url{https://proceedings.mlr.press/v139/hubara21a.html}.
+
+\bibitem[Kingma and Ba(2015)]{kingma2015adam}
+Diederik~P. Kingma and Jimmy Ba.
+\newblock Adam: A method for stochastic optimization.
+\newblock In \emph{International Conference on Learning Representations}, 2015.
+\newblock URL \url{https://arxiv.org/abs/1412.6980}.
+
+\bibitem[Paszke et~al.(2019)Paszke, Gross, Massa, et~al.]{paszke2019pytorch}
+Adam Paszke, Sam Gross, Francisco Massa, et~al.
+\newblock {PyTorch}: An imperative style, high-performance deep learning
+  library.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~32, 2019.
+\newblock URL
+  \url{https://proceedings.neurips.cc/paper/2019/hash/bdbca288fee7f92f2bfa9f7012727740-Abstract.html}.
+
+\bibitem[Pedregosa et~al.(2011)Pedregosa, Varoquaux, Gramfort,
+  et~al.]{pedregosa2011scikit}
+Fabian Pedregosa, Gael Varoquaux, Alexandre Gramfort, et~al.
+\newblock Scikit-learn: Machine learning in python.
+\newblock \emph{Journal of Machine Learning Research}, 12:\penalty0 2825--2830,
+  2011.
+\newblock URL \url{https://jmlr.org/papers/v12/pedregosa11a.html}.
+
+\bibitem[{NumPy Developers}(2026)]{numpyRound}
+{NumPy Developers}.
+\newblock {numpy.round}.
+\newblock NumPy reference documentation, 2026.
+\newblock URL
+  \url{https://numpy.org/doc/stable/reference/generated/numpy.round.html}.
+\newblock Accessed 2026-09-19.
+
+\bibitem[{JetBrains}(2026)]{kotlinRound}
+{JetBrains}.
+\newblock {kotlin.math.round}.
+\newblock Kotlin standard library reference, 2026.
+\newblock URL
+  \url{https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.math/round.html}.
+\newblock Accessed 2026-10-09.
+
+\bibitem[{Google AI Edge}(2026{\natexlab{b}})]{googleLiteRTCompiledModel}
+{Google AI Edge}.
+\newblock Run {LiteRT} compiled model {API} on {Android} with {Kotlin}.
+\newblock Google AI for Developers documentation, 2026{\natexlab{b}}.
+\newblock URL
+  \url{https://developers.google.com/edge/litert/next/android_kotlin}.
+\newblock Accessed 2026-07-20.
+
+\bibitem[{Google AI Edge}(2026{\natexlab{c}})]{googleLiteRTQuantization}
+{Google AI Edge}.
+\newblock Post-training quantization with {LiteRT}.
+\newblock Google AI for Developers documentation, 2026{\natexlab{c}}.
+\newblock URL
+  \url{https://developers.google.com/edge/litert/conversion/tensorflow/quantization/post_training_quantization}.
+\newblock Accessed 2026-09-19.
+
+\end{thebibliography}

@@ -55,6 +55,24 @@ def test_window_and_label_alignment():
     assert FIVE_CLASSES[y] == "rising_fast"
 
 
+def test_row_ids_trace_windows_to_time_ordered_source_rows():
+    # Shuffled rows with offset index labels, like a GlucoBench split frame:
+    # row_ids must follow time order and keep the frame's own index labels.
+    df = _make_df([16], step=1.0)
+    df.index = df.index + 1000
+    df = df.sample(frac=1.0, random_state=0)
+    dataset = GlucoseTrendDataset(df, classes=FIVE_CLASSES)
+
+    assert [list(rows) for rows in dataset.row_ids] == [
+        list(range(1000, 1015)),
+        list(range(1001, 1016)),
+    ]
+    for i, rows in enumerate(dataset.row_ids):
+        x, _ = dataset[i]
+        expected = torch.tensor(df.loc[rows[:12], "gl"].to_numpy(), dtype=torch.float32)
+        assert torch.equal(x.squeeze(0), expected)
+
+
 def test_collapse_map_reduces_to_three_classes():
     df = _make_df([15], start_value=100.0, step=20.0)  # same rising_fast case
     dataset = GlucoseTrendDataset(df, classes=THREE_CLASSES, collapse_map=THREE_CLASS_MAP)

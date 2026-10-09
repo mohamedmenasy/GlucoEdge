@@ -44,7 +44,7 @@ private data class QuantParams(val scale: Float, val zeroPoint: Int)
  * The project brief's intended hot path is LiteRT's `CompiledModel` API, and that is what
  * every real device runs. The one carve-out is emulators: `CompiledModel.create()`
  * unconditionally SIGILL-crashes the process on the required test AVD (`Medium_Phone_API_35`,
- * Apple-Silicon-hosted) - a native ARM SVE feature-probe (`rdsvl`) inside `libLiteRt.so`, run
+ * Apple-Silicon-hosted) - a native Arm SME feature-probe (`rdsvl`) inside `libLiteRt.so`, run
  * before any `Options`/`Accelerator` choice takes effect, faults because the guest kernel
  * advertises SVE2/SME2 it can't actually execute (full evidence, disassembly, and tombstones:
  * `docs/superpowers/specs/2026-07-05-emulator-compiledmodel-sigill.md`). Since a SIGILL can't be
@@ -116,7 +116,7 @@ class TrendClassifier private constructor(private val engine: Engine) : Classifi
 
     /**
      * Emulator fallback: the classic `org.tensorflow.lite.Interpreter`, XNNPACK explicitly
-     * disabled to avoid the crashing SVE probe. Verified via the full instrumented parity
+     * disabled to avoid the crashing SME probe. Verified via the full instrumented parity
      * suite on `Medium_Phone_API_35`.
      */
     private class InterpreterEngine(
@@ -168,7 +168,7 @@ class TrendClassifier private constructor(private val engine: Engine) : Classifi
             val quantized = model == ModelFile.INT8
 
             val engine = if (isEmulator()) {
-                // useXNNPACK(false): the SVE feature-probe that SIGILL-crashes on emulators
+                // useXNNPACK(false): the SME feature-probe that SIGILL-crashes on emulators
                 // lives in XNNPACK's native init path - see class KDoc and
                 // docs/superpowers/specs/2026-07-05-emulator-compiledmodel-sigill.md.
                 // Interpreter(File, Options) reads/mmaps the cacheDir copy directly - no

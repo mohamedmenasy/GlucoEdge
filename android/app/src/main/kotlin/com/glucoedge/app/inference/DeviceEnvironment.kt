@@ -5,7 +5,7 @@ import android.os.Build
 /**
  * Detects the emulator/host pairing where `CompiledModel.create()` is known to SIGILL-crash
  * the process (see `docs/superpowers/specs/2026-07-05-emulator-compiledmodel-sigill.md`): a
- * native ARM SVE feature-probe instruction (`rdsvl`) inside `libLiteRt.so`, run unconditionally
+ * native Arm SME feature-probe instruction (`rdsvl`) inside `libLiteRt.so`, run unconditionally
  * at model-compile time, faults because this AVD's guest kernel *advertises* SVE2/SME2
  * (inherited from an Apple Silicon host via Hypervisor.framework passthrough) without actually
  * being able to execute it. A SIGILL kills the whole process and cannot be caught by

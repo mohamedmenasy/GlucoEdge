@@ -15,6 +15,13 @@ class QuantizationMathTest {
         assertEquals((-11).toByte(), q[0])
     }
 
+    @Test fun roundsExactTiesToEvenLikeNumpy() {
+        // The Python benchmark's np.round sends half-way values to the even integer; the
+        // clients must agree on ties too (half-up rounding would give 1, 3, -1).
+        val q = QuantizationMath.quantizeInt8(floatArrayOf(0.5f, 1.5f, 2.5f, -1.5f), 1f, 0)
+        assertArrayEquals(byteArrayOf(0, 2, 2, -2), q)
+    }
+
     @Test fun clipsAboveCeilingInsteadOfWrapping() {
         // 260 mg/dL is above the ~239.9 ceiling: must clip to +127, never wrap negative
         val q = QuantizationMath.quantizeInt8(floatArrayOf(260f, 401f), scale, zeroPoint)

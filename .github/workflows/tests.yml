@@ -29,7 +29,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v4
       - name: Build and unit-test the app
         working-directory: android
         run: ./gradlew --no-daemon :app:assembleDebug :app:testDebugUnitTest :app:checkNoInternetPermission :app:checkNativeLibProvenance
