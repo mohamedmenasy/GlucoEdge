@@ -1,7 +1,15 @@
 # GlucoEdge paper
 
-This directory contains an arXiv-ready LaTeX manuscript describing the
-implemented GlucoEdge training, conversion, and Android deployment pipeline.
+This directory contains a LaTeX preprint draft describing the implemented
+GlucoEdge training, conversion, and Android deployment pipeline. The September
+2026 revision frames the recorded results around calibration-data coverage,
+directional recall, and deployment cost. It adds descriptive calculations from
+the existing tables; no new training, calibration study, or device benchmark
+was run for this revision.
+
+A subsequent prose edit simplifies dense sentences and improves the flow of
+the abstract, results, and discussion. It preserves the reported numbers,
+equations, tables, citations, limitations, and July 2026 manuscript date.
 
 ## Build
 
@@ -20,10 +28,11 @@ with the LaTeX sources in an arXiv submission.
 - **Author:** Mohamed Menasy
 - **Primary category:** `cs.LG`
 - **Possible cross-lists:** `eess.SP`, `q-bio.QM`
-- **Comments:** 8 pages, 1 figure, 5 tables. Source code and model artifacts are
+- **Comments:** 9 pages, 1 figure, 5 tables. Source code and model artifacts are
   available at <https://github.com/mohamedmenasy/GlucoEdge>.
 
 Before submission, confirm the author name, email, affiliation, category, and
-license in the arXiv form. The manuscript deliberately labels the system as a
-research engineering demonstration and documents the current evaluation
-limitations; it does not make a medical-device or treatment claim.
+license in the arXiv form, and complete the funding, competing-interest, and
+CRediT declarations flagged in the draft. The manuscript deliberately labels
+the system as a research engineering demonstration and documents the current
+evaluation limitations; it does not make a medical-device or treatment claim.

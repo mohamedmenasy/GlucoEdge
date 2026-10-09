@@ -1,4 +1,4 @@
-\begin{thebibliography}{30}
+\begin{thebibliography}{32}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -186,7 +186,7 @@ Benoit Jacob, Skirmantas Kligys, Bo~Chen, Menglong Zhu, Matthew Tang, Andrew
 \newblock {PT2E} quantization, 2026.
 \newblock URL
   \url{https://docs.pytorch.org/ao/stable/pt2e_quantization/index.html}.
-\newblock Accessed 2026-07-20.
+\newblock Accessed 2026-09-19.
 
 \bibitem[{Google AI Edge}(2026{\natexlab{a}})]{googleRepresentativeData}
 {Google AI Edge}.
@@ -194,7 +194,7 @@ Benoit Jacob, Skirmantas Kligys, Bo~Chen, Menglong Zhu, Matthew Tang, Andrew
 \newblock Google AI for Developers documentation, 2026{\natexlab{a}}.
 \newblock URL
   \url{https://developers.google.com/edge/api/tflite/python/tf/lite/RepresentativeDataset}.
-\newblock Accessed 2026-07-20.
+\newblock Accessed 2026-09-19.
 
 \bibitem[Banner et~al.(2019)Banner, Nahshan, and Soudry]{banner2019ptq}
 Ron Banner, Yury Nahshan, and Daniel Soudry.
@@ -247,6 +247,22 @@ Fabian Pedregosa, Gael Varoquaux, Alexandre Gramfort, et~al.
   2011.
 \newblock URL \url{https://jmlr.org/papers/v12/pedregosa11a.html}.
 
+\bibitem[{NumPy Developers}(2026)]{numpyRound}
+{NumPy Developers}.
+\newblock {numpy.round}.
+\newblock NumPy reference documentation, 2026.
+\newblock URL
+  \url{https://numpy.org/doc/stable/reference/generated/numpy.round.html}.
+\newblock Accessed 2026-09-19.
+
+\bibitem[{JetBrains}(2026)]{kotlinRoundToInt}
+{JetBrains}.
+\newblock {roundToInt}.
+\newblock Kotlin standard library reference, 2026.
+\newblock URL
+  \url{https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.math/round-to-int.html}.
+\newblock Accessed 2026-09-19.
+
 \bibitem[{Google AI Edge}(2026{\natexlab{b}})]{googleLiteRTCompiledModel}
 {Google AI Edge}.
 \newblock Run {LiteRT} compiled model {API} on {Android} with {Kotlin}.
@@ -261,6 +277,6 @@ Fabian Pedregosa, Gael Varoquaux, Alexandre Gramfort, et~al.
 \newblock Google AI for Developers documentation, 2026{\natexlab{c}}.
 \newblock URL
   \url{https://developers.google.com/edge/litert/conversion/tensorflow/quantization/post_training_quantization}.
-\newblock Accessed 2026-07-20.
+\newblock Accessed 2026-09-19.
 
 \end{thebibliography}
