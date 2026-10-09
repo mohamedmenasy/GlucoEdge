@@ -1,0 +1,87 @@
+{
+  "generated_by": "python -m experiments.split_audit",
+  "glucobench_commit": "661d840a98b316df51faa13a7100430afcbbb5b7",
+  "weinstock_csv_sha256": "b223559214fed20543c8d8ee6480b067e7605bdc84e03e0a4cb8211ba991113b",
+  "participants": {
+    "raw": 200,
+    "after_formatter": 192,
+    "held_out": 20
+  },
+  "grid_rows": {
+    "total": 579782,
+    "on_original_reading": 439218,
+    "no_gap_fill": 554183
+  },
+  "windows": {
+    "train": {
+      "windows": 424462,
+      "target_owner": {
+        "train": 424462,
+        "val": 0,
+        "test": 0,
+        "held_out": 0
+      },
+      "training_copies": 424462,
+      "participants": 172,
+      "inputs_and_endpoint_on_readings": 259357,
+      "inputs_and_endpoint_no_gap_fill": 328575
+    },
+    "val": {
+      "windows": 55289,
+      "target_owner": {
+        "train": 19402,
+        "val": 35887,
+        "test": 0,
+        "held_out": 0
+      },
+      "training_copies": 19402,
+      "participants": 127,
+      "inputs_and_endpoint_on_readings": 28729,
+      "inputs_and_endpoint_no_gap_fill": 42505
+    },
+    "test": {
+      "windows": 127165,
+      "target_owner": {
+        "train": 0,
+        "val": 17266,
+        "test": 52831,
+        "held_out": 57068
+      },
+      "training_copies": 0,
+      "participants": 186,
+      "inputs_and_endpoint_on_readings": 71326,
+      "inputs_and_endpoint_no_gap_fill": 97255
+    }
+  },
+  "int8_input": {
+    "scale": 0.9408126473426819,
+    "zero_point": -128,
+    "range_mgdl": [
+      0.0,
+      239.907
+    ]
+  },
+  "development_inputs_above_int8_range": {
+    "train": {
+      "readings": 431798,
+      "readings_above": 79707,
+      "windows": 424462,
+      "windows_above": 103755
+    },
+    "val": {
+      "readings": 57067,
+      "readings_above": 11700,
+      "windows": 55289,
+      "windows_above": 14515
+    }
+  },
+  "calibration": {
+    "windows": 200,
+    "participants": 1,
+    "segments": 1,
+    "unique_input_readings": 211,
+    "span_hours": 17.5,
+    "training_copies": 178,
+    "input_max_mgdl": 240.0
+  }
+}
