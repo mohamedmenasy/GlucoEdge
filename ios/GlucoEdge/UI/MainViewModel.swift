@@ -112,6 +112,17 @@ final class MainViewModel {
         prediction = nil
     }
 
+    /// Re-checked when the app returns to the foreground (Android's
+    /// onResumeCheck): never clobbers an in-flight generation or a shown note.
+    func refreshExplainAvailability(_ availability: ExplainAvailability) {
+        switch availability {
+        case .available:
+            if case .unavailable = explainerState { explainerState = .ready }
+        case .unavailable(let reason):
+            if explainerState != .generating { explainerState = .unavailable(reason) }
+        }
+    }
+
     func onExplain() {
         if case .unavailable = explainerState { return }
         guard explainerState != .generating,

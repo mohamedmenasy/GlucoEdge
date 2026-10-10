@@ -157,6 +157,35 @@ struct MainViewModelTests {
         #expect(note.started == 0)
     }
 
+    @Test func availabilityRefreshEnablesExplainWithoutClobberingANote() async {
+        // Mirrors Android's onResumeCheck: enabling Apple Intelligence in
+        // Settings and returning to the app must surface Explain; a shown
+        // note must survive a refresh; losing availability shows the reason.
+        let note = FakeNoteGenerator()
+        let vm = MainViewModel(
+            trace: TraceSource(readings: readings(14), skippedRows: 0, label: "synthetic"),
+            classifierFactory: { _ in FakeClassifier() },
+            explainAvailability: .unavailable("off"),
+            noteGenerator: note,
+            baseInterval: .milliseconds(1))
+        vm.refreshExplainAvailability(.available)
+        #expect(vm.explainerState == .ready)
+
+        vm.onPlayPause()
+        await waitUntil { vm.prediction != nil }
+        vm.onExplain()
+        await waitUntil { note.started == 1 }
+        vm.refreshExplainAvailability(.available)
+        #expect(vm.explainerState == .generating)   // in-flight generation untouched
+        note.finish?.resume(returning: "Kept.")
+        await waitUntil { vm.explainerState == .note("Kept.") }
+        vm.refreshExplainAvailability(.available)
+        #expect(vm.explainerState == .note("Kept."))
+
+        vm.refreshExplainAvailability(.unavailable("Explain needs Apple Intelligence — enable it in Settings."))
+        #expect(vm.explainerState == .unavailable("Explain needs Apple Intelligence — enable it in Settings."))
+    }
+
     @Test func unavailableExplainStateCarriesReason() {
         let vm = MainViewModel(
             trace: TraceSource(readings: readings(14), skippedRows: 0, label: "synthetic"),
