@@ -40,6 +40,21 @@ and after INT8; the INT8 input range against development data) and removes
 caveats that repeated ones already made in the Limitations section. No
 numbers changed.
 
+The October 2026 calibration-coverage revision rewrites the paper around
+the executed study (plan
+`docs/superpowers/plans/2026-09-19-calibration-coverage-paper-enhancement.md`,
+amendments included): corrected split-role/no-gap-fill evaluation, five
+training seeds, 100 matrix INT8 artifacts plus a 10-artifact min-max
+observer arm, prespecified contrasts with participant-cluster bootstrap
+intervals, clip-only/QDQ mechanism controls, and slope/logistic baselines.
+Headline: a uniform random 200-window calibration recovers the 13.4-point
+directional-recall loss of the toolchain-default sequential selection;
+range stratification, budget, and observer changes do nothing. The title
+changed to "GlucoEdge: Calibration Coverage and Quantization Trade-offs in
+On-Device Glucose Trend Classification". Historical device latency stays
+as historical context; the new artifacts are not device-timed yet.
+Aggregates live in `results/calibration-coverage/` beside this README.
+
 ## Build
 
 ```bash
@@ -52,12 +67,12 @@ with the LaTeX sources in an arXiv submission.
 
 ## Suggested arXiv metadata
 
-- **Title:** GlucoEdge: An Engineering Study of On-Device Five-Class Glucose
-  Trend Forecasting and INT8 Quantization
+- **Title:** GlucoEdge: Calibration Coverage and Quantization Trade-offs in
+  On-Device Glucose Trend Classification
 - **Author:** Mohamed Menasy
 - **Primary category:** `cs.LG`
 - **Possible cross-lists:** `eess.SP`, `q-bio.QM`
-- **Comments:** 11 pages, 3 figures, 6 tables. Source code and model artifacts are
+- **Comments:** 13 pages, 3 figures, 10 tables. Source code and model artifacts are
   available at <https://github.com/mohamedmenasy/GlucoEdge>.
 
 Before submission, confirm the author name, email, affiliation, category, and
