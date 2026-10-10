@@ -12,9 +12,11 @@ Python/Kotlin/Swift to the same bytes). INT8 is calibrated on the study's
 - `venv/bin/python -m experiments.delta_inputs train --run-id delta-r1 --variant anchor`
 - `venv/bin/python -m experiments.delta_inputs convert --run-id delta-r1 --variant anchor`
 
-Held-out-participant directional recall
-(paper/results/calibration-coverage/delta_inputs_r1.json): float 0.5088,
-INT8 (uniform-200) 0.5092 — above the absolute-input baseline (0.487) —
+Held-out-participant directional recall of THESE seed-0 artifacts
+(paper/results/calibration-coverage/delta_inputs_r1.json,
+variants.anchor.held_out): float 0.5161, INT8 (uniform-200 d101) 0.5174;
+the five-seed means are 0.5088 / 0.5092 — above the absolute-input
+baseline (0.487) —
 and the INT8 input grid is 6.4x finer (scale 0.247 vs 1.572 mg/dL/code),
 which makes quantization nearly calibration-proof: even the
 toolchain-default sequential selection costs only ~0.5 pp here (the frozen
@@ -35,15 +37,15 @@ shipped earlier on 2026-10-10) WAS device-verified on the iPhone that
 day: float `5a0f0744…`, INT8 `9f2f26f5…` — now historical; see git
 history and the paper.
 
-Golden parity with these exact bytes is green on the iOS simulator suite
-(48/48, INT8 bit-exact) and the goldens pin both sha256s. On-device
-verification (Galaxy S22 Ultra / iPhone 18 Pro Max) was performed on the
-PREVIOUS assets (2026-07-07 / 2026-10-10). The Android test device is no
-longer available (broken as of 2026-10-10), so the Android on-device record
-stays historical. These assets WERE re-verified on the iPhone 18 Pro Max on
-2026-10-10: golden parity 5/5 on device (INT8 bit-exact), and both files
-were among the nine artifacts hash-verified, parity-checked on 277 synthetic
-windows, and latency-benchmarked on device (see
+Device-verification history (applies to PREVIOUS pairs, NOT the delta
+bytes above): the original pre-study assets were device-verified on the
+Galaxy S22 Ultra (2026-07-07; that device is broken as of 2026-10-10, so
+the Android on-device record stays historical) and on the iPhone 18 Pro
+Max (2026-10-10). The absolute-input study pair (`5a0f0744…`/`9f2f26f5…`)
+was re-verified on the iPhone the same day — golden parity 5/5 on device
+(INT8 bit-exact) — and both of those files were among the nine artifacts
+hash-verified, parity-checked on 277 synthetic windows, and
+latency-benchmarked on device (see
 paper/results/calibration-coverage/device_benchmark_ios_r1.json).
 
 Historical pre-study assets (float `eb96c7e6…`, INT8 `0dc35387…`, sequential
