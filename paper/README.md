@@ -55,6 +55,15 @@ On-Device Glucose Trend Classification". Historical device latency stays
 as historical context; the new artifacts are not device-timed yet.
 Aggregates live in `results/calibration-coverage/` beside this README.
 
+A sensitivity-tier addendum evaluates the three disjoint window groups the
+protocol froze (exact-observed; gap-filled inputs with gap-free endpoints;
+gap-filled endpoint) on the same frozen artifacts: both headline findings
+reproduce in every tier (new Results subsection and table; the Limitations
+bullet now reports this instead of "unevaluated"). Full record in
+`results/calibration-coverage/sensitivity_tiers_r1.json`. It also notes the
+repository's bundled models were replaced with the study's seed-0
+uniform-200 pair. Pages/figures/tables: 13 pages, 3 figures, 11 tables.
+
 ## Build
 
 ```bash
@@ -72,7 +81,7 @@ with the LaTeX sources in an arXiv submission.
 - **Author:** Mohamed Menasy
 - **Primary category:** `cs.LG`
 - **Possible cross-lists:** `eess.SP`, `q-bio.QM`
-- **Comments:** 13 pages, 3 figures, 10 tables. Source code and model artifacts are
+- **Comments:** 13 pages, 3 figures, 11 tables. Source code and model artifacts are
   available at <https://github.com/mohamedmenasy/GlucoEdge>.
 
 Before submission, confirm the author name, email, affiliation, category, and

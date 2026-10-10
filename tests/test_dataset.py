@@ -202,3 +202,43 @@ def test_gap_free_filter_drops_masked_windows_and_keeps_labels_aligned():
         expected = torch.tensor(df.loc[rows[:3], "gl"].to_numpy(), dtype=torch.float32)
         assert torch.equal(x.squeeze(0), expected)
         assert ds.labels[i] == y
+
+
+def test_sensitivity_tiers_partition_scored_windows_disjointly():
+    from training.splits import sensitivity_tier_indices
+
+    df = _global_df({"p1": ([9], 100.0, 1.0)})
+    ds = _small_ds(df)  # 5 windows: inputs {i,i+1,i+2}, endpoint i+4
+    owner = np.full(9, "test", dtype=object)
+    no_gap_fill = np.ones(9, dtype=bool)
+    no_gap_fill[6] = False          # row 6 fills a sensor gap
+    on_reading = no_gap_fill.copy()
+    on_reading[[1, 8]] = False      # rows 1, 8 sit between readings
+
+    tiers = sensitivity_tier_indices(ds, owner, "test", on_reading, no_gap_fill)
+    # w3 (rows 3,4,5 + endpoint 7) is the only all-on-reading window.
+    assert tiers["exact_observed"] == [3]
+    # w4: input row 6 is gap-filled, endpoint 8 is clean.
+    assert tiers["gap_filled_inputs"] == [4]
+    # w2: endpoint row 6 is gap-filled (wins over any input status).
+    assert tiers["gap_filled_endpoint"] == [2]
+    # Disjoint, and together with the primary mask they cover every scored
+    # window: w0/w1 are primary-but-not-exact (between-readings input row 1).
+    primary = set(gap_free_window_indices(ds, no_gap_fill))
+    assert set(tiers["exact_observed"]) <= primary
+    assert primary - set(tiers["exact_observed"]) == {0, 1}
+    all_tiered = sum(tiers.values(), [])
+    assert len(all_tiered) == len(set(all_tiered))
+
+
+def test_sensitivity_tiers_only_include_scored_windows():
+    from training.splits import sensitivity_tier_indices
+
+    df = _global_df({"p1": ([9], 100.0, 1.0)})
+    ds = _small_ds(df)
+    owner = np.full(9, "test", dtype=object)
+    owner[7:] = "held_out"  # w3/w4 horizons cross ownership: scored nowhere
+    masks = np.ones(9, dtype=bool)
+    tiers = sensitivity_tier_indices(ds, owner, "test", masks, masks)
+    assert tiers["exact_observed"] == [0, 1, 2]
+    assert tiers["gap_filled_inputs"] == tiers["gap_filled_endpoint"] == []

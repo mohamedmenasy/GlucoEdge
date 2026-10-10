@@ -66,3 +66,24 @@ def gap_free_window_indices(ds, no_gap_fill):
         if no_gap_fill[checked].all():
             kept.append(i)
     return kept
+
+
+def sensitivity_tier_indices(ds, owner, split, on_reading, no_gap_fill):
+    """The protocol's three frozen sensitivity tiers, as disjoint groups of
+    the windows `split` scores (same checked rows as the primary mask: the
+    inputs and the future endpoint). `exact_observed` is the subset of the
+    primary no-gap-fill windows whose checked rows all coincide with original
+    readings; `gap_filled_inputs` has a gap-filled input but a no-gap
+    endpoint; `gap_filled_endpoint` has a gap-filled endpoint. Primary
+    windows that are not exact-observed belong to no tier."""
+    tiers = {"exact_observed": [], "gap_filled_inputs": [], "gap_filled_endpoint": []}
+    for i in scored_window_indices(ds, owner, split):
+        rows = ds.row_ids[i]
+        inputs, endpoint = rows[:ds.input_length], rows[-1]
+        if not no_gap_fill[endpoint]:
+            tiers["gap_filled_endpoint"].append(i)
+        elif not no_gap_fill[inputs].all():
+            tiers["gap_filled_inputs"].append(i)
+        elif on_reading[inputs].all() and on_reading[endpoint]:
+            tiers["exact_observed"].append(i)
+    return tiers
