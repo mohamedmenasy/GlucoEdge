@@ -1,0 +1,18 @@
+{
+  "study": "second-cohort confirmation",
+  "dataset": "hall",
+  "prediction": "uniform_random minus sequential directional recall at budget 200 is NEAR ZERO on this narrow-range cohort (max glucose ~303, ~0% readings above 240): sequential selection cannot meaningfully under-cover the population range",
+  "strategies": ["sequential", "uniform_random"],
+  "budgets": [200],
+  "draws": [101, 102, 103],
+  "training_seeds": [0, 1, 2, 3, 4],
+  "mask": "no-gap-fill at 1.5x modal per-participant grid interval",
+  "availability_audit_counts_only": {
+    "eligible_train": 55426, "calibration_pool": 6961,
+    "eligible_temporal": 11212, "temporal_participants": 50,
+    "eligible_held_out": 8723, "held_out_participants": 6
+  },
+  "components": "held_out (6 participants) primary, temporal secondary; both use the paired participant-cluster bootstrap",
+  "bootstrap": {"n_boot": 2000, "seed": 20261010},
+  "frozen_before_any_scored_label_read": true
+}
