@@ -1009,6 +1009,53 @@ hall & temporal & 0.428 & 0.378 & 0.421 & $+0.043$ $[+0.011, +0.073]$ \\
 \end{tabular}}
 \end{table}
 
+\subsection{Delta-encoded inputs}
+
+If calibration failures are input-range failures, re-encoding the input
+should remove them. Two variants were trained from scratch on the same
+eligible windows and seeds (gates frozen beforehand; like the
+sensitivity tiers, this is a post-hoc experiment on previously touched
+held-out data): 11 consecutive differences, and the same differences
+plus the last absolute value divided by 16, placing a coarse level
+channel inside the delta range. Both passed the frozen float gate
+(five-seed held-out directional recall $\geq 0.482$): differences alone
+reach 0.497, and differences plus the scaled anchor reach
+\textbf{0.509} --- above the absolute-input baseline's 0.487, so the
+re-encoding costs nothing and appears to help. The anchor variant
+proceeded to INT8 per the frozen rule.
+
+The robustness prediction held (Table~\ref{tab:delta}). The anchor
+model's INT8 input grid is $6.4\times$ finer (scale 0.247 versus 1.572
+mg/dL per code), and under the toolchain-default sequential calibration
+--- the selection that costs the absolute-input model 13.4 points ---
+the delta model loses only half a point against its own float
+($+0.50$ $[+0.33, +0.67]$); uniform minus sequential is $+0.54$
+$[+0.38, +0.72]$. The frozen ship criterion (sequential-INT8 within 0.5
+points of float) passes at 0.4955, a margin of less than five
+thousandths of a point, which we state rather than celebrate; the
+bundled INT8 model is calibrated with the uniform selection, where no
+gap is resolvable. Full record:
+\texttt{delta\_inputs\_r1.json}.
+
+\begin{table}[t]
+\centering
+\caption{Delta-encoded inputs (held-out directional recall, five-seed
+means; uniform over three draws). The absolute-input row repeats the
+main study for comparison.}
+\label{tab:delta}
+\footnotesize
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Input encoding & Float & INT8 seq.\ 200 & INT8 unif.\ 200 & Unif.$-$Seq. [95\% CI] \\
+\midrule
+Absolute mg/dL & 0.487 & 0.354 & 0.487 & $+0.134$ $[+0.103, +0.169]$ \\
+Deltas only & 0.497 & --- & --- & (did not proceed) \\
+Deltas + anchor/16 & 0.509 & 0.504 & 0.509 & $+0.005$ $[+0.004, +0.007]$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
 \subsection{Historical comparison}
 
 The earlier revision reported accuracy 0.5184 and macro recall 0.5060 for

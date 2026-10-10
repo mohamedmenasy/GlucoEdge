@@ -86,6 +86,15 @@ sequential-ceiling deficit (240/401 -> +13.4; 286/400 -> +2.0;
 `results/calibration-coverage/confirmation_{dubosson,hall}.json`. Now 13
 tables.
 
+A delta-inputs addendum (D12) trains two re-encodings of the same windows
+(11 consecutive differences; differences + last value/16) under frozen
+gates: both pass the float gate, the anchor variant reaches 0.509 held-out
+directional recall (above the absolute baseline 0.487) and its INT8 loses
+only ~0.5 pp under the toolchain-default sequential calibration (vs 13.4
+for absolute inputs; input grid 6.4x finer). Post-hoc on touched data,
+disclosed. New subsection + table (tab:delta); record in
+`results/calibration-coverage/delta_inputs_r1.json`. Now 14 tables.
+
 ## Build
 
 ```bash
@@ -103,7 +112,7 @@ with the LaTeX sources in an arXiv submission.
 - **Author:** Mohamed Menasy
 - **Primary category:** `cs.LG`
 - **Possible cross-lists:** `eess.SP`, `q-bio.QM`
-- **Comments:** 14 pages, 3 figures, 13 tables. Source code and model artifacts are
+- **Comments:** 14 pages, 3 figures, 14 tables. Source code and model artifacts are
   available at <https://github.com/mohamedmenasy/GlucoEdge>.
 
 Before submission, confirm the author name, email, affiliation, category, and
