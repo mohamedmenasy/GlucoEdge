@@ -46,11 +46,11 @@ def split_summary(ds, owner, split, no_gap_fill, classes=None):
     return summary
 
 
-def main():
+def load_weinstock_context():
+    """Formatter plus the provenance arrays every study stage shares:
+    (formatter, owner, no_gap_fill)."""
     import pandas as pd
 
-    from training.dataset import GlucoseTrendDataset
-    from training.labeling import FIVE_CLASSES
     from training.train import GLUCOBENCH_ROOT, load_formatter
 
     formatter = load_formatter("weinstock")
@@ -66,6 +66,14 @@ def main():
     readings = raw[raw["id"].isin(encoder.classes_)].assign(
         id=lambda d: encoder.transform(d["id"]).astype(np.float32))
     _, no_gap_fill = observation_status(data[["id", "time"]], readings)
+    return formatter, owner, no_gap_fill
+
+
+def main():
+    from training.dataset import GlucoseTrendDataset
+    from training.labeling import FIVE_CLASSES
+
+    formatter, owner, no_gap_fill = load_weinstock_context()
 
     train_ds = GlucoseTrendDataset(formatter.train_data, classes=FIVE_CLASSES)
     val_ds = GlucoseTrendDataset(formatter.val_data, classes=FIVE_CLASSES)

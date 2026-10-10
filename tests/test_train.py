@@ -61,6 +61,18 @@ def test_build_eligible_dataset_filters_by_split_and_mask():
     assert y == ds.labels[3]
 
 
+def test_class_weights_accepts_a_torch_subset():
+    from torch.utils.data import Subset
+
+    full = _FakeDataset([0, 0, 1, 1, 1, 2])
+    sub = Subset(full, [0, 2, 3, 5])  # labels 0, 1, 1, 2
+    weights = class_weights(sub, num_classes=3)
+    from sklearn.utils.class_weight import compute_class_weight
+    expected = compute_class_weight("balanced", classes=np.arange(3),
+                                    y=np.array([0, 1, 1, 2]))
+    assert torch.allclose(weights, torch.tensor(expected, dtype=torch.float32))
+
+
 def test_set_seed_makes_model_init_reproducible():
     from training.model import TrendCNN
 

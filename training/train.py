@@ -49,8 +49,14 @@ def build_eligible_dataset(ds, owner, split, no_gap_fill=None):
     return Subset(ds, indices)
 
 
-def class_weights(train_ds: GlucoseTrendDataset, num_classes: int) -> torch.Tensor:
-    labels = np.array(train_ds.labels)
+def _dataset_labels(ds):
+    if hasattr(ds, "labels"):
+        return np.array(ds.labels)
+    return np.array([ds.dataset.labels[i] for i in ds.indices])  # torch Subset
+
+
+def class_weights(train_ds, num_classes: int) -> torch.Tensor:
+    labels = _dataset_labels(train_ds)
     present = np.unique(labels)
     weights = np.ones(num_classes, dtype=np.float64)
     if len(present) > 0:

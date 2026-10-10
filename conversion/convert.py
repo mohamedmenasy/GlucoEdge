@@ -19,7 +19,8 @@ def convert_float(model, sample_input: torch.Tensor, out_path: Path) -> None:
     edge_model.export(str(out_path))
 
 
-def convert_int8(model, sample_input, calibration_inputs, out_path: Path) -> None:
+def convert_int8(model, sample_input, calibration_inputs, out_path: Path,
+                 observer: str = "histogram") -> None:
     import litert_torch
     from litert_torch.quantize.pt2e_quantizer import PT2EQuantizer, get_symmetric_quantization_config
     from litert_torch.quantize.quant_config import QuantConfig
@@ -27,9 +28,22 @@ def convert_int8(model, sample_input, calibration_inputs, out_path: Path) -> Non
 
     exported = torch.export.export(model, (sample_input,)).module()
 
-    quantizer = PT2EQuantizer().set_global(
-        get_symmetric_quantization_config(is_per_channel=True, is_dynamic=False)
-    )
+    config = get_symmetric_quantization_config(is_per_channel=True, is_dynamic=False)
+    if observer == "minmax":
+        # Observer arm (plan Amendment 3): min-max activation ranges in place
+        # of the default histogram observer. get_symmetric_quantization_config
+        # is lru_cached, so swap specs on immutable copies, never in place.
+        from dataclasses import replace
+
+        from torchao.quantization.pt2e.observer import MinMaxObserver
+
+        act = replace(config.input_activation,
+                      observer_or_fake_quant_ctr=MinMaxObserver.with_args(eps=2**-12))
+        config = replace(config, input_activation=act, output_activation=act)
+    elif observer != "histogram":
+        raise ValueError(f"unknown observer {observer!r}")
+
+    quantizer = PT2EQuantizer().set_global(config)
     prepared = prepare_pt2e(exported, quantizer)
 
     for calib_input in calibration_inputs:
