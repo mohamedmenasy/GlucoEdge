@@ -52,3 +52,24 @@ def test_observation_status_marks_a_reading_less_participant_unobserved():
 
     assert on_reading.tolist() == [True, False, False]
     assert no_gap_fill.tolist() == [True, False, False]
+
+
+def test_observation_status_accepts_a_custom_gap_threshold():
+    t = lambda minutes: pd.Timestamp("2024-01-01") + pd.Timedelta(minutes=minutes)
+    readings = pd.DataFrame({"id": ["a", "a"], "time": [t(0), t(10)]})
+    grid = pd.DataFrame({"id": ["a"] * 3, "time": [t(0), t(5), t(10)]})
+    # Default 7.5-min threshold: the 10-min bracket is a gap.
+    _, strict = observation_status(grid, readings)
+    assert strict.tolist() == [True, False, True]
+    # A 15-minute threshold (1.5 x a 10-min cohort interval) accepts it.
+    _, loose = observation_status(grid, readings,
+                                  max_gap=np.timedelta64(900, "s"))
+    assert loose.tolist() == [True, True, True]
+
+
+def test_cohort_interval_scales_threshold():
+    from experiments.data_availability import cohort_interval
+    t = pd.Timestamp("2024-01-01")
+    times = pd.Series([t + pd.Timedelta(minutes=m) for m in
+                       (0, 15, 30, 45, 60, 61)]).to_numpy()
+    assert cohort_interval(times) == np.timedelta64(15 * 60, "s")

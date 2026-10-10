@@ -23,11 +23,13 @@ def row_owner(n_rows, train_idx, val_idx, test_idx, held_out_idx):
     return owner
 
 
-def observation_status(grid, readings):
+def observation_status(grid, readings, max_gap=None):
     """Per grid row (by position): is it an original reading, and is it free
     of gap filling - an original reading, or between two consecutive readings
-    of the same participant at most MAX_ADJACENT_GAP apart? Both frames hold
-    `id` and minute-rounded `time`."""
+    of the same participant at most `max_gap` apart (default
+    MAX_ADJACENT_GAP, i.e. 1.5x a 5-minute sensor interval)? Both frames
+    hold `id` and minute-rounded `time`."""
+    max_gap = MAX_ADJACENT_GAP if max_gap is None else max_gap
     grid = grid.reset_index(drop=True)
     on_reading = np.zeros(len(grid), dtype=bool)
     no_gap_fill = np.zeros(len(grid), dtype=bool)
@@ -41,7 +43,7 @@ def observation_status(grid, readings):
         nxt = times[np.minimum(pos, len(times) - 1)]
         prv = times[np.maximum(pos - 1, 0)]
         hit = (pos < len(times)) & (nxt == t)
-        bracketed = (pos > 0) & (pos < len(times)) & (nxt - prv <= MAX_ADJACENT_GAP)
+        bracketed = (pos > 0) & (pos < len(times)) & (nxt - prv <= max_gap)
         on_reading[g.index] = hit
         no_gap_fill[g.index] = hit | bracketed
     return on_reading, no_gap_fill
