@@ -290,3 +290,36 @@ addendum to this spec and in the README:
    handled as visible states and tested live early.
 4. **CI cannot exercise Explain generation** (no Apple Intelligence on
    runners); covered by fakes in CI and a live device check.
+
+## Implementation notes (2026-10-09)
+
+Deviations found during implementation, each recorded at the point it
+was decided:
+
+- **LiteRT pin (decision 1).** The `v2.3.0` tag's `Package.swift`
+  references `prebuilt/*.zip` files that were never committed, and
+  SwiftPM crashes while extracting them. The app instead pins commit
+  `8f555ada850ac4cd331d9d10bded0d0048013666` ("Update Package.swift binary
+  targets", 2026-10-08), which points at the v2.3.0 release xcframeworks
+  by URL and checksum. The binaries are therefore exactly 2.3.0. The Swift
+  wrapper sources come from `main` at that commit; golden parity passed on
+  that pairing.
+- **Git LFS.** The LiteRT repository keeps Android/Linux prebuilts, which
+  its Swift package never uses, in Git LFS. SwiftPM's mirror lacks those
+  objects for a pinned revision, so `git lfs pull` fails. Package
+  resolution runs with `lfs.fetchexclude='*'`, supplied as `GIT_CONFIG_*`
+  environment variables (CI job env and the documented CLI command).
+  `git-lfs` must still be installed.
+- **Concurrency.** `Classifier` and `NoteGenerator` are `@MainActor`
+  protocols, because the main-actor view model is their only caller.
+- **Explain.**
+  - Every generation failure maps to a readable `NoteError`. This
+    includes bridged `NSError`s that don't cast to `GenerationError`; one
+    was observed on the simulator while guardrail assets were loading.
+  - The live guardrail test runs on physical devices only, because the
+    simulator reports the host Mac's availability and behaves
+    nondeterministically.
+  - Availability is re-checked when the app returns to the foreground,
+    mirroring Android's `onResumeCheck`.
+- **Stats line.** It shows `device`/`simulator`, as this spec's UI section
+  lists.

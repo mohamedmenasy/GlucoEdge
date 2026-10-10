@@ -1,6 +1,6 @@
 # GlucoEdge
 
-An on-device glucose trend classifier for Android — a portfolio project
+An on-device glucose trend classifier for Android and iOS — a portfolio project
 demonstrating production on-device ML deployment (privacy, offline
 inference, latency), **not a medical device**. It does not diagnose,
 monitor, or advise on diabetes management, and none of its outputs should
@@ -27,7 +27,9 @@ models — see [Android app](#android-app-android) below, with the
 `CompiledModel` path verified on a physical device), and the optional
 on-device explanation layer (LiteRT-LM + Gemma 3 1B, fully offline — see
 [the setup notes](#optional-on-device-explanation-notes-litert-lm)). All
-planned pieces are built; see [Roadmap](#roadmap).
+planned pieces are built; see [Roadmap](#roadmap). The app has since been
+ported to iOS: the same two model files and the same parity vectors, run
+through LiteRT's Swift API — see [iOS app](#ios-app-ios).
 
 **The 5-class question is settled with real data, not assumed.** On
 GlucoBench's small 4-patient iglu config, the two "fast" trend classes had
@@ -146,6 +148,47 @@ guard: both LiteRT libraries bundle a `libLiteRt.so`, and the check fails
 CI if the packaged copy ever stops being the exact binary the classifier's
 parity suite was verified against.
 
+## iOS app (`ios/`)
+
+SwiftUI sibling of the Android app. It bundles the **same two `.tflite`
+files** — referenced in place from `android/app/src/main/assets/` by an
+Xcode folder reference, never copied — and runs them through LiteRT's Swift
+**CompiledModel** API (CPU). It is held to the **same golden vectors** as
+the Kotlin client: on the iOS simulator (in CI) float logits match the
+Python benchmark within 1e-5 and INT8 dequantized outputs are bit-exact,
+with the asset sha256 pinned. Replay, gap-aware windowing, the float/INT8
+toggle and the latency stats line mirror the Android screen.
+
+- Explain notes come from Apple's on-device **Foundation Models** framework
+  (`SystemLanguageModel`, iOS 26+, Apple Intelligence on) instead of
+  LiteRT-LM: same describe-only, no-advice/no-dosing rules, no model file
+  to download, but a different model, so notes read differently from the
+  Android ones. Without Apple Intelligence the app says why Explain is off.
+- LiteRT is pinned to commit `8f555ada` — Google's `Package.swift` fix that
+  points at the checksum-verified v2.3.0 release xcframeworks. The `v2.3.0`
+  tag itself is not consumable from SwiftPM: its manifest references
+  `prebuilt/*.zip` files that were never committed.
+- Build/test (Xcode 26.6+, `git-lfs` installed). LiteRT's repository keeps
+  unused Android/Linux prebuilts in Git LFS that SwiftPM cannot pull for a
+  pinned commit, so resolve packages with LFS fetches disabled (once per
+  machine; Xcode's UI then reuses the checkout):
+
+      GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=lfs.fetchexclude GIT_CONFIG_VALUE_0='*' \
+        xcodebuild test -project ios/GlucoEdge.xcodeproj -scheme GlucoEdge \
+        -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+
+- Device installs: put `DEVELOPMENT_TEAM = <your team id>` in the
+  gitignored `ios/Config/Local.xcconfig`.
+- A locally extracted `real_trace.csv` (see the Android notes) is bundled by
+  iOS builds too — same rule: don't distribute such builds.
+- **No-network note:** iOS has no INTERNET permission, so there is no
+  equivalent of the Android build's merged-manifest guarantee. CI runs a
+  source scan (`ios/scripts/check_no_network.sh`) that fails on networking
+  APIs — a weaker, best-effort guard.
+
+On-device (iPhone) parity and latency are not yet measured; simulator
+latency is a host-Mac proxy and is not reported as a device number.
+
 ## The quantization tradeoff, measured
 
 The headline comparison across the three model artifacts, on the full
@@ -225,6 +268,11 @@ Per the original project plan, in order:
    mean 0.334 ms / INT8 mean 0.484 ms (Kotlin inference path, excluding
    softmax — INT8 is again not faster). Details appended to
    [the SIGILL decision record](docs/superpowers/specs/2026-07-05-emulator-compiledmodel-sigill.md).
+6. ~~Port the app to iOS with the same model files and parity vectors~~ —
+   done, see [iOS app](#ios-app-ios); golden parity green on the iOS
+   simulator in CI.
+   - iPhone on-device latency and parity verification (iPhone 18 Pro Max)
+     pending.
 
 ~~Optional stretch, once the above works end to end: a fully local
 on-device explanation layer (LiteRT-LM + a small open-weight model) that
