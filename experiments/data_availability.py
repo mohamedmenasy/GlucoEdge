@@ -79,6 +79,12 @@ def main():
     val_ds = GlucoseTrendDataset(formatter.val_data, classes=FIVE_CLASSES)
     test_ds = GlucoseTrendDataset(formatter.test_data, classes=FIVE_CLASSES)
 
+    # Real-data check of the ownership rule: the two evaluation components
+    # score disjoint window sets of the same test frame.
+    overlap = set(scored_window_indices(test_ds, owner, "test")) & \
+        set(scored_window_indices(test_ds, owner, "held_out"))
+    assert not overlap, f"temporal/held-out components share {len(overlap)} windows"
+
     val_eligible = split_summary(val_ds, owner, "val", no_gap_fill, FIVE_CLASSES)
     report = {
         "generated_by": "python -m experiments.data_availability",

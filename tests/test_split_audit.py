@@ -39,3 +39,16 @@ def test_observation_status_separates_regridding_from_gap_filling():
     # b's 00:10 reading must not mark a's 00:10 grid row as observed.
     assert on_reading.tolist() == [True, True, False, False, False, True]
     assert no_gap_fill.tolist() == [True, True, True, False, False, True]
+
+
+def test_observation_status_marks_a_reading_less_participant_unobserved():
+    t = lambda minutes: pd.Timestamp("2024-01-01") + pd.Timedelta(minutes=minutes)
+    readings = pd.DataFrame({"id": ["a", "a"], "time": [t(0), t(5)]})
+    # Participant "c" appears on the grid with no readings at all: every one
+    # of its rows is unobserved rather than a KeyError.
+    grid = pd.DataFrame({"id": ["a", "c", "c"], "time": [t(0), t(0), t(5)]})
+
+    on_reading, no_gap_fill = observation_status(grid, readings)
+
+    assert on_reading.tolist() == [True, False, False]
+    assert no_gap_fill.tolist() == [True, False, False]

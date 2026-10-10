@@ -242,3 +242,17 @@ def test_sensitivity_tiers_only_include_scored_windows():
     tiers = sensitivity_tier_indices(ds, owner, "test", masks, masks)
     assert tiers["exact_observed"] == [0, 1, 2]
     assert tiers["gap_filled_inputs"] == tiers["gap_filled_endpoint"] == []
+
+
+def test_gap_free_windows_exclude_a_window_masked_only_at_its_endpoint():
+    from training.splits import sensitivity_tier_indices
+
+    df = _global_df({"p1": ([7], 100.0, 1.0)})
+    ds = _small_ds(df)  # 3 windows; w2 = inputs 2,3,4 + endpoint 6
+    no_gap_fill = np.ones(7, dtype=bool)
+    no_gap_fill[6] = False  # only the future endpoint row is gap-filled
+    assert gap_free_window_indices(ds, no_gap_fill) == [0, 1]
+    owner = np.full(7, "test", dtype=object)
+    tiers = sensitivity_tier_indices(ds, owner, "test", no_gap_fill, no_gap_fill)
+    assert tiers["gap_filled_endpoint"] == [2]
+    assert tiers["gap_filled_inputs"] == []

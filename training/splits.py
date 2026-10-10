@@ -33,7 +33,10 @@ def observation_status(grid, readings):
     no_gap_fill = np.zeros(len(grid), dtype=bool)
     reading_times = {pid: np.sort(g["time"].to_numpy()) for pid, g in readings.groupby("id")}
     for pid, g in grid.groupby("id"):
-        times, t = reading_times[pid], g["time"].to_numpy()
+        times = reading_times.get(pid)
+        if times is None:  # participant has no readings: every row stays unobserved
+            continue
+        t = g["time"].to_numpy()
         pos = np.searchsorted(times, t)  # first reading at or after t
         nxt = times[np.minimum(pos, len(times) - 1)]
         prv = times[np.maximum(pos - 1, 0)]

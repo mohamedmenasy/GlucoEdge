@@ -20,7 +20,11 @@ def convert_float(model, sample_input: torch.Tensor, out_path: Path) -> None:
 
 
 def convert_int8(model, sample_input, calibration_inputs, out_path: Path,
-                 observer: str = "histogram") -> None:
+                 observer: str = "histogram") -> dict:
+    """Returns phase timings: observer_time_s (the calibration pass) and
+    export_time_s (quantize + LiteRT conversion + file write)."""
+    import time
+
     import litert_torch
     from litert_torch.quantize.pt2e_quantizer import PT2EQuantizer, get_symmetric_quantization_config
     from litert_torch.quantize.quant_config import QuantConfig
@@ -46,8 +50,10 @@ def convert_int8(model, sample_input, calibration_inputs, out_path: Path,
     quantizer = PT2EQuantizer().set_global(config)
     prepared = prepare_pt2e(exported, quantizer)
 
+    t0 = time.time()
     for calib_input in calibration_inputs:
         prepared(calib_input)
+    t1 = time.time()
 
     quantized = convert_pt2e(prepared, fold_quantize=False)
 
@@ -55,6 +61,8 @@ def convert_int8(model, sample_input, calibration_inputs, out_path: Path,
         quantized, (sample_input,), quant_config=QuantConfig(pt2e_quantizer=quantizer)
     )
     edge_model.export(str(out_path))
+    return {"observer_time_s": round(t1 - t0, 3),
+            "export_time_s": round(time.time() - t1, 3)}
 
 
 def build_calibration_inputs(val_ds, max_samples: int = 200) -> list:

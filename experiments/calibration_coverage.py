@@ -263,13 +263,9 @@ def stage_convert(run_id):
             if ipath.exists():
                 continue
             calib = [val_ds[i][0].unsqueeze(0) for i in sel["indices"]]
-            t0 = time.time()
-            convert_int8(model, sample, calib, ipath)
-            _write_json(ipath.with_suffix(".json"), {
-                "selection": sel_path.name,
-                "observer_time_s_incl_export": round(time.time() - t0, 2),
-                "export_time_s": round(time.time() - t0, 2),
-            })
+            timings = convert_int8(model, sample, calib, ipath)
+            _write_json(ipath.with_suffix(".json"),
+                        {"selection": sel_path.name, **timings})
             print(f"converted {ipath.name}")
 
         # Observer arm (Amendment 3): min-max activation observer on two
@@ -282,12 +278,9 @@ def stage_convert(run_id):
                 continue
             sel = json.loads(sel_path.read_text())
             calib = [val_ds[i][0].unsqueeze(0) for i in sel["indices"]]
-            t0 = time.time()
-            convert_int8(model, sample, calib, ipath, observer="minmax")
-            _write_json(ipath.with_suffix(".json"), {
-                "selection": sel_path.name, "observer": "minmax",
-                "export_time_s": round(time.time() - t0, 2),
-            })
+            timings = convert_int8(model, sample, calib, ipath, observer="minmax")
+            _write_json(ipath.with_suffix(".json"),
+                        {"selection": sel_path.name, "observer": "minmax", **timings})
             print(f"converted {ipath.name}")
 
 
