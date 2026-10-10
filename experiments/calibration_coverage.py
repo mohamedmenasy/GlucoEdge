@@ -31,6 +31,18 @@ BUDGETS = (200, 1000)
 STOCHASTIC = ("uniform_random", "participant_balanced_random",
               "participant_balanced_range_coverage")
 
+
+def selection_cells(strategies=None, budgets=None):
+    """Matrix cells as (strategy, budget, draw); None means all."""
+    strategies = ("sequential",) + STOCHASTIC if strategies is None else tuple(strategies)
+    budgets = BUDGETS if budgets is None else tuple(budgets)
+    cells = []
+    for s in strategies:
+        for b in budgets:
+            for d in ((0,) if s == "sequential" else DRAWS):
+                cells.append((s, b, d))
+    return cells
+
 # --- quantization controls (H3): pure, unit-tested ---------------------------
 
 
@@ -85,12 +97,12 @@ def _eligible(ds, owner, no_gap_fill, split):
     return [i for i in scored if i in gap_free]
 
 
-def _load_study_data():
-    from experiments.data_availability import load_weinstock_context
+def _load_study_data(dataset="weinstock"):
+    from experiments.data_availability import load_cohort_context
     from training.dataset import GlucoseTrendDataset
     from training.labeling import FIVE_CLASSES
 
-    formatter, owner, _, no_gap_fill = load_weinstock_context()
+    formatter, owner, _, no_gap_fill = load_cohort_context(dataset)
     datasets = {
         "train": GlucoseTrendDataset(formatter.train_data, classes=FIVE_CLASSES),
         "val": GlucoseTrendDataset(formatter.val_data, classes=FIVE_CLASSES),
@@ -102,7 +114,7 @@ def _load_study_data():
 # --- stage: train --------------------------------------------------------------
 
 
-def stage_train(run_id, epochs=20):
+def stage_train(run_id, epochs=20, dataset="weinstock"):
     """Five fixed-seed TrendCNN checkpoints plus the logistic-regression
     baseline, all on the eligible (scored + no-gap-fill) windows."""
     import torch
@@ -110,7 +122,7 @@ def stage_train(run_id, epochs=20):
 
     from training.train import train_model
 
-    datasets, owner, no_gap_fill = _load_study_data()
+    datasets, owner, no_gap_fill = _load_study_data(dataset)
     train_idx = _eligible(datasets["train"], owner, no_gap_fill, "train")
     val_idx = _eligible(datasets["val"], owner, no_gap_fill, "val")
     train_sub = Subset(datasets["train"], train_idx)
@@ -207,19 +219,17 @@ def _coverage(pool, selection, ds):
     }
 
 
-def stage_select(run_id):
+def stage_select(run_id, dataset="weinstock", strategies=None, budgets=None):
     from conversion.calibration import build_pool, select
 
-    datasets, owner, no_gap_fill = _load_study_data()
+    datasets, owner, no_gap_fill = _load_study_data(dataset)
     val_ds = datasets["val"]
     val_idx = _eligible(val_ds, owner, no_gap_fill, "val")
     pool = build_pool(val_ds, val_idx)
     out = _run_dir(run_id) / "selections"
     out.mkdir(exist_ok=True)
 
-    cells = [("sequential", 0)] + [(s, d) for s in STOCHASTIC for d in DRAWS]
-    for strategy, draw in cells:
-        for budget in BUDGETS:
+    for strategy, budget, draw in selection_cells(strategies, budgets):
             name = f"{strategy}_{budget}_d{draw}.json"
             path = out / name
             if path.exists():
@@ -236,13 +246,13 @@ def stage_select(run_id):
 # --- stage: convert ---------------------------------------------------------------
 
 
-def stage_convert(run_id):
+def stage_convert(run_id, dataset="weinstock"):
     import torch
 
     from conversion.common import load_checkpoint
     from conversion.convert import convert_float, convert_int8
 
-    datasets, _, _ = _load_study_data()
+    datasets, _, _ = _load_study_data(dataset)
     val_ds = datasets["val"]
     run = _run_dir(run_id)
     sels = sorted((run / "selections").glob("*.json"))
@@ -327,13 +337,13 @@ def _clip_stats(windows, labels, scale, zp, dtype_info):
             "by_true_class": by_class}
 
 
-def stage_evaluate(run_id):
+def stage_evaluate(run_id, dataset="weinstock"):
     """LOCKED-EVALUATION GATE: first read of held-out labels."""
     import torch
 
     from conversion.common import load_checkpoint
 
-    datasets, owner, no_gap_fill = _load_study_data()
+    datasets, owner, no_gap_fill = _load_study_data(dataset)
     test_ds = datasets["test"]
     run = _run_dir(run_id)
     ev = run / "eval"
@@ -415,15 +425,21 @@ def main():
     parser.add_argument("stage", choices=["train", "select", "convert", "evaluate"])
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--epochs", type=int, default=20)
+    parser.add_argument("--dataset", default="weinstock")
+    parser.add_argument("--strategies", default=None,
+                        help="comma list; default all")
+    parser.add_argument("--budgets", default=None, help="comma ints; default all")
     args = parser.parse_args()
     if args.stage == "train":
-        stage_train(args.run_id, args.epochs)
+        stage_train(args.run_id, args.epochs, args.dataset)
     elif args.stage == "select":
-        stage_select(args.run_id)
+        stage_select(args.run_id, args.dataset,
+                     args.strategies.split(",") if args.strategies else None,
+                     [int(b) for b in args.budgets.split(",")] if args.budgets else None)
     elif args.stage == "convert":
-        stage_convert(args.run_id)
+        stage_convert(args.run_id, args.dataset)
     elif args.stage == "evaluate":
-        stage_evaluate(args.run_id)
+        stage_evaluate(args.run_id, args.dataset)
 
 
 if __name__ == "__main__":
