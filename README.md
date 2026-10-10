@@ -218,7 +218,7 @@ rolling window, INT8 over a 21-inference window. The iPhone 18 Pro Max
 (iOS 27.0.1) numbers come from the iOS app's stats line, timing the same
 region (quantize, run, dequantize; no softmax), over 100 inferences for
 **both** models during 16× replay of the synthetic trace (ranges span two
-app sessions). The back-to-back test-runner benchmark is 20–30× faster (float 2.85 µs,
+measurement rounds). The back-to-back test-runner benchmark is 20–30× faster (float 2.85 µs,
 INT8 3.7 µs mean, same code, warmed up), so most of the in-app time is
 per-call cost between replay ticks rather than the model's arithmetic. The
 conversion phase's dev-machine CPU proxy reached the same qualitative

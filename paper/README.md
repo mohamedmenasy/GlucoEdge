@@ -1,7 +1,7 @@
 # GlucoEdge paper
 
 This directory contains a LaTeX preprint draft describing the implemented
-GlucoEdge training, conversion, and Android deployment pipeline. The September
+GlucoEdge training, conversion, and Android and iOS deployment pipeline. The September
 2026 revision frames the recorded results around calibration-data coverage,
 directional recall, and deployment cost. It adds descriptive calculations from
 the existing tables; no new training, calibration study, or device benchmark
@@ -23,6 +23,13 @@ A follow-up correction pass dates the manuscript October 2026. It also
 describes `rdsvl` as an SME instruction (it had been called SVE) and
 updates the rounding text to match the Kotlin client, which now rounds
 ties half to even like `numpy.round`.
+
+An October 2026 device revision adds the iOS client: the same artifact
+files run through LiteRT's Swift `CompiledModel` API. It reports golden
+parity (20/20 vectors per model, INT8 bit-exact) and equal-sample in-app
+latency on an iPhone 18 Pro Max (n=100 per model, two rounds), plus a
+back-to-back benchmark that separates per-call overhead from the model's
+arithmetic. No model was retrained, reconverted, or re-evaluated.
 
 ## Build
 

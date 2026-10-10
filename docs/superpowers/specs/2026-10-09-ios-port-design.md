@@ -352,7 +352,7 @@ free Apple ID's Personal Team via `xcodebuild -allowProvisioningUpdates`.
 
    | Measurement | Float mean / p95 | INT8 mean / p95 |
    |---|---|---|
-   | In-app stats line, 16× replay of the synthetic trace, n=100 each, two app sessions | 0.062–0.073 ms / 0.103–0.134 ms | 0.101–0.110 ms / 0.178–0.182 ms |
+   | In-app stats line, 16× replay of the synthetic trace, n=100 each, two rounds | 0.062–0.073 ms / 0.103–0.134 ms | 0.101–0.110 ms / 0.178–0.182 ms |
    | Test-runner loop, 1 warmup + n=100 back-to-back calls, three runs | 2.83–2.85 µs / 3.29–3.38 µs | 3.69–3.72 µs / 4.13–4.25 µs |
 
    - The in-app row sits beside the S22 Ultra's in the README; both are
