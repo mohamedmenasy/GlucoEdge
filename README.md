@@ -116,10 +116,13 @@ tries to merge that permission in.
   this exercises the `Interpreter` fallback; on a physical device it
   exercises `CompiledModel` — verified 3/3 on a Galaxy S22 Ultra
   (Android 16): float logits within 1e-5, INT8 outputs bit-exact. That
-  device run used the pre-study assets; the 2026-10-10 study artifacts
-  pass the same goldens on the iOS simulator suite. The Android test
-  device is no longer available, so its record stays historical and the
-  on-device re-run is planned on iOS only.
+  device run used the pre-study assets; the Android test device is no
+  longer available, so its record stays historical. The 2026-10-10 study
+  artifacts passed golden parity on an iPhone 18 Pro Max on device (5/5,
+  INT8 bit-exact) and the nine prespecified study artifacts were
+  latency-benchmarked there (30 paired rounds, 6,000 timed calls each):
+  all eight INT8 calibration arms are indistinguishable, so the
+  calibration fix is latency-free on hardware.
 
 The app shows measured on-device inference latency; numbers from an
 emulator are labeled as such and are not device measurements.

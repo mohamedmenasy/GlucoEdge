@@ -62,7 +62,18 @@ reproduce in every tier (new Results subsection and table; the Limitations
 bullet now reports this instead of "unevaluated"). Full record in
 `results/calibration-coverage/sensitivity_tiers_r1.json`. It also notes the
 repository's bundled models were replaced with the study's seed-0
-uniform-200 pair. Pages/figures/tables: 13 pages, 3 figures, 11 tables.
+uniform-200 pair.
+
+A device-benchmark addendum executes the plan's prespecified nine-artifact
+paired-round protocol on the remaining study phone (iPhone 18 Pro Max,
+iOS-only re-scope after the Android device broke): 30 rounds, randomized
+order, 6,000 timed calls per artifact, parity + hash verified before
+timing. All eight INT8 calibration arms are latency-indistinguishable
+(paired differences vs float +0.64 to +0.70 µs), so the calibration fix is
+measured, not argued, as deployment-free. New Results table
+(tab:devicebench); the device-timing limitation is rewritten accordingly.
+Summary JSON: `results/calibration-coverage/device_benchmark_ios_r1.json`.
+Pages/figures/tables: 14 pages, 3 figures, 12 tables.
 
 ## Build
 
@@ -81,7 +92,7 @@ with the LaTeX sources in an arXiv submission.
 - **Author:** Mohamed Menasy
 - **Primary category:** `cs.LG`
 - **Possible cross-lists:** `eess.SP`, `q-bio.QM`
-- **Comments:** 13 pages, 3 figures, 11 tables. Source code and model artifacts are
+- **Comments:** 14 pages, 3 figures, 12 tables. Source code and model artifacts are
   available at <https://github.com/mohamedmenasy/GlucoEdge>.
 
 Before submission, confirm the author name, email, affiliation, category, and

@@ -988,13 +988,59 @@ with the study's seed-0 float artifact and its uniform-200 INT8 artifact;
 both client golden-parity suites pass against the new files bit-exactly
 on the continuous-integration simulators.
 
-Table~\ref{tab:deployment} retains the historical device observations for
-the shipped artifacts; none of the new artifacts has been device-timed, and
-the planned paired-round phone benchmark remains future work. In those
+The prespecified nine-artifact benchmark was then executed on the
+iPhone~18~Pro~Max (iPhone19,3, iOS~27.0.1), the only study device still
+available: the seed-0 float artifact plus all four strategies at both
+budgets, 30 paired rounds with the artifact order reshuffled each round
+(seed 20261010), and per artifact per round 100 warm-up plus 200 timed
+calls on one frozen synthetic workload --- 6{,}000 timed calls per
+artifact, with every artifact hash-verified and parity-checked on all
+277 workload windows before any timing, and the thermal state nominal
+in every round (Table~\ref{tab:devicebench}). The result matches the
+byte-level argument: the eight calibration arms are indistinguishable
+(means 3.42--3.47~$\mu$s; paired round-level differences against the
+same-round float mean, $+0.64$ to $+0.70~\mu$s for every arm), so the
+calibration fix costs nothing measurable on hardware. INT8 remains
+slightly slower than float back-to-back, consistent with the historical
+observation that per-call overhead, not arithmetic, dominates; p95 here
+is linear interpolation over the 6{,}000 pooled calls. Raw rounds and
+the aggregation are in
+\texttt{device\_benchmark\_ios\_r1.json}.
+
+\begin{table}[t]
+\centering
+\caption{Nine-artifact device benchmark (iPhone 18 Pro Max, iOS 27.0.1,
+back-to-back calls; inner timer: quantize + run + dequantize, no
+softmax). 6{,}000 timed calls per artifact over 30 paired rounds.
+$\Delta$ is the mean of paired round-level differences vs.\ the same
+round's float mean.}
+\label{tab:devicebench}
+\footnotesize
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Artifact (seed 0) & Mean & Median & p95 & $\Delta$ vs.\ float ($\mu$s) \\
+\midrule
+Float & 2.78 & 2.96 & 3.17 & --- \\
+Sequential 200 & 3.44 & 3.33 & 4.00 & $+0.67$ \\
+Sequential 1000 & 3.44 & 3.33 & 3.96 & $+0.66$ \\
+Uniform 200 & 3.42 & 3.33 & 3.96 & $+0.64$ \\
+Uniform 1000 & 3.47 & 3.38 & 4.08 & $+0.70$ \\
+Balanced 200 & 3.45 & 3.33 & 4.00 & $+0.67$ \\
+Balanced 1000 & 3.44 & 3.33 & 3.96 & $+0.66$ \\
+Range coverage 200 & 3.44 & 3.33 & 3.96 & $+0.66$ \\
+Range coverage 1000 & 3.45 & 3.33 & 4.00 & $+0.68$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Table~\ref{tab:deployment} retains the earlier two-device historical
+observations for the previously shipped artifacts. In those
 historical observations neither phone showed an INT8 latency advantage,
 and the iPhone's back-to-back benchmark (means 2.83--2.85~$\mu$s float,
 3.69--3.72~$\mu$s INT8) indicates that per-call overhead, not arithmetic,
-dominates the in-app path.
+dominates the in-app path --- the same qualitative picture as the new
+measurement.
 
 All three Android instrumentation tests passed on the physical device. The
 \texttt{CompiledModel} path loaded both artifact hashes, matched float logits
@@ -1129,11 +1175,14 @@ The results should be read with the following limitations in mind.
     CGM point, not expert annotations, and the CGM-only model omits meal,
     insulin, activity, illness, and other covariates. Probability
     calibration and event-level performance were not evaluated.
-    \item None of the 110 new artifacts has been device-timed. The phone
-    observations in Table~\ref{tab:deployment} are historical, from two
-    devices differing in hardware, OS, LiteRT version, and timer, with
-    unequal Android sample counts and uncontrolled conditions. Energy and
-    memory were not measured.
+    \item The nine prespecified artifacts were device-timed on one
+    iPhone (Table~\ref{tab:devicebench}); repeated calls on one phone
+    are not evidence across devices, the Android device from the
+    historical observations is no longer available, initialization was
+    measured within-process rather than process-cold, and energy and
+    memory were not measured. The remaining 101 artifacts were not
+    device-timed; they share one operator inventory and byte size with
+    the timed ones.
     \item The application replays synthetic or locally extracted
     historical traces. It does not ingest a live sensor stream and has
     not undergone prospective, external, usability, or clinical
@@ -1250,9 +1299,10 @@ were the wrong knobs.
 
 The conclusions are scoped to one cohort, one architecture, and one
 quantizer, on a reanalysis of previously touched data; the frozen
-sensitivity tiers reproduce both headline findings. Device timing of
-the new artifacts under a paired-round protocol and confirmation on an
-unused public cohort remain future work. \project remains a research prototype, not a medical device.
+sensitivity tiers reproduce both headline findings, and the paired-round
+device benchmark measured the calibration fix as latency-free on the one
+remaining phone. Confirmation on an unused public cohort remains future
+work. \project remains a research prototype, not a medical device.
 
 \bibliographystyle{unsrtnat}
 \renewcommand{\bibfont}{\small}
