@@ -1,0 +1,54 @@
+{
+  "generated_by": "python -m experiments.data_availability",
+  "mask": "no-gap-fill, 7.5-minute threshold (Amendment 1)",
+  "training": {
+    "windows_in_frame": 424462,
+    "scored": 424462,
+    "excluded_context_or_boundary_target": 0,
+    "eligible_no_gap_fill": 328575,
+    "excluded_gap_fill": 95887,
+    "participants": 172,
+    "class_counts": {
+      "falling_fast": 10330,
+      "falling": 31845,
+      "stable": 242611,
+      "rising": 30551,
+      "rising_fast": 13238
+    }
+  },
+  "calibration_pool": {
+    "windows_in_frame": 55289,
+    "scored": 35560,
+    "excluded_context_or_boundary_target": 19729,
+    "eligible_no_gap_fill": 27109,
+    "excluded_gap_fill": 8451,
+    "participants": 127,
+    "class_counts": {
+      "falling_fast": 543,
+      "falling": 2318,
+      "stable": 21174,
+      "rising": 2267,
+      "rising_fast": 807
+    }
+  },
+  "evaluation_temporal": {
+    "windows_in_frame": 127165,
+    "scored": 52540,
+    "excluded_context_or_boundary_target": 74625,
+    "eligible_no_gap_fill": 37361,
+    "excluded_gap_fill": 15179,
+    "participants": 166
+  },
+  "evaluation_held_out": {
+    "windows_in_frame": 127165,
+    "scored": 57068,
+    "excluded_context_or_boundary_target": 70097,
+    "eligible_no_gap_fill": 46376,
+    "excluded_gap_fill": 10692,
+    "participants": 20
+  },
+  "calibration_budgets": {
+    "200": "feasible",
+    "1000": "feasible"
+  }
+}

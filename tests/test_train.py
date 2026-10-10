@@ -27,6 +27,40 @@ def test_class_weights_matches_sklearn_when_all_classes_present():
     assert torch.allclose(weights, torch.tensor(expected, dtype=torch.float32))
 
 
+def test_build_eligible_dataset_filters_by_split_and_mask():
+    import pandas as pd
+
+    from training.dataset import GlucoseTrendDataset
+    from training.labeling import FIVE_CLASSES
+    from training.train import build_eligible_dataset
+
+    rows = [{"id": "p1", "id_segment": 0,
+             "time": pd.Timestamp("2024-01-01") + pd.Timedelta(minutes=5 * i),
+             "gl": 100.0 + i} for i in range(10)]
+    df = pd.DataFrame(rows)
+    ds = GlucoseTrendDataset(df, classes=FIVE_CLASSES, input_length=3, horizon=2,
+                             horizon_minutes=10.0)  # 6 windows, rows i..i+4
+
+    owner = np.array(["train"] * 5 + ["val"] * 5, dtype=object)
+    # Scored val windows: anchor (3rd input row) and both horizon rows
+    # val-owned -> windows starting at rows 3, 4, 5 (indices 3, 4, 5).
+    eligible = build_eligible_dataset(ds, owner, "val")
+    assert len(eligible) == 3
+    x, y = eligible[0]
+    assert x.shape == (1, 3)
+    assert y == ds.labels[3]
+
+    # Masking row 6 as gap-filled drops the windows using it as an input
+    # (starts 4 and 5); for the window at 3 it is only an intermediate
+    # horizon step, so that window survives.
+    no_gap_fill = np.ones(len(df), dtype=bool)
+    no_gap_fill[6] = False
+    eligible = build_eligible_dataset(ds, owner, "val", no_gap_fill=no_gap_fill)
+    assert len(eligible) == 1
+    x, y = eligible[0]
+    assert y == ds.labels[3]
+
+
 def test_set_seed_makes_model_init_reproducible():
     from training.model import TrendCNN
 

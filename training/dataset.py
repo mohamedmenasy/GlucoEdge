@@ -31,15 +31,26 @@ class GlucoseTrendDataset(Dataset):
         # Index labels of each window's input + horizon rows in `df`, so a
         # window can be traced back to its source rows (split audits).
         self.row_ids = []
+        # Per-window provenance, aligned with windows/labels: participant,
+        # segment, anchor time (last input sample) and target time.
+        self.participants = []
+        self.segments = []
+        self.anchor_times = []
+        self.target_times = []
 
         span = input_length + horizon
-        for _, group in df.groupby([id_col, segment_col]):
+        for (pid, seg), group in df.groupby([id_col, segment_col]):
             group = group.sort_values(time_col)
             values = group[target_col].to_numpy(dtype=np.float32)
+            times = group[time_col].to_numpy()
             index = group.index.to_numpy()
             n_valid = len(values) - span + 1
             for i in range(max(n_valid, 0)):
                 self.row_ids.append(index[i:i + span])
+                self.participants.append(pid)
+                self.segments.append(seg)
+                self.anchor_times.append(times[i + input_length - 1])
+                self.target_times.append(times[i + span - 1])
                 window = values[i:i + input_length]
                 last_value = window[-1]
                 future_value = values[i + input_length + horizon - 1]

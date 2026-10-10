@@ -11,9 +11,12 @@ from sklearn.metrics import classification_report
 from sklearn.utils.class_weight import compute_class_weight
 from torch.utils.data import DataLoader
 
+from torch.utils.data import Subset
+
 from training.dataset import GlucoseTrendDataset
 from training.labeling import FIVE_CLASSES, THREE_CLASSES, THREE_CLASS_MAP
 from training.model import TrendCNN
+from training.splits import gap_free_window_indices, scored_window_indices
 
 GLUCOEDGE_ROOT = Path(__file__).resolve().parent.parent
 GLUCOBENCH_ROOT = GLUCOEDGE_ROOT / "GlucoBench"
@@ -35,6 +38,15 @@ def load_formatter(dataset: str) -> "DataFormatter":
         config = yaml.safe_load(f)
     config["data_csv_path"] = str(GLUCOBENCH_ROOT / "raw_data" / f"{dataset}.csv")
     return DataFormatter(config)
+
+
+def build_eligible_dataset(ds, owner, split, no_gap_fill=None):
+    """Subset of `ds` scored by `split` under the provenance rules; with a
+    mask, also requires gap-free inputs and endpoint (Amendment 1)."""
+    indices = scored_window_indices(ds, owner, split)
+    if no_gap_fill is not None:
+        indices = sorted(set(indices) & set(gap_free_window_indices(ds, no_gap_fill)))
+    return Subset(ds, indices)
 
 
 def class_weights(train_ds: GlucoseTrendDataset, num_classes: int) -> torch.Tensor:
