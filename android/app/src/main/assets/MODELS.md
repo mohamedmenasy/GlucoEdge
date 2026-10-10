@@ -26,9 +26,11 @@ Golden parity with these exact bytes is green on the iOS simulator suite
 verification (Galaxy S22 Ultra / iPhone 18 Pro Max) was performed on the
 PREVIOUS assets (2026-07-07 / 2026-10-10). The Android test device is no
 longer available (broken as of 2026-10-10), so the Android on-device record
-stays historical; re-verification of these assets is planned on the iPhone
-only. The runtime path, tensor shapes, operator set, and file sizes are
-unchanged from the verified assets.
+stays historical. These assets WERE re-verified on the iPhone 18 Pro Max on
+2026-10-10: golden parity 5/5 on device (INT8 bit-exact), and both files
+were among the nine artifacts hash-verified, parity-checked on 277 synthetic
+windows, and latency-benchmarked on device (see
+paper/results/calibration-coverage/device_benchmark_ios_r1.json).
 
 Historical pre-study assets (float `eb96c7e6…`, INT8 `0dc35387…`, sequential
 calibration): float acc 0.5184 / macro recall 0.5060, INT8 acc 0.5866 /
