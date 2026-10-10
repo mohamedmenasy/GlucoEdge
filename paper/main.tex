@@ -49,7 +49,8 @@ relative to a uniform random selection of the same size, while raw accuracy
 rises --- an illusion created by the majority class. Any randomized
 200-window selection restores float-level directional recall (0.487 vs.\
 0.487); range-aware stratification adds nothing further (+0.06 points, CI
-$-0.02$ to $+0.13$), a five-fold calibration budget adds nothing, and a
+$-0.02$ to $+0.13$), a five-fold calibration budget changes it by at
+most $+0.08$ points, and a
 min--max observer behaves like the default histogram observer. Clip-only
 controls attribute the entire sequential-arm loss to input-range clipping
 rather than grid resolution, and every INT8 artifact is byte-identical in
@@ -791,7 +792,7 @@ Model & Accuracy & Macro & Directional \\
 \midrule
 Float LiteRT ($=$ PyTorch) & 0.507 & 0.494 & 0.487 \\
 INT8, sequential & 0.570 (0.499) & 0.412 (0.492) & 0.354 (0.487) \\
-INT8, uniform random & 0.496 (0.497) & 0.492 (0.492) & 0.487 (0.487) \\
+INT8, uniform random & 0.496 (0.497) & 0.492 (0.492) & 0.487 (0.488) \\
 INT8, balanced random & 0.497 (0.497) & 0.491 (0.492) & 0.487 (0.488) \\
 INT8, range coverage & 0.497 (0.496) & 0.492 (0.492) & 0.487 (0.488) \\
 \bottomrule
@@ -864,10 +865,10 @@ a uniform random selection of the same size restores the float profile.}
 
 Table~\ref{tab:mechanism} decomposes the sequential-200 loss with the
 input-grid controls. Feeding the float model the clip-only image of the
-inputs reproduces the full loss (13.14 of 13.12 points); the quantize--%
-dequantize image gives the same number, so the coarser input grid itself
-costs nothing measurable, and the remaining INT8-internal difference is
-0.2 points. Under the sequential-200 range, 27.8\% of held-out windows
+inputs reproduces essentially the entire 13.35-point float-to-INT8
+difference (float$-$clip $13.14$; float$-$QDQ $13.12$), so the coarser
+input grid itself costs nothing measurable and the remaining
+INT8-internal difference is 0.2 points. Under the sequential-200 range, 27.8\% of held-out windows
 have at least one clipped input slot by the rounded-code rule ---
 60.9\% of \texttt{falling\_fast} windows, the class that collapses ---
 against none under the randomized range: 3.5\% of held-out windows
@@ -1194,8 +1195,8 @@ span two participants and cap the input range at 251~\mgdl, cost 13.4
 points of held-out directional recall while raising raw accuracy --- an
 illusion a class-balanced metric exposes. Any randomized selection of the
 same 200 windows restored float-level directional recall; range-aware
-stratification, a five-fold budget, and a min--max observer added nothing
-measurable; and clip-only controls attributed the loss to input-range
+stratification, a five-fold budget, and a min--max observer moved it by
+at most eight hundredths of a point; and clip-only controls attributed the loss to input-range
 clipping rather than grid resolution. Every INT8 artifact is
 byte-identical in size and selection takes milliseconds, so the corrected
 calibration is free at deployment time. In this setting, coverage means
