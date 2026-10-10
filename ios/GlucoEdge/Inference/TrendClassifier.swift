@@ -11,8 +11,8 @@ enum ModelFile: String, CaseIterable {
 struct Prediction {
     let probabilities: [Float]
     let classIndex: Int
-    /// Wall time of the engine run only — softmax and class selection excluded,
-    /// same scope as the Android client and the paper.
+    /// Wall time of quantize + run + dequantize — softmax and class selection
+    /// excluded, the same scope as the Android client and the paper.
     let latencyNanos: Int64
     /// Raw model output (pre-softmax), for logit-level parity assertions.
     let logits: [Float]
@@ -78,26 +78,29 @@ final class TrendClassifier: Classifier {
         guard window.count == 12 else {
             throw ClassifierError(description: "expected a 12-reading window, got \(window.count)")
         }
+        // Timed region = Kotlin's engine.runInference(window): input
+        // quantization + buffer write + run + buffer read + dequantization.
+        // Softmax and class selection stay outside, as in the README and paper.
+        let start = DispatchTime.now()
+        let logits = try runInference(window)
+        let elapsed = Int64(DispatchTime.now().uptimeNanoseconds - start.uptimeNanoseconds)
+        let probs = QuantizationMath.softmax(logits)
+        let classIndex = probs.indices.max(by: { probs[$0] < probs[$1] })!
+        return Prediction(probabilities: probs, classIndex: classIndex,
+                          latencyNanos: elapsed, logits: logits)
+    }
+
+    private func runInference(_ window: [Float]) throws -> [Float] {
         if let inputQuant {
             try inputBuffers[0].write(QuantizationMath.quantizeInt8(
                 window, scale: inputQuant.scale, zeroPoint: inputQuant.zeroPoint))
         } else {
             try inputBuffers[0].write(window)
         }
-        let start = DispatchTime.now()
         try model.run(inputs: inputBuffers, outputs: outputBuffers)
-        let elapsed = Int64(DispatchTime.now().uptimeNanoseconds - start.uptimeNanoseconds)
-        let logits: [Float]
-        if let outputQuant {
-            let raw: [Int8] = try outputBuffers[0].read()
-            logits = QuantizationMath.dequantizeInt8(raw, scale: outputQuant.scale,
-                                                     zeroPoint: outputQuant.zeroPoint)
-        } else {
-            logits = try outputBuffers[0].read()
-        }
-        let probs = QuantizationMath.softmax(logits)
-        let classIndex = probs.indices.max(by: { probs[$0] < probs[$1] })!
-        return Prediction(probabilities: probs, classIndex: classIndex,
-                          latencyNanos: elapsed, logits: logits)
+        guard let outputQuant else { return try outputBuffers[0].read() }
+        let raw: [Int8] = try outputBuffers[0].read()
+        return QuantizationMath.dequantizeInt8(raw, scale: outputQuant.scale,
+                                               zeroPoint: outputQuant.zeroPoint)
     }
 }

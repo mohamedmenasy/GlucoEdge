@@ -21,7 +21,7 @@ enum CsvTraceLoader {
                 .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             if parts.count >= 2,
                let date = formatter.date(from: parts[0]),
-               let gl = Float(parts[1]) {
+               let gl = Float(parts[1]), gl.isFinite {   // Float() accepts nan/inf
                 readings.append(Reading(epochMinutes: Int64(date.timeIntervalSince1970) / 60, mgdl: gl))
             } else if !line.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 skipped += 1

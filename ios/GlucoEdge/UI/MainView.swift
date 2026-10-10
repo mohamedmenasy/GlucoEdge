@@ -73,14 +73,17 @@ struct MainView: View {
         Chart(Array(viewModel.recentReadings.enumerated()), id: \.offset) { index, value in
             LineMark(x: .value("reading", index), y: .value("mg/dL", value))
         }
-        .chartYScale(domain: chartDomain)
+        .chartYScale(domain: Self.chartDomain(viewModel.recentReadings))
         .frame(height: 140)
     }
 
-    private var chartDomain: ClosedRange<Double> {
-        let readings = viewModel.recentReadings
+    /// Y-axis range: readings ±10 mg/dL, clamped to 40...410 like the Compose chart.
+    static func chartDomain(_ readings: [Float]) -> ClosedRange<Double> {
         guard let low = readings.min(), let high = readings.max() else { return 40...410 }
-        return Double(max(low - 10, 40))...Double(min(high + 10, 410))
+        let lower = Double(max(low - 10, 40)), upper = Double(min(high + 10, 410))
+        // Every reading outside the clamp would invert the range (a crash):
+        // show the data's own padded range instead.
+        return lower < upper ? lower...upper : Double(low - 10)...Double(high + 10)
     }
 
     private var statsLine: String {

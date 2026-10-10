@@ -1,9 +1,12 @@
 import FoundationModels
 
 /// Writes the Explain note with Apple's on-device model (SystemLanguageModel
-/// only — never the Private Cloud Compute model, so no network). The session
-/// is created lazily on first use and kept; instructions carry the standing
-/// no-advice rules so a prompt-injection-ish trace label can't override them.
+/// only — never the Private Cloud Compute model, so no network). Every note
+/// gets a fresh session, like Android's per-note conversation: a reused
+/// session would carry earlier prompts and notes into the next one and, after
+/// ~16 notes, exhaust the model's context window. Instructions carry the
+/// standing no-advice rules so a prompt-injection-ish trace label can't
+/// override them.
 @MainActor
 final class FoundationModelsNoteGenerator: NoteGenerator {
     private static let instructions = """
@@ -12,8 +15,6 @@ final class FoundationModelsNoteGenerator: NoteGenerator {
         Never give advice, recommendations, or dosing. Never address the reader \
         as a patient. Never mention insulin or treatment.
         """
-
-    private var session: LanguageModelSession?
 
     static func currentAvailability() -> ExplainAvailability {
         switch SystemLanguageModel.default.availability {
@@ -31,11 +32,7 @@ final class FoundationModelsNoteGenerator: NoteGenerator {
     }
 
     func generate(_ prompt: String) async throws -> String {
-        let session = self.session ?? {
-            let s = LanguageModelSession(instructions: Self.instructions)
-            self.session = s
-            return s
-        }()
+        let session = LanguageModelSession(instructions: Self.instructions)
         do {
             let response = try await session.respond(
                 to: prompt,

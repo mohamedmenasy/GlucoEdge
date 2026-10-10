@@ -205,6 +205,7 @@
 /* Begin XCBuildConfiguration section */
 		AA0000000000000000000031 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AA0000000000000000000044 /* Base.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_MODULES = YES;
@@ -222,6 +223,7 @@
 		};
 		AA0000000000000000000032 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AA0000000000000000000044 /* Base.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_MODULES = YES;
@@ -237,7 +239,6 @@
 		};
 		AA0000000000000000000013 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AA0000000000000000000044 /* Base.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -257,7 +258,6 @@
 		};
 		AA0000000000000000000014 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AA0000000000000000000044 /* Base.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

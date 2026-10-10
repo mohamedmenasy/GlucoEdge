@@ -40,4 +40,18 @@ struct CsvTraceLoaderTests {
         #expect(result.readings.count == 2)
         #expect(result.skippedRows == 0)
     }
+
+    @Test func nonFiniteValuesAreSkippedNotFatal() {
+        // Swift's Float("nan") / Float("inf") parse successfully; a NaN reading
+        // would later trap in Int(...) during quantization and prompt building.
+        // Spec: malformed rows are skipped and counted, never fatal.
+        let result = CsvTraceLoader.load("""
+        time,gl
+        2026-01-01T00:00,nan
+        2026-01-01T00:05,inf
+        2026-01-01T00:10,110.0
+        """)
+        #expect(result.readings.count == 1)
+        #expect(result.skippedRows == 2)
+    }
 }
