@@ -323,3 +323,17 @@ was decided:
     mirroring Android's `onResumeCheck`.
 - **Stats line.** It shows `device`/`simulator`, as this spec's UI section
   lists.
+- **Fixes from the final review.**
+  - **Latency timer.** It now wraps quantize, buffer write, run, buffer
+    read and dequantize, the same region Kotlin's
+    `engine.runInference(window)` times. Softmax and class selection stay
+    outside. This makes iPhone numbers comparable with the S22 Ultra's.
+  - **Explain sessions.** Every note gets a fresh `LanguageModelSession`, as
+    Android uses a fresh conversation per note. A reused session failed
+    with a context overflow on the 17th consecutive note (reproduced
+    locally) and fed earlier notes into later prompts.
+  - **Signing.** `Base.xcconfig` is now attached at project level, so the
+    test target inherits `DEVELOPMENT_TEAM` for on-device test runs.
+  - **Crash fixes.** Rows whose glucose value isn't finite (`nan`, `inf`)
+    are skipped and counted. The chart's y-range no longer inverts when
+    every reading sits outside 30–420 mg/dL.

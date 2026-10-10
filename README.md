@@ -154,9 +154,9 @@ SwiftUI sibling of the Android app. It bundles the **same two `.tflite`
 files** — referenced in place from `android/app/src/main/assets/` by an
 Xcode folder reference, never copied — and runs them through LiteRT's Swift
 **CompiledModel** API (CPU). It is held to the **same golden vectors** as
-the Kotlin client: on the iOS simulator (in CI) float logits match the
-Python benchmark within 1e-5 and INT8 dequantized outputs are bit-exact,
-with the asset sha256 pinned. Replay, gap-aware windowing, the float/INT8
+the Kotlin client: on the iOS 27 simulator float logits match the Python
+benchmark within 1e-5 and INT8 dequantized outputs are bit-exact, with the
+asset sha256 pinned; the `ios` CI job runs the same suite on every push. Replay, gap-aware windowing, the float/INT8
 toggle and the latency stats line mirror the Android screen.
 
 - Explain notes come from Apple's on-device **Foundation Models** framework
@@ -269,8 +269,8 @@ Per the original project plan, in order:
    softmax — INT8 is again not faster). Details appended to
    [the SIGILL decision record](docs/superpowers/specs/2026-07-05-emulator-compiledmodel-sigill.md).
 6. ~~Port the app to iOS with the same model files and parity vectors~~ —
-   done, see [iOS app](#ios-app-ios); golden parity green on the iOS
-   simulator in CI.
+   done, see [iOS app](#ios-app-ios); golden parity green on the iOS 27
+   simulator, and the `ios` CI job runs it on every push.
    - iPhone on-device latency and parity verification (iPhone 18 Pro Max)
      pending.
 
