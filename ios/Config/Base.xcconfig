@@ -1,0 +1,3 @@
+// Shared build settings. Local.xcconfig (gitignored) holds DEVELOPMENT_TEAM
+// for installing on a physical iPhone; CI builds simulator-only without it.
+#include? "Local.xcconfig"
