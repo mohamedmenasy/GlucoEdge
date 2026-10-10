@@ -207,15 +207,20 @@ note.
 
 ## The quantization tradeoff, measured
 
-**The bundled models were replaced on 2026-10-10** with the
-calibration-coverage study's seed-0 artifacts: the INT8 model is now
-calibrated on 200 uniformly random eligible validation windows instead of
-the toolchain-default first-200-sequential selection, which the study
-showed was the sole cause of a 13.4-point held-out directional-recall loss
-(see `paper/` and `android/app/src/main/assets/MODELS.md` for the new
-hashes and held-out metrics). The table below records the HISTORICAL
-artifacts' numbers — the measured collapse that motivated the study — on
-the historical test split and devices:
+**The bundled models were replaced twice on 2026-10-10.** First with the
+calibration-coverage study's seed-0 absolute-input artifacts (uniform
+random 200-window calibration instead of the toolchain-default
+first-200-sequential selection, whose under-coverage was the sole cause
+of a 13.4-point held-out directional-recall loss). Then with the
+delta-encoded (anchor) models from the follow-up experiment: both clients
+now feed the network 11 consecutive differences plus the last reading/16
+(`DeltaEncoding` in Kotlin and Swift, pinned to Python by the golden
+vectors). The delta float model scores 0.509 held-out directional recall
+(above the absolute baseline's 0.487) and its INT8 input grid is 6.4x
+finer, making quantization nearly calibration-proof. Hashes and metrics:
+`android/app/src/main/assets/MODELS.md`. The table below records the
+HISTORICAL artifacts' numbers — the measured collapse that motivated the
+study — on the historical test split and devices:
 
 | | Size | Latency mean / p95 (Galaxy S22 Ultra) | Latency mean / p95 (iPhone 18 Pro Max) | Accuracy | Macro-avg recall |
 |---|---|---|---|---|---|

@@ -78,11 +78,14 @@ final class TrendClassifier: Classifier {
         guard window.count == 12 else {
             throw ClassifierError(description: "expected a 12-reading window, got \(window.count)")
         }
-        // Timed region = Kotlin's engine.runInference(window): input
-        // quantization + buffer write + run + buffer read + dequantization.
-        // Softmax and class selection stay outside, as in the README and paper.
+        // Delta encoding runs before the timed region, so the timer's
+        // definition is unchanged. Timed region = Kotlin's
+        // engine.runInference(window): input quantization + buffer write +
+        // run + buffer read + dequantization. Softmax and class selection
+        // stay outside, as in the README and paper.
+        let encoded = DeltaEncoding.encode(window)
         let start = DispatchTime.now()
-        let logits = try runInference(window)
+        let logits = try runInference(encoded)
         let elapsed = Int64(DispatchTime.now().uptimeNanoseconds - start.uptimeNanoseconds)
         let probs = QuantizationMath.softmax(logits)
         let classIndex = probs.indices.max(by: { probs[$0] < probs[$1] })!
