@@ -1,0 +1,18 @@
+{
+  "study": "second-cohort confirmation",
+  "dataset": "dubosson",
+  "prediction": "uniform_random minus sequential directional recall at budget 200 is POSITIVE on this wide-range T1D cohort",
+  "strategies": ["sequential", "uniform_random"],
+  "budgets": [200],
+  "draws": [101, 102, 103],
+  "training_seeds": [0, 1, 2, 3, 4],
+  "mask": "no-gap-fill at 1.5x modal per-participant grid interval",
+  "availability_audit_counts_only": {
+    "eligible_train": 4570, "calibration_pool": 846,
+    "eligible_temporal": 1068, "temporal_participants": 6,
+    "eligible_held_out": 1126, "held_out_participants": 1
+  },
+  "components": "temporal (6 participants) carries the prespecified contrast with the paired participant-cluster bootstrap; held_out is ONE participant, so it is reported descriptively without an interval (a cluster bootstrap over one cluster is undefined)",
+  "bootstrap": {"n_boot": 2000, "seed": 20261010},
+  "frozen_before_any_scored_label_read": true
+}
