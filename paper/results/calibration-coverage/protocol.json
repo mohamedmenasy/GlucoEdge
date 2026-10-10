@@ -1,0 +1,73 @@
+{
+  "study": "calibration-coverage",
+  "plan": "docs/superpowers/plans/2026-09-19-calibration-coverage-paper-enhancement.md",
+  "plan_amendments": "Section 9, adopted 2026-10-10 before any held-out label, class count, or metric was inspected",
+  "frozen_date_utc": "2026-10-10",
+  "glucoedge_commit_at_freeze": "d63cc8f",
+  "glucobench_commit": "661d840a98b316df51faa13a7100430afcbbb5b7",
+  "weinstock_csv_sha256": "b223559214fed20543c8d8ee6480b067e7605bdc84e03e0a4cb8211ba991113b",
+  "glucobench_weinstock_config_sha256": "d099e57bdcb5745be9ab3e083db3adcf1a7a6634f7ce0de213f29c97125e035f",
+  "dataset": "weinstock",
+  "split_identity": "GlucoBench DataFormatter split seed 0; aggregate counts and provenance in paper/results/split_audit.json",
+  "observation_mask": {
+    "primary": "no-gap-fill: every grid value lies on or between two original readings at most 7.5 minutes apart (Amendment 1)",
+    "sensitivity": [
+      "exact-observed subset",
+      "gap-filled inputs with no-gap endpoints",
+      "any gap-filled endpoint"
+    ]
+  },
+  "model": {
+    "architecture": "TrendCNN",
+    "parameters": 2909,
+    "loss": "inverse-frequency class-weighted cross-entropy",
+    "optimizer": "Adam, lr 1e-3",
+    "batch_size": 64,
+    "epochs": 20,
+    "training_seeds": [0, 1, 2, 3, 4]
+  },
+  "calibration": {
+    "strategies": [
+      "sequential",
+      "uniform_random",
+      "participant_balanced_random",
+      "participant_balanced_range_coverage"
+    ],
+    "budgets": [200, 1000],
+    "nested_budgets": "the 200-window set is the first 200 of the 1,000-window ordering",
+    "draws": [101, 102, 103],
+    "pool": "eligible validation windows under the primary mask; no future labels used by any sampler",
+    "observer_arm": {
+      "observer": "min-max",
+      "cells": ["sequential_200", "range_coverage_200"],
+      "draw": 101,
+      "seeds": [0, 1, 2, 3, 4],
+      "role": "mechanism control (Amendment 3)"
+    }
+  },
+  "artifacts": {
+    "float": 5,
+    "int8": 110,
+    "note": "100 from the Section 3 matrix plus 10 from the observer arm; bundled application models are never overwritten"
+  },
+  "primary_endpoint": "minority_macro_recall(range_coverage_200) - minority_macro_recall(participant_balanced_random_200), observed-only held-out-participant component, paired by model seed, calibration draw, and evaluated windows",
+  "secondary_contrasts": [
+    "range_coverage vs uniform_random",
+    "1000 vs 200 within each strategy",
+    "budget-by-strategy interaction",
+    "uniform_random vs sequential at each budget (Amendment 2)"
+  ],
+  "uncertainty": {
+    "method": "paired participant-cluster bootstrap",
+    "draws": 2000,
+    "analysis_seed": 20261010,
+    "undefined_endpoint_rule": "report metric as undefined on zero support; omit interval if more than 5% of bootstrap draws are undefined"
+  },
+  "baselines": ["constant stable", "recent slope (g_t - g_{t-15})/15", "multinomial logistic regression, C=1, balanced weights"],
+  "mechanism_controls": ["float parity", "float on INT8 input grid (QDQ)", "clip-only float", "min-max observer arm"],
+  "device_workload": "Section 5 of the plan: nine artifacts (seed 0, draw 101), 30 paired rounds, 100 warm-up + 200 timed calls per artifact per round, frozen synthetic trace",
+  "storage": {
+    "local": "results/calibration-coverage/<run-id>/ (gitignored): checkpoints, per-window outputs, selected window keys, participant-level summaries",
+    "published": "paper/results/calibration-coverage/: aggregate reports and reproducibility metadata only"
+  }
+}
