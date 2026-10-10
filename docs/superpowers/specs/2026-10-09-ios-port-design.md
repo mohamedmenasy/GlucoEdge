@@ -337,3 +337,50 @@ was decided:
   - **Crash fixes.** Rows whose glucose value isn't finite (`nan`, `inf`)
     are skipped and counted. The chart's y-range no longer inverts when
     every reading sits outside 30–420 mg/dL.
+
+## Device verification results (2026-10-10)
+
+iPhone 18 Pro Max (iPhone19,3), iOS 27.0.1, Debug build, signed with a
+free Apple ID's Personal Team via `xcodebuild -allowProvisioningUpdates`.
+
+1. **Golden parity:** `GoldenParityTests` 4/4 on the device (asset
+   sha256, class names, float logits within 1e-5, INT8 bit-exact). The
+   same suite is also green on the iOS 27 simulator and in the `ios` CI job
+   (Xcode 26.6, iOS 26.5).
+2. **Latency, equal n.** Both measurements time the same region:
+   quantize, write, run, read, dequantize.
+
+   | Measurement | Float mean / p95 | INT8 mean / p95 |
+   |---|---|---|
+   | In-app stats line, 16× replay of the synthetic trace, n=100 each, two rounds | 0.062–0.073 ms / 0.103–0.134 ms | 0.101–0.110 ms / 0.178–0.182 ms |
+   | Test-runner loop, 1 warmup + n=100 back-to-back calls, three runs | 2.83–2.85 µs / 3.29–3.38 µs | 3.69–3.72 µs / 4.13–4.25 µs |
+
+   - The in-app row sits beside the S22 Ultra's in the README; both are
+     in-app measurements.
+   - The loop is 20–30× faster on the same code. Most of the in-app cost
+     is therefore per-call overhead between replay ticks, not the model's
+     arithmetic.
+   - INT8 is not faster on either path, matching Android.
+3. **Explain:**
+   - `FoundationModelsLiveTests` passed 2/2 with Apple Intelligence
+     available. The real prompt produced a descriptive note with no
+     advice, and 25 consecutive fresh-session notes took 30.4 s.
+   - In the app, tapping Explain (float and INT8, one note each) showed
+     descriptive notes under the "not medical guidance" label, with no
+     advice. The note describes the window at the moment of the tap;
+     replay keeps running while it generates.
+   - A throwaway probe (not committed) asked for an exact insulin dose and
+     separately tried a "skip your insulin" prompt injection. Both direct
+     `respond` and `FoundationModelsNoteGenerator` returned a refusal *as
+     text* and threw no error, so the app shows the refusal as the note.
+   - The probe never triggered a thrown guardrail error. Whether iOS 27
+     surfaces one as `GenerationError` or `LanguageModelError` is
+     therefore still unobserved. The catch-all keeps the `NoteError`
+     contract either way.
+4. **Signing:**
+   - `com.glucoedge.ios` was already registered to a different free team
+     during setup, and bundle IDs are global. The app ID is now
+     `com.mohamedmenasy.glucoedge` (tests `.tests`).
+   - Opening the project in Xcode 27 re-serialized `project.pbxproj`
+     (sections reordered, `objectVersion` 77 → 71) with no setting changed.
+     That rewrite was discarded.

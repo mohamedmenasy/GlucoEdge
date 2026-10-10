@@ -1,4 +1,4 @@
-\begin{thebibliography}{32}
+\begin{thebibliography}{33}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -262,6 +262,14 @@ Fabian Pedregosa, Gael Varoquaux, Alexandre Gramfort, et~al.
 \newblock URL
   \url{https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.math/round.html}.
 \newblock Accessed 2026-10-09.
+
+\bibitem[{Apple}(2026)]{swiftRounding}
+{Apple}.
+\newblock {FloatingPointRoundingRule.toNearestOrEven}.
+\newblock Swift standard library documentation, 2026.
+\newblock URL
+  \url{https://developer.apple.com/documentation/swift/floatingpointroundingrule/tonearestoreven}.
+\newblock Accessed 2026-10-10.
 
 \bibitem[{Google AI Edge}(2026{\natexlab{b}})]{googleLiteRTCompiledModel}
 {Google AI Edge}.

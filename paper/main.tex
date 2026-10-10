@@ -30,7 +30,7 @@ Independent Researcher\\
 \begin{abstract}
 We study how INT8 quantization changes a compact glucose trend classifier
 and assess whether limited calibration coverage could explain the observed
-errors. \project is an open-source Android prototype that
+errors. \project is an open-source Android and iOS prototype that
 uses 12 five-minute continuous glucose monitor (CGM) readings to predict one
 of five rate-of-change classes over the next 15 minutes. A 2,909-parameter
 convolutional network was trained
@@ -48,8 +48,11 @@ source of error, but its contribution has not been isolated by comparing
 calibration selections. On a Galaxy S22 Ultra, timed inference-path
 mean/p95 latencies were
 0.334/0.540 ms for float ($n=100$) and 0.484/0.665 ms for INT8 ($n=21$),
-excluding softmax and class selection. The unequal replay samples do not
-establish a latency benefit. Context-prefix overlap (13.6\% of test windows
+excluding softmax and class selection. On an iPhone 18 Pro Max with equal
+samples ($n=100$ per model, two rounds), mean latencies were 0.062--0.073 ms
+for float and 0.101--0.110 ms for INT8, and the same golden vectors passed.
+These uncontrolled observations show no INT8 latency benefit on either phone.
+Context-prefix overlap (13.6\% of test windows
 score targets in validation rows; none score training rows) and test-informed
 class selection also limit the predictive conclusions. These results describe the
 converted models; they do not show whether broader calibration coverage would
@@ -101,7 +104,7 @@ observed trade-off and where the input-range limit came from. They cannot
 establish what would change if calibration coverage alone were varied.
 
 This paper follows the model from public CGM preprocessing through conversion
-to offline Android replay. It reports:
+to offline replay on Android and iOS. It reports:
 \begin{itemize}
     \item a segment-aware construction of 12-sample CGM windows and
     future-derived, five-class 15-minute trend labels;
@@ -109,7 +112,8 @@ to offline Android replay. It reports:
     artifacts, showing the opposing changes in accuracy and directional
     recall on the same aggregate test frame;
     \item cross-runtime golden-vector tests and physical-device latency
-    observations for an Android \texttt{CompiledModel} implementation; and
+    observations for Android (Kotlin) and iOS (Swift) \texttt{CompiledModel}
+    implementations that run the same model files; and
     \item a provenance audit of window splits and calibration inputs, which
     traces the INT8 input range to a single participant's data, and the
     comparisons needed to test whether that range explains the recall loss.
@@ -179,7 +183,7 @@ Martinsson et al. \cite{martinsson2020variance} & Value + variance & 30/60 min &
 Li et al. \cite{li2020crnn} & Value & 30/60 min & CGM, insulin, meals & 10 real + 10 simulated & Android timing \\
 GlucoBench \cite{sergazinov2024glucobench} & Value trajectory & 60 min & Dataset-dependent & Five public datasets & None reported \\
 Ghimire et al. \cite{ghimire2024generalize} & Value & 30/60 min & CGM & Four datasets & None reported \\
-\project (this work) & Trend class & 15 min & CGM & Weinstock aggregate test & Android replay timing \\
+\project (this work) & Trend class & 15 min & CGM & Weinstock aggregate test & Android/iOS replay timing \\
 \bottomrule
 \end{tabular}%
 }
@@ -227,8 +231,8 @@ findings support checking converted outputs and per-class metrics alongside
 model size.
 
 \project connects public preprocessing with conversion parity, class-wise
-evaluation, and offline replay on one Android device; it does not establish
-live-sensor, clinical, or cross-hardware performance.
+evaluation, and offline replay on one Android and one iOS device; it does not
+establish live-sensor, clinical, or cross-hardware performance.
 
 \section{Problem Formulation}
 
@@ -362,7 +366,7 @@ of the five per-class recalls and is equivalent to balanced accuracy
 \node[box, right=of format] (windows) {Segment-safe windows\\12 inputs + 3-step horizon};
 \node[box, right=of windows] (cnn) {TrendCNN\\2,909\\parameters};
 \node[box, right=of cnn] (models) {LiteRT artifacts\\float and static INT8};
-\node[box, right=of models] (android) {Offline Android replay\\parity and latency};
+\node[box, right=of models] (android) {Offline Android/iOS\\replay: parity\\and latency};
 \draw[arrow] (data) -- (format);
 \draw[arrow] (format) -- (windows);
 \draw[arrow] (windows) -- (cnn);
@@ -371,7 +375,7 @@ of the five per-class recalls and is equivalent to balanced accuracy
 \end{tikzpicture}
 \caption{End-to-end \project workflow. Patient data are used locally for
 training and evaluation; only model files and a synthetic replay trace are
-committed to the Android application.}
+committed to the Android and iOS applications.}
 \label{fig:pipeline}
 \end{figure*}
 
@@ -399,10 +403,11 @@ For input scale $s$ and zero point $z$, both clients use the affine form
     -128,127\right), \qquad \hat{x}=s(q-z).
 \end{equation}
 Quantization parameters are read from the model metadata rather than hardcoded.
-Both clients divide in single precision and round exact half-way values to
-the even integer, Python with \texttt{numpy.round} and Kotlin with
-\texttt{kotlin.math.round} \cite{numpyRound,kotlinRound}, so they produce
-identical integer inputs for any glucose value. The July device tests ran an
+All three clients divide in single precision and round exact half-way values
+to the even integer: Python with \texttt{numpy.round}, Kotlin with
+\texttt{kotlin.math.round}, and Swift with
+\texttt{rounded(.toNearestOrEven)} \cite{numpyRound,kotlinRound,swiftRounding}.
+They therefore produce identical integer inputs for any glucose value. The July device tests ran an
 earlier Kotlin version that rounded ties toward positive infinity. The
 golden-vector inputs are given to 0.1~\mgdl, and none of those values is a
 tie at the shipped input scale, so the expected outputs are unchanged.
@@ -423,6 +428,16 @@ cannot be caught by Kotlin, emulators are selected before runtime initialization
 and use the classic interpreter with XNNPACK disabled. This workaround applies
 to the tested environment; it does not establish performance across LiteRT
 configurations.
+
+A SwiftUI iOS application mirrors the Android client. It bundles the same two
+artifact files and synthetic trace by reference to the Android asset
+directory, so both platforms ship byte-identical models. It runs them through
+LiteRT's Swift \texttt{CompiledModel} API on CPU, using the LiteRT 2.3.0
+release binaries. Replay, the gap-resetting window buffer, the model switch,
+and the latency statistics follow the Kotlin implementation. iOS has no
+equivalent of Android's \texttt{INTERNET} permission. Instead, a source scan
+fails the build's continuous-integration job if networking APIs appear in the
+application code. This guard is weaker than the Android manifest check.
 
 \section{Experimental Protocol}
 
@@ -472,6 +487,15 @@ $\lfloor0.95(n-1)\rfloor$, so these estimates also have different rank
 resolution. The timings cover this portion of the inference path during replay.
 They measure neither the full classification call nor the kernel alone, and
 the runs were not controlled for a benchmark comparison.
+
+The iOS client times the same region with the monotonic
+\texttt{DispatchTime} clock. Measurements were recorded on an iPhone 18 Pro
+Max (iPhone19,3, iOS 27.0.1) during 16$\times$ replay of the synthetic trace,
+which produces one inference every 312.5 ms. Each model's statistics use its
+latest 100 inferences, and the measurement was repeated in two rounds. The application code was a debug build; LiteRT itself is a prebuilt
+release binary. A separate test-runner benchmark calls each model 100 times
+back to back after one warm-up call, in three runs. It isolates the timed
+region from the interval between replay ticks.
 Calibration preparation time, peak memory, model-load time, and energy were
 not measured.
 
@@ -480,7 +504,9 @@ from each float-predicted class and including values above the INT8 input range.
 The test also verifies the SHA-256 hash of each bundled artifact. Float logits
 must match the Python output within $10^{-5}$; dequantized INT8 outputs are
 required to match bit-for-bit because both sides dequantize identical integer
-outputs with the same float32 operation.
+outputs with the same float32 operation. The iOS suite applies the same
+vectors and tolerances and also checks the class-name order. It runs on the
+physical iPhone, on the iOS simulator, and in continuous integration.
 
 \section{Results}
 
@@ -596,8 +622,16 @@ Directional mean & 0.5019 & 0.3537 & $-0.1482$ \\
 
 Table~\ref{tab:deployment} summarizes deployment measurements. INT8 reduced the
 artifact by 5,376 bytes, or 31.0\%. Observed on-device latency did not decrease.
-The unequal sample counts prevent a formal comparison, so these measurements
-cannot establish a speed advantage for either model.
+The unequal Android sample counts prevent a formal comparison there. On the
+iPhone, with 100 inferences per model, INT8 had the higher mean and p95
+latency in both rounds. Two uncontrolled rounds cannot establish a speed
+ordering, but neither phone shows an INT8 speed advantage.
+
+The iPhone's back-to-back benchmark measured mean latencies of
+2.83--2.85~$\mu$s for float and 3.69--3.72~$\mu$s for INT8 across three runs,
+again with INT8 slower. These values are roughly 20--30 times lower than the
+in-app means for the same code. Most of the in-app time therefore comes from
+calling the model once per replay tick rather than from its arithmetic.
 
 The July conversion record\footnote{\url{https://github.com/mohamedmenasy/GlucoEdge/blob/513e940/docs/superpowers/specs/2026-07-01-litert-conversion-results.md}}
 reports a test maximum of 401 \mgdl\ and saturation in approximately 28\% of
@@ -612,7 +646,11 @@ information outside the representable range.
 All three Android instrumentation tests passed on the physical device. The
 \texttt{CompiledModel} path loaded both artifact hashes, matched float logits
 within $10^{-5}$ on all 20 windows, and matched INT8 dequantized outputs exactly.
-The two runtimes therefore agreed on the tested vectors. Model outputs may
+All four iOS parity tests passed on the iPhone with the same result: the
+artifact hashes, the class-name order, float logits within $10^{-5}$, and
+bit-exact INT8 outputs. The iPhone run used the half-to-even input rounding
+described above, which the July Android run predates. Python, Kotlin, and
+Swift therefore agreed on the tested vectors. Model outputs may
 still differ on untested inputs, although input quantization now follows the
 same rounding rule on both sides. These tests also cannot establish whether
 calibration caused the predictive loss.
@@ -620,7 +658,8 @@ calibration caused the predictive loss.
 \begin{table}[t]
 \centering
 \caption{Artifact and physical-device observations. Timing ends before
-softmax and class selection; sample counts differ by model.}
+softmax and class selection. Android sample counts differ by model; iPhone
+ranges span two rounds of 100 inferences per model.}
 \label{tab:deployment}
 \footnotesize
 \begin{tabular}{@{}lrr@{}}
@@ -629,8 +668,13 @@ Measurement & Float & INT8 \\
 \midrule
 Artifact size (bytes) & 17,352 & 11,976 \\
 Artifact size (KiB) & 16.95 & 11.70 \\
+\multicolumn{3}{@{}l}{\emph{Galaxy S22 Ultra, Android 16, LiteRT 2.1.0}} \\
 Mean latency (ms) & 0.334 ($n=100$) & 0.484 ($n=21$) \\
 p95 latency (ms) & 0.540 & 0.665 \\
+Golden vectors passed & 20/20 & 20/20 \\
+\multicolumn{3}{@{}l}{\emph{iPhone 18 Pro Max, iOS 27.0.1, LiteRT 2.3.0}} \\
+Mean latency (ms) & 0.062--0.073 & 0.101--0.110 \\
+p95 latency (ms) & 0.103--0.134 & 0.178--0.182 \\
 Golden vectors passed & 20/20 & 20/20 \\
 \bottomrule
 \end{tabular}
@@ -644,6 +688,8 @@ INT8 produced a smaller model file and lower recall for every directional
 class. Integer arithmetic often reduces memory and can improve latency for compute-heavy
 networks \cite{jacob2018quantization}; here the network is only 2,909 parameters,
 so fixed invocation and data-movement costs may dominate the measured path.
+The iPhone's back-to-back benchmark supports this: the same calls ran 20--30
+times faster when issued consecutively.
 Mobile acceleration studies and device benchmarks also show why performance
 must be measured for a particular model, runtime, and device
 \cite{lane2016deepx,ignatov2019aibenchmark,banbury2021mlperftiny}. The observed
@@ -658,8 +704,10 @@ to the measured models and does not rank quantization methods in general.
 
 The 5.25-KiB saving concerns model storage. We did not measure whether it
 reduced application size or working memory. The phone ran both models at the
-reported latencies, but the uncontrolled workloads and unequal sample counts
-prevent a comparison of speed. Calibration preparation time was also not
+reported latencies. The uncontrolled workloads, and on Android the unequal
+sample counts, prevent a formal speed comparison. Across the two phones,
+which differ in hardware, operating system, and LiteRT version, INT8 was
+never the faster model. Calibration preparation time was also not
 measured. The results therefore cannot tell us how changing calibration
 coverage would affect either preparation cost or runtime cost.
 
@@ -701,7 +749,7 @@ remain to be done.
 
 The parity tests check agreement for particular inputs and artifact hashes.
 Unit tests cover exact rounding ties and out-of-range values in the Kotlin
-quantizer, but model execution has been compared only on the tested vectors.
+and Swift quantizers, but model execution has been compared only on the tested vectors.
 Runtime agreement alone cannot
 separate calibration error from other quantization effects. It also does not
 validate the labels, cohort split, probability calibration, clinical safety,
@@ -755,9 +803,12 @@ The results should be read with the following limitations in mind.
     specific to this conversion protocol. It should not be generalized to INT8.
     Without comparisons of calibration samplers or budgets, we cannot estimate
     the effect of coverage, a dose--response relation, or possible recall recovery.
-    \item The phone latency observations use one device, one runtime path, and
-    unequal sample counts. Warm-up, temperature, and processor frequency were
-    not controlled, and repeated runs were not analyzed. Calibration time,
+    \item The phone latency observations use two devices that differ in
+    hardware, operating system, LiteRT version (2.1.0 and 2.3.0), and timer.
+    Android sample counts are unequal. The iPhone counts are equal but cover
+    only two rounds, recorded with a debug build of the application code.
+    Warm-up, temperature, and processor frequency were not controlled, and
+    repeated runs were not analyzed statistically. Calibration time,
     model-load time, energy, and
     memory use were not measured. The internal timing excludes softmax and
     class selection.
@@ -770,8 +821,8 @@ The results should be read with the following limitations in mind.
 
 \subsection{Code, artifacts, and computational record}
 
-The repository contains the training, conversion, benchmark, Android, and test
-code. The bundled artifacts were generated from repository commit
+The repository contains the training, conversion, benchmark, Android, iOS,
+and test code. The bundled artifacts were generated from repository commit
 \texttt{361148a} with seed 0. Their SHA-256 digests are
 \texttt{eb96c7e...08e6} (float) and \texttt{0dc35387...ea29} (INT8); full hashes
 are stored beside the assets and asserted by instrumentation tests. Python unit
@@ -779,7 +830,10 @@ tests cover label boundaries, segment-aware windows, model shape, conversion
 helpers, synthetic replay behavior, and the provenance audit's split
 bookkeeping. Android unit tests cover replay,
 buffering, quantization, latency aggregation, and view-model behavior. A merged-
-manifest check enforces the absence of Internet permission.
+manifest check enforces the absence of Internet permission. The iOS test
+suite covers the same units and the golden-vector parity. Continuous
+integration runs it on a simulator, together with the source scan for
+networking APIs.
 
 The conversion requirements record LiteRT Torch 0.9.1, TorchAO 0.17.0, and
 Python LiteRT 2.1.5. They also document PyTorch 2.12.1 and NumPy 2.5.0 in the
@@ -798,7 +852,12 @@ different numbers from those recorded here.
 
 A subsequent provenance audit reran only the GlucoBench formatter and window
 construction; it involved no
-training, model evaluation, or held-out glucose values. Its aggregate output,
+training, model evaluation, or held-out glucose values.
+
+The October revision adds the iOS client and its device measurements,
+recorded on 10 October 2026 with the unchanged artifacts (same SHA-256
+hashes). It involved no retraining, conversion, or evaluation on research
+data. Its aggregate output,
 including the GlucoBench commit and a SHA-256 hash of the Weinstock data file,
 is versioned as \texttt{paper/results/split\_audit.json}.
 
@@ -822,7 +881,8 @@ We do not claim an institutional ethics determination for this work.
 OpenAI Codex assisted with language editing during the September manuscript
 revision, checked sources, and compared claims with repository code and
 recorded results. Claude Code (Anthropic) wrote the provenance audit script
-and the Kotlin rounding fix, and drafted the corresponding manuscript edits.
+and the Kotlin rounding fix, implemented the iOS client, and drafted the
+corresponding manuscript edits.
 The draft requires author review.
 Funding, competing interests, and CRediT author contributions remain to be
 confirmed by the author before submission.
@@ -830,7 +890,7 @@ confirmed by the author before submission.
 \section{Conclusion}
 
 \project follows a compact five-class CGM trend model from segment-aware
-window construction to offline execution on Android. The implementation
+window construction to offline execution on Android and iOS. The implementation
 documents fixed-shape conversion, integer input handling, artifact provenance,
 and cross-runtime parity. Under the recorded calibration protocol, INT8
 saved 5.25 KiB while reducing five-class macro recall by 9.25 percentage
@@ -840,8 +900,9 @@ test windows. The INT8 input range was derived from calibration windows drawn
 from a single participant, which makes calibration coverage worth
 investigating, but this comparison cannot establish whether broader coverage
 would recover recall or how it would affect preparation and deployment cost.
-The phone measurements, taken with unequal sample counts, do not establish
-an INT8 latency advantage.
+Neither phone showed an INT8 latency advantage, including the iPhone, where
+both models had equal sample counts. These measurements were not controlled
+benchmarks.
 
 These results provide a baseline for a controlled calibration-coverage study.
 That study needs corrected target boundaries, comparisons of calibration

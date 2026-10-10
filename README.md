@@ -154,9 +154,10 @@ SwiftUI sibling of the Android app. It bundles the **same two `.tflite`
 files** — referenced in place from `android/app/src/main/assets/` by an
 Xcode folder reference, never copied — and runs them through LiteRT's Swift
 **CompiledModel** API (CPU). It is held to the **same golden vectors** as
-the Kotlin client: on the iOS 27 simulator float logits match the Python
-benchmark within 1e-5 and INT8 dequantized outputs are bit-exact, with the
-asset sha256 pinned; the `ios` CI job runs the same suite on every push. Replay, gap-aware windowing, the float/INT8
+the Kotlin client: on an iPhone 18 Pro Max (iOS 27.0.1), on the iOS 27
+simulator and in the `ios` CI job (every push), float logits match the
+Python benchmark within 1e-5 and INT8 dequantized outputs are bit-exact,
+with the asset sha256 pinned. Replay, gap-aware windowing, the float/INT8
 toggle and the latency stats line mirror the Android screen.
 
 - Explain notes come from Apple's on-device **Foundation Models** framework
@@ -178,7 +179,10 @@ toggle and the latency stats line mirror the Android screen.
         -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 
 - Device installs: put `DEVELOPMENT_TEAM = <your team id>` in the
-  gitignored `ios/Config/Local.xcconfig`.
+  gitignored `ios/Config/Local.xcconfig`. A free Apple ID's Personal Team
+  is enough. Bundle IDs are global across teams, so on your own team
+  change `PRODUCT_BUNDLE_IDENTIFIER` (`com.mohamedmenasy.glucoedge`) to
+  something unique.
 - A locally extracted `real_trace.csv` (see the Android notes) is bundled by
   iOS builds too — same rule: don't distribute such builds.
 - **No-network note:** iOS has no INTERNET permission, so there is no
@@ -186,8 +190,13 @@ toggle and the latency stats line mirror the Android screen.
   source scan (`ios/scripts/check_no_network.sh`) that fails on networking
   APIs — a weaker, best-effort guard.
 
-On-device (iPhone) parity and latency are not yet measured; simulator
-latency is a host-Mac proxy and is not reported as a device number.
+On-device results (iPhone 18 Pro Max, iOS 27.0.1, Debug build): golden
+parity 4/4, INT8 bit-exact; in-app latency in the table below; live
+Explain tests 2/2 on Apple Intelligence (25 consecutive notes in ~30 s),
+and tapping Explain in the app produces a descriptive, advice-free note.
+Asked for a dose or to skip insulin, the on-device model declined in its
+own text rather than raising an error, and the app shows that text as the
+note.
 
 ## The quantization tradeoff, measured
 
@@ -195,17 +204,23 @@ The headline comparison across the three model artifacts, on the full
 127,165-window weinstock test set (accuracy/recall) and a real phone
 (latency):
 
-| | Size | Latency mean / p95 (device) | Accuracy | Macro-avg recall |
-|---|---|---|---|---|
-| PyTorch checkpoint | 14.4 KB | — (not deployable) | 0.5184 | 0.5060 |
-| Float `.tflite` (shipped default) | 16.95 KB | 0.334 ms / 0.540 ms | 0.5184 | 0.5060 |
-| INT8 `.tflite` | 11.70 KB | 0.484 ms / 0.665 ms | 0.5866 | 0.4135 |
+| | Size | Latency mean / p95 (Galaxy S22 Ultra) | Latency mean / p95 (iPhone 18 Pro Max) | Accuracy | Macro-avg recall |
+|---|---|---|---|---|---|
+| PyTorch checkpoint | 14.4 KB | — (not deployable) | — | 0.5184 | 0.5060 |
+| Float `.tflite` (shipped default) | 16.95 KB | 0.334 ms / 0.540 ms | 0.062–0.073 ms / 0.103–0.134 ms | 0.5184 | 0.5060 |
+| INT8 `.tflite` | 11.70 KB | 0.484 ms / 0.665 ms | 0.101–0.110 ms / 0.178–0.182 ms | 0.5866 | 0.4135 |
 
 Latency is measured in-app on a Samsung Galaxy S22 Ultra (Android 16) via
 the CompiledModel path. The timer covers the Kotlin inference path (buffer
 writes, input quantization, model execution, output dequantization) but
 stops before softmax and class selection; float over a full 100-inference
-rolling window, INT8 over a 21-inference window. The
+rolling window, INT8 over a 21-inference window. The iPhone 18 Pro Max
+(iOS 27.0.1) numbers come from the iOS app's stats line, timing the same
+region (quantize, run, dequantize; no softmax), over 100 inferences for
+**both** models during 16× replay of the synthetic trace (ranges span two
+measurement rounds). The back-to-back test-runner benchmark is 20–30× faster (float 2.85 µs,
+INT8 3.7 µs mean, same code, warmed up), so most of the in-app time is
+per-call cost between replay ticks rather than the model's arithmetic. The
 conversion phase's dev-machine CPU proxy reached the same qualitative
 conclusion: INT8 is not faster at this model size — per-call overhead
 dominates a ~2,900-parameter network.
@@ -269,10 +284,10 @@ Per the original project plan, in order:
    softmax — INT8 is again not faster). Details appended to
    [the SIGILL decision record](docs/superpowers/specs/2026-07-05-emulator-compiledmodel-sigill.md).
 6. ~~Port the app to iOS with the same model files and parity vectors~~ —
-   done, see [iOS app](#ios-app-ios); golden parity green on the iOS 27
-   simulator, and the `ios` CI job runs it on every push.
-   - iPhone on-device latency and parity verification (iPhone 18 Pro Max)
-     pending.
+   done, see [iOS app](#ios-app-ios): golden parity 4/4 (INT8 bit-exact)
+   on an iPhone 18 Pro Max, the iOS 27 simulator and the `ios` CI job;
+   in-app latency float mean 0.062–0.073 ms / INT8 mean 0.101–0.110 ms
+   (INT8 again not faster).
 
 ~~Optional stretch, once the above works end to end: a fully local
 on-device explanation layer (LiteRT-LM + a small open-weight model) that
