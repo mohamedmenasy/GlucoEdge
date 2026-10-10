@@ -316,9 +316,11 @@ def _predict_tflite_batch(path, windows):
 
 
 def _clip_stats(windows, labels, scale, zp, dtype_info):
-    hi = scale * (dtype_info.max - zp)
-    lo = scale * (dtype_info.min - zp)
-    clipped = (windows > hi) | (windows < lo)
+    # Rounded-code clipping, per the plan: a slot clips only when its
+    # rounded code falls outside the dtype, not when the real value merely
+    # exceeds the representable range (those within half a step round in).
+    q_raw = np.round(windows / scale) + zp
+    clipped = (q_raw < dtype_info.min) | (q_raw > dtype_info.max)
     by_class = {}
     for c in range(5):
         m = labels == c

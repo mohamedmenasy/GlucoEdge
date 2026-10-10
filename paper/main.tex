@@ -762,7 +762,7 @@ accuracy \emph{rises} from 0.507 to 0.570 --- the same accuracy illusion
 the shipped artifact showed, now reproduced under the corrected protocol.
 Quantized with any randomized 200-window selection, INT8 matches float to
 the third decimal (0.487). \texttt{falling\_fast} is the most sensitive
-class: 0.550 float, 0.236 under sequential-200, 0.542 under uniform-200.
+class: 0.550 float, 0.236 under sequential-200, 0.547 under uniform-200.
 
 Table~\ref{tab:contrasts} reports the prespecified contrasts. The primary
 contrast --- range coverage versus participant-balanced random at 200 ---
@@ -848,11 +848,12 @@ Range: 1,000 vs.\ 200 & $+0.03$ {\tiny[$-0.09,+0.16$]} & $-0.01$ {\tiny[$-0.11,+
 \addplot[draw=black, fill=black!75] coordinates
   {(1,0.236) (2,0.383) (3,0.648) (4,0.339) (5,0.456) (6.45,0.354)};
 \addplot[draw=black!80, pattern=north east lines, pattern color=black!60] coordinates
-  {(1,0.542) (2,0.451) (3,0.509) (4,0.404) (5,0.549) (6.45,0.487)};
+  {(1,0.547) (2,0.449) (3,0.509) (4,0.402) (5,0.551) (6.45,0.487)};
 \legend{Float, INT8 sequential 200, INT8 uniform 200}
 \end{axis}
 \end{tikzpicture}
-\caption{Per-class held-out recall, mean over five seeds. The sequential-200
+\caption{Per-class held-out recall, mean over five seeds (and three draws
+for the uniform arm). The sequential-200
 calibration collapses \texttt{falling\_fast} and inflates \texttt{stable};
 a uniform random selection of the same size restores the float profile.}
 \label{fig:recall}
@@ -866,11 +867,12 @@ input-grid controls. Feeding the float model the clip-only image of the
 inputs reproduces the full loss (13.14 of 13.12 points); the quantize--%
 dequantize image gives the same number, so the coarser input grid itself
 costs nothing measurable, and the remaining INT8-internal difference is
-0.2 points. Under the sequential-200 range, 28.0\% of held-out windows
-have at least one clipped input slot --- 61.1\% of \texttt{falling\_fast}
-windows, the class that collapses --- against 3.5\% under the randomized
-range, where clipping is confined to sensor-cap readings of 401~\mgdl\
-truncated to 400.8. Wider range coverage therefore did not trade recall
+0.2 points. Under the sequential-200 range, 27.8\% of held-out windows
+have at least one clipped input slot by the rounded-code rule ---
+60.9\% of \texttt{falling\_fast} windows, the class that collapses ---
+against none under the randomized range: 3.5\% of held-out windows
+exceed its real-valued top of 400.8~\mgdl\ at the 401 sensor cap, but
+those readings round into the top code, so no input slot clips. Wider range coverage therefore did not trade recall
 for resolution in this model: the grid-resolution cost of covering
 39--401~\mgdl\ was unmeasurable.
 
@@ -879,7 +881,7 @@ for resolution in this model: the grid-resolution cost of covering
 \caption{Mechanism controls on the held-out component (directional-recall
 differences in percentage points, seed means). QDQ = float model on the
 artifact's quantize--dequantize input grid; clip = float model on inputs
-clipped to the artifact's range without re-gridding.}
+clipped to the artifact's range without re-gridding. Stochastic arms average all three draws; sequential has one order.}
 \label{tab:mechanism}
 \footnotesize
 \begin{tabular}{@{}lrrr@{}}
@@ -887,8 +889,8 @@ clipped to the artifact's range without re-gridding.}
 Calibration arm & Float$-$clip & Float$-$QDQ & QDQ$-$INT8 \\
 \midrule
 Sequential 200 & $+13.14$ & $+13.12$ & $+0.23$ \\
-Uniform 200 & $+0.01$ & $-0.20$ & $+0.26$ \\
-Range coverage 200 & $+0.01$ & $-0.20$ & $+0.25$ \\
+Uniform 200 & $+0.01$ & $-0.20$ & $+0.17$ \\
+Range coverage 200 & $+0.01$ & $-0.20$ & $+0.16$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -935,8 +937,9 @@ sequential arm.
 
 Calibration coverage has no deployment cost in this model. All 100 matrix
 INT8 artifacts serialize to exactly 11,976 bytes regardless of strategy or
-budget (float: 17,352 bytes, a 31.0\% reduction), with no operator-inventory
-differences attributable to the calibration arm. Offline preparation is
+budget (float: 17,352 bytes, a 31.0\% reduction), and all 110 INT8
+artifacts share a single operator inventory, so no graph change is
+attributable to any calibration arm. Offline preparation is
 also negligible: every sampler selects its windows in under 0.03~s, and
 INT8 export averages 0.5~s for a 200-window set and 0.8~s for a
 1,000-window set on the study host. The corrected calibration therefore
@@ -1072,8 +1075,10 @@ The results should be read with the following limitations in mind.
     the retained grid still contains formatter re-gridding between
     adjacent readings, and interpolation precedes windowing, so
     retrospective preprocessing may use information unavailable in real
-    time. The exact-coincidence sensitivity tier was defined but its
-    stratified results are not reported here.
+    time. The protocol froze three sensitivity tiers (exact-observed
+    windows; gap-filled inputs with gap-free endpoints; any gap-filled
+    endpoint); none of the three has been evaluated, so results for
+    windows outside the primary mask are unreported, not implied.
     \item The five labels are deterministic transformations of a future
     CGM point, not expert annotations, and the CGM-only model omits meal,
     insulin, activity, illness, and other covariates. Probability
@@ -1139,9 +1144,12 @@ The calibration-coverage study itself is versioned under
 (\texttt{environment.txt}; a single virtual environment with the
 conversion pins, PyTorch 2.12.1, and NumPy 2.5.3, reconciling the
 previously recorded drift), the eligibility audit
-(\texttt{data\_availability.json}), and the complete aggregate results
+(\texttt{data\_availability.json}), the complete aggregate results
 with contrasts, intervals, coverage, and all 100 planned cells
-(\texttt{aggregate\_r1.json}). Checkpoints, selected window keys,
+(\texttt{aggregate\_r1.json}), and the artifact summary --- operator
+inventories, sizes, and distinct-hash counts
+(\texttt{artifacts\_summary.json}); per-artifact SHA-256 hashes live in
+the local run manifest. Checkpoints, selected window keys,
 per-window predictions, and participant-level summaries remain local and
 are regenerable from the committed runner
 (\texttt{experiments/calibration\_coverage.py}) with GlucoBench cloned;

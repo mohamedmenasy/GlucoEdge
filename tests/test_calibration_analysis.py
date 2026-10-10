@@ -131,6 +131,20 @@ def test_clip_only_truncates_range_without_regridding():
     assert out[2] == pytest.approx(LO)
 
 
+def test_clip_stats_count_rounded_code_clipping_not_range_exceedance():
+    from experiments.calibration_coverage import _clip_stats
+
+    # scale 2, zp 0: top code 127 represents 254.0. A value of 254.9 rounds
+    # to code 127 (not clipped); 255.1 rounds to 128 (clipped). Plain
+    # range-exceedance would wrongly count both.
+    windows = np.array([[254.9, 100.0], [255.1, 100.0], [100.0, 100.0]],
+                       dtype=np.float32)
+    labels = np.array([2, 2, 2])
+    out = _clip_stats(windows, labels, np.float32(2.0), 0, np.iinfo(np.int8))
+    assert out["window_fraction"] == pytest.approx(1 / 3)
+    assert out["slot_fraction"] == pytest.approx(1 / 6)
+
+
 def test_qdq_from_detail_uses_the_artifact_scale_and_zero_point():
     detail = {"dtype": np.int8, "quantization": (2.0, 10)}
     x = np.array([0.0, 500.0], dtype=np.float32)
