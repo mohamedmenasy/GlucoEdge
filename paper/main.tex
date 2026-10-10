@@ -923,6 +923,44 @@ TrendCNN (float) & 0.507 & 0.494 & 0.487 \\
 \end{tabular}
 \end{table}
 
+\subsection{Sensitivity tiers}
+
+The protocol froze three disjoint window groups outside or inside the
+primary mask: the exact-observed subset (every checked row coincides with
+an original reading), windows with gap-filled inputs but gap-free
+endpoints, and windows with a gap-filled endpoint (whose labels derive
+from gap-filled grid values and describe the formatter's grid rather than
+sensor truth). Table~\ref{tab:sensitivity} evaluates the same frozen
+artifacts on each tier. The two findings that matter are mask-insensitive:
+uniform random calibration beats sequential by $+10.5$ to $+13.2$ points
+of directional recall in every tier and both components (temporal
+intervals $[+6.5, +14.7]$ at the widest), and the float-to-INT8 gap under
+uniform calibration never exceeds $1.0$ point (largest:
+$+1.0$~$[+0.2,+1.9]$ on the temporal gap-filled-endpoint tier). The tier
+evaluation ran after the primary analysis was published, on tiers,
+artifacts, and contrasts that were all frozen in the protocol beforehand;
+the full per-model record is in
+\texttt{sensitivity\_tiers\_r1.json}.
+
+\begin{table}[t]
+\centering
+\caption{Held-out directional recall by sensitivity tier: five-seed float
+mean, sequential-200 INT8 mean, uniform-200 INT8 mean (seeds $\times$
+draws), and the paired cluster-bootstrap uniform$-$sequential difference.}
+\label{tab:sensitivity}
+\footnotesize
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lrcccc@{}}
+\toprule
+Tier & $n$ & Float & Seq.\ 200 & Unif.\ 200 & Unif.$-$Seq.\ [95\% CI] \\
+\midrule
+Exact-observed & 36{,}150 & 0.476 & 0.346 & 0.477 & $+0.132$ $[+0.101, +0.166]$ \\
+Gap-filled inputs & 8{,}682 & 0.450 & 0.332 & 0.446 & $+0.114$ $[+0.066, +0.159]$ \\
+Gap-filled endpoint & 2{,}010 & 0.501 & 0.383 & 0.497 & $+0.113$ $[+0.071, +0.152]$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
 \subsection{Historical comparison}
 
 The earlier revision reported accuracy 0.5184 and macro recall 0.5060 for
@@ -945,6 +983,10 @@ also negligible: every sampler selects its windows in under 0.03~s, and
 INT8 export averages 0.5~s for a 200-window set and 0.8~s for a
 1,000-window set on the study host. The corrected calibration therefore
 changes nothing the device sees except the two quantization parameters.
+The repository's bundled application models were accordingly replaced
+with the study's seed-0 float artifact and its uniform-200 INT8 artifact;
+both client golden-parity suites pass against the new files bit-exactly
+on the continuous-integration simulators.
 
 Table~\ref{tab:deployment} retains the historical device observations for
 the shipped artifacts; none of the new artifacts has been device-timed, and
@@ -1076,10 +1118,13 @@ The results should be read with the following limitations in mind.
     the retained grid still contains formatter re-gridding between
     adjacent readings, and interpolation precedes windowing, so
     retrospective preprocessing may use information unavailable in real
-    time. The protocol froze three sensitivity tiers (exact-observed
-    windows; gap-filled inputs with gap-free endpoints; any gap-filled
-    endpoint); none of the three has been evaluated, so results for
-    windows outside the primary mask are unreported, not implied.
+    time. The three frozen sensitivity tiers (exact-observed windows;
+    gap-filled inputs with gap-free endpoints; any gap-filled endpoint)
+    reproduce both headline findings
+    (Table~\ref{tab:sensitivity}), but the tier evaluation ran after the
+    primary analysis was published, and the gap-filled-endpoint tier's
+    labels score agreement with the formatter's interpolated grid, not
+    with unobserved sensor readings.
     \item The five labels are deterministic transformations of a future
     CGM point, not expert annotations, and the CGM-only model omits meal,
     insulin, activity, illness, and other covariates. Probability
@@ -1204,10 +1249,10 @@ covering participants; sample count, stratification, and observer choice
 were the wrong knobs.
 
 The conclusions are scoped to one cohort, one architecture, and one
-quantizer, on a reanalysis of previously touched data. Device timing of
-the new artifacts under a paired-round protocol, the exact-coincidence
-sensitivity tier, and confirmation on an unused public cohort remain
-future work. \project remains a research prototype, not a medical device.
+quantizer, on a reanalysis of previously touched data; the frozen
+sensitivity tiers reproduce both headline findings. Device timing of
+the new artifacts under a paired-round protocol and confirmation on an
+unused public cohort remain future work. \project remains a research prototype, not a medical device.
 
 \bibliographystyle{unsrtnat}
 \renewcommand{\bibfont}{\small}

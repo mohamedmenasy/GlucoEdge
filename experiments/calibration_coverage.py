@@ -90,7 +90,7 @@ def _load_study_data():
     from training.dataset import GlucoseTrendDataset
     from training.labeling import FIVE_CLASSES
 
-    formatter, owner, no_gap_fill = load_weinstock_context()
+    formatter, owner, _, no_gap_fill = load_weinstock_context()
     datasets = {
         "train": GlucoseTrendDataset(formatter.train_data, classes=FIVE_CLASSES),
         "val": GlucoseTrendDataset(formatter.val_data, classes=FIVE_CLASSES),
