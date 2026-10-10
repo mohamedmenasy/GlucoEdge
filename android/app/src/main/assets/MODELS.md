@@ -1,16 +1,36 @@
 # Bundled model provenance
 
-Both models were produced from this repository at commit 361148a, seed 0:
-- `venv/bin/python -m training.train --dataset weinstock --classes 5 --epochs 20 --seed 0 --save-checkpoint`
-- `venv/bin/python -m conversion.convert --dataset weinstock --classes 5`
+Both models are artifacts of the 2026-10-10 calibration-coverage study
+(run `r1`; protocol frozen at commit d63cc8f, study code merged via PR #11):
+training seed 0 on the corrected eligible-window splits (no-gap-fill mask),
+INT8 calibrated on the study's `uniform_random_200_d101` selection — 200
+uniformly random eligible validation windows, draw seed 101. Reproduce with:
+- `venv/bin/python -m experiments.calibration_coverage train --run-id r1`
+- `venv/bin/python -m experiments.calibration_coverage select --run-id r1`
+- `venv/bin/python -m experiments.calibration_coverage convert --run-id r1`
 
-Verified against docs/superpowers/specs/2026-07-01-litert-conversion-results.md
-(float acc 0.5184 / macro recall 0.5060; int8 acc 0.5866 / macro recall 0.4135).
+These are `seed0_float.tflite` and `seed0_int8_uniform_random_200_d101.tflite`
+from that run, copied byte-identically. Held-out-participant metrics
+(paper/results/calibration-coverage/aggregate_r1.json): float macro recall
+0.4884 / directional recall 0.5087; INT8 0.4857 / 0.5069 — the INT8 input
+range now reaches 400.8 mg/dL (the previous sequential calibration capped it
+at 239.9 and cost 13.4 points of held-out directional recall; see the paper).
 
 | file | sha256 | bytes |
 |---|---|---|
-| `trend_float.tflite` | `eb96c7e66ab13a41a6bacdcbeb00c0c089d63f67dd1a45c2947a48ff301b08e6` | 17352 |
-| `trend_int8.tflite` | `0dc3538704c89f055fb7437e50a5bf42c81a64853a4b527d49c206569f8bea29` | 11976 |
+| `trend_float.tflite` | `5a0f0744618b9126634af9d817e7dc171b86392ff22e2a1cd97b19b4cecfd24a` | 17352 |
+| `trend_int8.tflite` | `9f2f26f5da5c2964abe9eaca71626c812d4710de4d698b7d83deee04fc5187a4` | 11976 |
+
+Golden parity with these exact bytes is green on the iOS simulator suite
+(48/48, INT8 bit-exact) and the goldens pin both sha256s. On-device
+verification (Galaxy S22 Ultra / iPhone 18 Pro Max) was performed on the
+PREVIOUS assets (2026-07-07 / 2026-10-10) and is pending re-run for these —
+the runtime path, tensor shapes, operator set, and file sizes are unchanged.
+
+Historical pre-study assets (float `eb96c7e6…`, INT8 `0dc35387…`, sequential
+calibration): float acc 0.5184 / macro recall 0.5060, INT8 acc 0.5866 /
+macro recall 0.4135 on the historical test split — see
+docs/superpowers/specs/2026-07-01-litert-conversion-results.md.
 
 Not a medical device. Trained only on the public GlucoBench benchmark.
 

@@ -115,7 +115,10 @@ tries to merge that permission in.
   models, including round-and-clip INT8 input quantization. On an emulator
   this exercises the `Interpreter` fallback; on a physical device it
   exercises `CompiledModel` — verified 3/3 on a Galaxy S22 Ultra
-  (Android 16): float logits within 1e-5, INT8 outputs bit-exact.
+  (Android 16): float logits within 1e-5, INT8 outputs bit-exact. That
+  device run used the pre-study assets; the 2026-10-10 study artifacts
+  pass the same goldens on the iOS simulator suite, with the on-device
+  re-run pending.
 
 The app shows measured on-device inference latency; numbers from an
 emulator are labeled as such and are not device measurements.
@@ -200,9 +203,15 @@ note.
 
 ## The quantization tradeoff, measured
 
-The headline comparison across the three model artifacts, on the full
-127,165-window weinstock test set (accuracy/recall) and a real phone
-(latency):
+**The bundled models were replaced on 2026-10-10** with the
+calibration-coverage study's seed-0 artifacts: the INT8 model is now
+calibrated on 200 uniformly random eligible validation windows instead of
+the toolchain-default first-200-sequential selection, which the study
+showed was the sole cause of a 13.4-point held-out directional-recall loss
+(see `paper/` and `android/app/src/main/assets/MODELS.md` for the new
+hashes and held-out metrics). The table below records the HISTORICAL
+artifacts' numbers — the measured collapse that motivated the study — on
+the historical test split and devices:
 
 | | Size | Latency mean / p95 (Galaxy S22 Ultra) | Latency mean / p95 (iPhone 18 Pro Max) | Accuracy | Macro-avg recall |
 |---|---|---|---|---|---|
