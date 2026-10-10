@@ -4,6 +4,7 @@
 \usepackage[margin=0.75in,columnsep=0.24in]{geometry}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
+\usepackage{multirow}
 \usepackage{microtype}
 \usepackage{graphicx}
 \usepackage{xcolor}
@@ -19,8 +20,8 @@
 \newcommand{\mgdl}{\ensuremath{\mathrm{mg/dL}}}
 \newcommand{\project}{\textsc{GlucoEdge}\xspace}
 
-\title{\project: An Engineering Study of On-Device Five-Class\\
-Glucose Trend Forecasting and INT8 Quantization}
+\title{\project: Calibration Coverage and Quantization Trade-offs\\
+in On-Device Glucose Trend Classification}
 \author{Mohamed Menasy\\
 Independent Researcher\\
 \texttt{mohamedmenasy@gmail.com}}
@@ -30,34 +31,34 @@ Independent Researcher\\
 \maketitle
 
 \begin{abstract}
-We report what static INT8 quantization did to a compact glucose trend
-classifier and trace the resulting input range back to its calibration
-data. \project is an open-source Android and iOS prototype that
-uses 12 five-minute continuous glucose monitor (CGM) readings to predict one
-of five rate-of-change classes over the next 15 minutes. A 2,909-parameter
-convolutional network was trained
-with class-weighted cross-entropy on public Weinstock data prepared by
-GlucoBench. On 127,165 aggregate test windows, float LiteRT preserved the
-checkpoint's reported accuracy (0.5184) and macro recall (0.5060). Static INT8
-quantization using the first 200 validation windows reduced the artifact from
-16.95 to 11.70 KiB (31.0\%). Accuracy rose to 0.5866, but macro recall fell to
-0.4135: stable-class recall improved while all four directional recalls
-declined. Their mean fell from 0.5019 to 0.3537. A provenance audit shows
-that the 200 calibration windows came from one participant's 17.5 hours of
-data and that the resulting INT8 input range ends at 239.9 \mgdl, below
-readings in 24.4\% of training windows. Clipping is therefore a plausible
-source of error; isolating its contribution requires the controlled
-calibration-coverage comparison this paper specifies but does not run.
-On a Galaxy S22 Ultra, timed inference-path
-mean/p95 latencies were
-0.334/0.540 ms for float ($n=100$) and 0.484/0.665 ms for INT8 ($n=21$),
-excluding softmax and class selection. On an iPhone 18 Pro Max with equal
-samples ($n=100$ per model, two rounds), mean latencies were 0.062--0.073 ms
-for float and 0.101--0.110 ms for INT8, and the same golden vectors passed.
-These uncontrolled observations show no INT8 latency benefit on either phone.
-Context-prefix overlap (13.6\% of test windows
-score targets in validation rows; none score training rows) and test-informed
-class selection also limit the predictive conclusions. \project is a
+How does calibration-data coverage affect minority-class performance and
+deployment cost in a compact, quantized glucose trend classifier? We answer
+this with a controlled study on \project, an open-source Android and iOS
+prototype that maps 12 five-minute continuous glucose monitor (CGM) readings
+to one of five rate-of-change classes 15 minutes ahead. On a corrected
+evaluation protocol --- split-role provenance masks, gap-free windows, and a
+separate held-out-participant component --- we trained a 2,909-parameter CNN
+at five seeds on public Weinstock data prepared by GlucoBench, then
+quantized each checkpoint with four calibration-selection strategies at two
+budgets and three draws: 100 INT8 artifacts, evaluated pairwise against
+their float sources. The toolchain-default sequential selection reproduces
+the failure we previously shipped: the first eligible windows cover two
+participants, cap the INT8 input range at 251~\mgdl, and cost 13.4
+percentage points of held-out directional recall (95\% CI 10.3--16.9)
+relative to a uniform random selection of the same size, while raw accuracy
+rises --- an illusion created by the majority class. Any randomized
+200-window selection restores float-level directional recall (0.487 vs.\
+0.487); range-aware stratification adds nothing further (+0.06 points, CI
+$-0.02$ to $+0.13$), a five-fold calibration budget changes it by at
+most $+0.08$ points, and a
+min--max observer behaves like the default histogram observer. Clip-only
+controls attribute the entire sequential-arm loss to input-range clipping
+rather than grid resolution, and every INT8 artifact is byte-identical in
+size, so the fix costs nothing at deployment time: calibration coverage
+here means covering participants, not tuning budgets or samplers. The CNN
+outperforms recent-slope and logistic-regression baselines on directional
+recall. Prior single-device latency observations are reported as historical
+context; the new artifacts have not been device-timed. \project is a
 research demonstration, not a medical device or treatment system.
 \end{abstract}
 
@@ -94,38 +95,45 @@ errors:
 accuracy can increase as predictions concentrate on a majority class even while
 minority-class recall declines \cite{brodersen2010balanced}.
 
-This paper answers three questions about one such deployment. First, does
-conversion itself change the model? Float LiteRT reproduces the checkpoint's
-reported metrics exactly, and golden-vector tests show that the Python,
-Kotlin, and Swift runtimes agree on the shipped artifacts. Second, what did
-static INT8 quantization under the toolchain's default calibration protocol
-do to the five classes? Accuracy rose while recall fell for every directional
-class --- a change that raw accuracy conceals and macro recall exposes.
-Third, where did the INT8 input range come from? A provenance audit traces it
+The research question is: \emph{how does calibration-data coverage affect
+minority-class performance and deployment cost in compact glucose trend
+classifiers?} Here, coverage refers to the input values and trajectories
+represented during quantizer calibration, not calibration of predicted
+probabilities. An earlier revision of this work could only motivate the
+question: a provenance audit traced the shipped INT8 artifact's input range
 to a single participant's 17.5 hours of data, whose maximum set a ceiling
-below readings found in a quarter of training windows. These answers
-motivate, but do not settle, a larger question: \emph{how does
-calibration-data coverage affect minority-class performance and deployment
-cost in compact glucose trend classifiers?} Here, coverage refers to the
-input values and trajectories represented during quantizer calibration, not
-calibration of predicted probabilities. Answering it requires varying
-calibration selection under controls this study did not have;
-Section~\ref{sec:calibevidence} specifies that comparison.
+below readings found in a quarter of training windows, but no comparison of
+calibration selections existed. This revision runs that comparison under a
+prespecified protocol, frozen --- hypotheses, samplers, endpoint,
+missing-class rules, and environment --- before any held-out label was read.
 
-This paper follows the model from public CGM preprocessing through conversion
-to offline replay on Android and iOS. It reports:
+The study holds the architecture, loss, quantizer, and data split fixed and
+varies only calibration selection: four strategies (the toolchain-default
+sequential order, uniform random, participant-balanced random, and
+participant-balanced range coverage), two budgets (200 and 1,000 windows,
+nested), three random draws, and five training seeds, giving 100 INT8
+artifacts evaluated against their five float sources, plus a ten-artifact
+min--max-observer arm. The evaluation protocol is corrected relative to the
+earlier revision: split-role provenance masks remove context-only targets,
+a gap-fill mask removes windows touched by interpolation of missing
+readings, and held-out-participant evaluation is separated from temporal
+evaluation on training participants. This paper reports:
 \begin{itemize}
-    \item a segment-aware construction of 12-sample CGM windows and
-    future-derived, five-class 15-minute trend labels;
-    \item matched evaluation of PyTorch, float LiteRT, and static INT8 LiteRT
-    artifacts, showing the opposing changes in accuracy and directional
-    recall on the same aggregate test frame;
-    \item cross-runtime golden-vector tests and physical-device latency
-    observations for Android (Kotlin) and iOS (Swift) \texttt{CompiledModel}
-    implementations that run the same model files; and
-    \item a provenance audit of window splits and calibration inputs, which
-    traces the INT8 input range to a single participant's data, and the
-    comparisons needed to test whether that range explains the recall loss.
+    \item a corrected, provenance-masked evaluation protocol for
+    GlucoBench-formatted CGM windows, with eligible-window and class-support
+    audits published alongside the code;
+    \item a controlled answer to the coverage question: randomizing a
+    200-window calibration selection recovers all of the directional recall
+    the default sequential selection loses (13.4 points, 95\% CI
+    10.3--16.9), while range-aware stratification, a five-fold budget, and
+    an observer change add nothing measurable;
+    \item mechanism controls that attribute the sequential-arm loss to
+    input-range clipping rather than input-grid resolution or internal
+    quantization; and
+    \item deployment-cost accounting: every INT8 artifact has identical
+    size, sampler and export times are fractions of a second, so the
+    corrected calibration is free at deployment time. Prior
+    single-device latency observations are retained as historical context.
 \end{itemize}
 
 All source code, tests, synthetic replay data, and shipped model artifacts are
@@ -192,7 +200,7 @@ Martinsson et al. \cite{martinsson2020variance} & Value + variance & 30/60 min &
 Li et al. \cite{li2020crnn} & Value & 30/60 min & CGM, insulin, meals & 10 real + 10 simulated & Android timing \\
 GlucoBench \cite{sergazinov2024glucobench} & Value trajectory & 60 min & Dataset-dependent & Five public datasets & None reported \\
 Ghimire et al. \cite{ghimire2024generalize} & Value & 30/60 min & CGM & Four datasets & None reported \\
-\project (this work) & Trend class & 15 min & CGM & Weinstock aggregate test & Android/iOS replay timing \\
+\project (this work) & Trend class & 15 min & CGM & Weinstock held-out + temporal & Android/iOS replay timing \\
 \bottomrule
 \end{tabular}%
 }
@@ -298,8 +306,9 @@ occur among the inputs or at samples used to form targets. The configured
 split holds out 10\% of participants (20 people) for
 an out-of-distribution component and forms temporal validation and test
 components from the remaining participants. The formatter combines the test
-components into one frame. We report metrics for that aggregate without
-separate in- and out-of-distribution results.
+components into one frame; Section~\ref{sec:eligible} separates them again
+by row ownership, and all results report the held-out-participant and
+temporal components separately.
 
 Windows are generated independently within each $(\texttt{id},
 \texttt{id\_segment})$ group and ordered by time. A window is emitted only when
@@ -343,6 +352,53 @@ Total                   & 424,462 & 127,165 \\
 \end{tabular}
 \end{table}
 
+\subsection{Split roles, observation mask, and eligible windows}
+\label{sec:eligible}
+
+GlucoBench repeats rows from a preceding split at the top of validation and
+in-distribution test frames so sequence models can form initial histories.
+The earlier revision of this work let every prefix row start a window, so
+13.6\% of aggregate test windows scored targets in validation-owned rows and
+35.1\% of validation windows duplicated training windows
+(Table~\ref{tab:provenance}). The corrected protocol assigns every formatter
+row to the earliest split that lists it and scores a window in a split only
+when its anchor (last input sample) and all three forecast rows are owned by
+that split. Earlier-split readings may serve as causal history among the
+inputs. Scored $(\text{participant}, \text{segment}, \text{target time})$
+keys are asserted disjoint across splits.
+
+Because the formatter interpolates before windowing, a second mask removes
+gap filling: a grid value is retained only if it lies on or between two
+original readings at most 7.5 minutes apart. An audit showed that requiring
+exact coincidence with an original reading would discard roughly 40\% of
+windows for grid drift unrelated to missing data, so the gap-fill rule is
+the primary mask and exact coincidence is a sensitivity tier. A window is
+eligible when its 12 inputs and future endpoint are all gap-free; the two
+intermediate forecast steps are not label inputs and are not masked.
+Table~\ref{tab:eligible} shows the result. Eligible training windows retain
+all five classes with at least 10,330 examples
+(\texttt{falling\_fast}); the calibration pool keeps 127 of 172 development
+participants.
+
+\begin{table}[t]
+\centering
+\caption{Eligible windows under the corrected protocol. Scored removes
+context-only and boundary-crossing targets; eligible additionally removes
+windows touched by gap filling.}
+\label{tab:eligible}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Component & Frame & Scored & Eligible & Part. \\
+\midrule
+Training & 424,462 & 424,462 & 328,575 & 172 \\
+Calibration pool & 55,289 & 35,560 & 27,109 & 127 \\
+Temporal test & \multirow{2}{*}{127,165} & 52,540 & 37,361 & 166 \\
+Held-out test &  & 57,068 & 46,376 & 20 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Model and training}
 
 The \texttt{TrendCNN} accepts tensors of shape $(B,1,12)$. It applies a
@@ -352,15 +408,26 @@ and a 36-to-5 linear head. Both convolutions use kernel size 3, stride 1, and
 padding 1. The network contains 2,909 trainable parameters.
 
 Training uses inverse-frequency class-weighted cross-entropy, batch size 64,
-and Adam with learning rate $10^{-3}$ \cite{kingma2015adam}. The artifact used
-for conversion was trained for 20 epochs with PyTorch seed 0
-\cite{paszke2019pytorch}. Validation loss was observed after every epoch; there
-was no early stopping or test-time selection. Classification reports were
-computed with scikit-learn \cite{pedregosa2011scikit}. Because the test
-distribution is dominated by \texttt{stable}, macro-averaged recall is the
-primary aggregate metric. For single-label multiclass prediction it is the mean
-of the five per-class recalls and is equivalent to balanced accuracy
-\cite{brodersen2010balanced}.
+and Adam with learning rate $10^{-3}$ for 20 epochs
+\cite{kingma2015adam,paszke2019pytorch}. The study trains five checkpoints
+with seeds 0--4 on the eligible windows of Section~\ref{sec:eligible}; the
+fixed split does not change with the training seed. Validation loss was
+observed after every epoch; there was no early stopping or test-time
+selection. Classification metrics were computed with scikit-learn and the
+study's own confusion-count code \cite{pedregosa2011scikit}. Because the
+test distribution is dominated by \texttt{stable}, the primary summary is
+the unweighted mean recall of the four directional classes (minority macro
+recall); five-class macro recall, equivalent to balanced accuracy, is also
+reported \cite{brodersen2010balanced}.
+
+Two input-dependent baselines use the same eligible windows. The recent-slope
+baseline maps $(g_t - g_{t-15})/15$, computed from the inputs alone, through
+the same five thresholds. The logistic-regression baseline is a multinomial
+model on the 12 readings with training-only standardization, balanced class
+weights, and fixed $C=1$; it converged. The constant-\texttt{stable}
+classifier shows the effect of prevalence. The shipped application artifact
+(seed 0, historical protocol) is unchanged; no new artifact replaces it in
+the applications.
 
 \begin{figure*}[t]
 \centering
@@ -390,7 +457,9 @@ committed to the Android and iOS applications.}
 
 \section{Conversion and Deployment}
 
-The seed-0 checkpoint was converted with LiteRT Torch. Float conversion uses a
+\subsection{Shipped artifacts (historical protocol)}
+
+The shipped application checkpoint was converted with LiteRT Torch. Float conversion uses a
 fixed $(1,1,12)$ input signature. INT8 conversion uses PyTorch 2 Export (PT2E)
 with LiteRT Torch's \texttt{get\_symmetric\_quantization\_config} helper
 (\texttt{is\_per\_channel=True}, \texttt{is\_dynamic=False}). Despite the
@@ -405,6 +474,41 @@ participant. The converted model's input scale is 0.9408~\mgdl\ per code with
 zero point $-128$, so its representable input range is 0--239.9~\mgdl. The
 range starts at zero because the observer always includes zero, which leaves
 the codes below the lowest CGM reading unused.
+
+\subsection{Calibration experiment design}
+\label{sec:design}
+
+The study freezes the checkpoint, quantizer, and conversion pipeline and
+varies only which validation windows calibrate the histogram observer. The
+calibration pool is the 27,109 eligible validation windows; no sampler
+reads future labels, and selection code is tested to be invariant under
+label shuffling. Four strategies are compared. \emph{Sequential} takes the
+first windows in deterministic (participant, segment, time) order --- the
+toolchain-default pattern that produced the shipped artifact.
+\emph{Uniform random} is a seeded permutation of the pool.
+\emph{Participant-balanced random} fixes a shuffled participant order per
+draw and cycles it round-robin, taking one window from a fixed
+per-participant permutation each visit and skipping exhausted participants.
+\emph{Participant-balanced range coverage} reuses exactly the same
+participant allocation but, within each participant, cycles through
+low/middle/high range cells defined by the pool's own 10th and 90th
+percentiles of per-window input minimum and maximum, so it differs from the
+balanced-random arm only in within-participant input-range coverage.
+
+Each strategy is drawn at budgets of 200 and 1,000 windows, with the
+200-window set nested as the first 200 of the 1,000-window ordering.
+Stochastic strategies use three seeded draws (101--103); all selections are
+shared across the five model seeds. This yields 100 INT8 artifacts (5 seeds
+$\times$ [2 sequential + 3 strategies $\times$ 2 budgets $\times$ 3 draws]).
+A mechanism-control arm re-quantizes two cells (sequential-200 and
+range-coverage-200, draw 101) with a min--max activation observer in place
+of the histogram observer, adding 10 artifacts. For every calibration set
+the study records participants, segments, unique input readings, input
+extremes and quantiles, and occupied range cells, because a nominal window
+count can cover few distinct readings; for every artifact it records input
+quantization parameters, size, and SHA-256.
+
+\subsection{Client implementations}
 
 For input scale $s$ and zero point $z$, both clients use the affine form
 \begin{equation}
@@ -450,39 +554,61 @@ application code. This guard is weaker than the Android manifest check.
 
 \section{Experimental Protocol}
 
-The aggregate test frame combines temporal and held-out-participant components.
-The implementation did not exclude context-prefix rows from eligible targets;
-Section~\ref{sec:provenance} quantifies the resulting overlap, which involves
-validation rows but no training rows. The metrics therefore describe the
-shipped model under this protocol rather than separate temporal and
-participant-level generalization.
+Evaluation uses two disjoint components from Section~\ref{sec:eligible}:
+the 46,376 eligible windows of the 20 held-out participants (primary) and
+the 37,361 eligible temporal windows of 166 training participants
+(secondary). They are never concatenated. The protocol --- hypotheses,
+samplers, budgets, endpoint, bootstrap, and missing-class rules --- was
+frozen and committed before any held-out label was read, in
+\texttt{paper/results/} \texttt{calibration-coverage/protocol.json}. Because an
+earlier revision of this work evaluated on an overlapping aggregate frame
+and the five-class decision was informed by a historical test run, the
+study is a locked, corrected reanalysis of previously touched data, not a
+fresh test set.
 
-A provenance audit (\texttt{experiments/split\_audit.py}) maps every window to
-the formatter rows it uses and assigns each row to the earliest split that
-lists it, because GlucoBench repeats rows from a preceding split as context.
-It reads row identities and timestamps for all splits but glucose values only
-from training and validation rows; it does not read labels, held-out glucose
-values, or predictions. It also records the composition of the calibration
-set and the INT8 model's input quantization parameters.
+A provenance audit (\texttt{experiments/split\_audit.py}) maps every window
+to the formatter rows it uses and assigns each row to the earliest split
+that lists it. It reads row identities and timestamps for all splits but
+glucose values only from training and validation rows. It also records the
+composition of the shipped calibration set and the shipped INT8 model's
+input quantization parameters.
 
-The same 127,165 aggregate test windows and labels were passed through the
-PyTorch checkpoint, float LiteRT model, and INT8 LiteRT model. Accuracy,
-per-class recall, and macro recall were computed from each prediction set. A
-constant-\texttt{stable} classifier is included to show the effect of class
-prevalence. If $n_c$ is class support, $N=\sum_c n_c$, and $R_c$ is class
-recall, then
+If $n_c$ is class support, $N=\sum_c n_c$, and $R_c$ is class recall, then
 \begin{equation}
     A=\sum_{c=1}^{5}\frac{n_c}{N}R_c,
-    \qquad R_{\mathrm{macro}}=\frac{1}{5}\sum_{c=1}^{5}R_c.
+    \qquad R_{\mathrm{macro}}=\frac{1}{5}\sum_{c=1}^{5}R_c,
 \end{equation}
-We also summarize the four directional classes, defined here as all classes
-except \texttt{stable}, by their unweighted mean recall. This descriptive
-summary and the accuracy decomposition below use the existing rounded
-per-class reports. Neither required a new training or evaluation run. All
-differences refer to the same aggregate windows; no confidence intervals or
-significance tests were calculated.
+and the primary endpoint is the unweighted mean recall of the four
+directional classes. The prespecified primary contrast is range-coverage
+versus participant-balanced random at budget 200, which isolates
+within-participant input-range coverage from participant representation.
+Secondary contrasts are range coverage versus uniform random, 1,000 versus
+200 within each strategy, and uniform random versus sequential at each
+budget. A recall is undefined on zero support and never replaced by zero.
 
-File size is the exact serialized artifact size. Device latency is measured
+Uncertainty comes from a paired participant-cluster bootstrap: 2,000 draws
+with a fixed analysis seed resample participants with replacement, keep
+every selected participant's complete windows, recompute each arm's
+confusion counts, and average the paired differences over the five model
+seeds and three calibration draws inside each bootstrap draw. Percentile
+95\% intervals are conditional on the fitted models and calibration sets.
+Overlapping windows are never resampled individually. If more than 5\% of
+draws have an undefined endpoint, the interval is omitted.
+
+Two input-grid controls separate mechanisms. The float-QDQ control feeds
+each INT8 artifact's quantize--dequantize image of the inputs --- using
+that artifact's own scale and zero point --- through the float model, which
+measures the input-grid intervention alone. The clip-only control clips
+inputs to the artifact's representable range without re-gridding, which
+separates range truncation from input resolution. Clipping is counted with
+the actual quantization operation (round half-to-even, then saturate), per
+input slot and per window, with true-class breakdowns on the evaluation
+components only. These comparisons describe the measured error components;
+they are not an additive causal decomposition of every error.
+
+File size is the exact serialized artifact size. The device observations
+below predate this study and describe the shipped artifacts only; none of
+the 110 new artifacts has been device-timed. Device latency is measured
 inside the application's \texttt{classify} method with
 \texttt{System.nanoTime}; it includes buffer writes, input quantization when
 needed, model execution, and output reading/dequantization. The timer stops
@@ -537,7 +663,8 @@ calibration input, 240.0~\mgdl, matches the upper end of the INT8 input range,
 239.9~\mgdl. In development data, 24.4\% of training windows and 26.3\% of
 validation windows contain at least one reading above that range.
 Figure~\ref{fig:range} shows the resulting ceiling against the development
-inputs.
+inputs. These historical facts motivated the controlled study; the
+remaining subsections report its results.
 
 \begin{figure}[t]
 \centering
@@ -593,77 +720,118 @@ INT8 input range & \multicolumn{2}{r}{0--239.9 \mgdl} \\
 \end{tabular}
 \end{table}
 
-\subsection{Predictive performance}
+\subsection{Coverage manipulation}
 
-Table~\ref{tab:modelsummary} shows that float LiteRT preserved the checkpoint's
-reported classification metrics. The constant majority-class baseline reaches
-0.7549 accuracy, higher than either learned model, but its macro recall is only
-0.2000. Accuracy alone would therefore favor a model that never predicts a
-directional class.
-
-INT8 accuracy increased by 6.82 percentage points relative to float, while
-macro recall decreased by 9.25 points. Table~\ref{tab:recall} and
-Figure~\ref{fig:recall} show where the
-change occurred: recall improved only for \texttt{stable}. It fell for every
-minority class. The largest loss was in \texttt{falling\_fast}, whose recall
-fell from 0.5119 to 0.1907, a 62.7\% relative reduction. Mean directional
-recall fell from 0.5019 to 0.3537, a 14.82-percentage-point decrease derived
-from the rounded per-class values.
-
-Weighting each recall change by its class support explains the accuracy gain.
-This calculation does not require predicted class frequencies. With the recorded supports,
-the stable-class recall gain contributes approximately $+9.84$ percentage
-points to accuracy; the four directional losses contribute $-3.03$ points
-in total. Summing before rounding yields the reported $+6.82$-point change.
-The reported recalls are not enough to reconstruct the full confusion matrix
-or predicted class proportions.
+Table~\ref{tab:coverage} shows that the sampling interventions changed
+measured coverage, not just the strategy label. The sequential-200 set
+draws from 2 of 127 pool participants and 224 unique readings with a
+maximum of 251~\mgdl; every randomized 200-window set covers 96--127
+participants, roughly 2,300 unique readings, and the pool maximum of
+401~\mgdl. The resulting INT8 input ranges split accordingly: 0--250.9
+(scale 0.98~\mgdl\ per code) for sequential-200 against 0--400.8 (scale
+1.57) for the randomized arms --- the price of the wider range is a 60\%
+coarser input grid. Sequential at budget 1,000 reaches 6 participants,
+1,180 readings, and the full range.
 
 \begin{table}[t]
 \centering
-\caption{Aggregate test metrics. PyTorch and float LiteRT have identical
-reported values.}
-\label{tab:modelsummary}
-\small
-\begin{tabular}{lcc}
+\caption{Measured coverage of the 200-window calibration sets (draw 101)
+and the resulting INT8 input range. The pool holds 27,109 eligible windows
+from 127 participants, range 39--401~\mgdl.}
+\label{tab:coverage}
+\footnotesize
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
-Model & Accuracy & Macro recall \\
+Strategy (200) & Part. & Readings & Max & INT8 range \\
 \midrule
-Constant \texttt{stable} & 0.7549 & 0.2000 \\
-PyTorch checkpoint       & 0.5184 & 0.5060 \\
-Float LiteRT             & 0.5184 & 0.5060 \\
-INT8 LiteRT              & 0.5866 & 0.4135 \\
+Sequential & 2 & 224 & 251 & 0--250.9 \\
+Uniform random & 96 & 2,300 & 401 & 0--400.8 \\
+Balanced random & 127 & 2,359 & 401 & 0--400.8 \\
+Range coverage & 127 & 2,358 & 401 & 0--400.8 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+\subsection{Calibration effects on directional recall}
+\label{sec:maineffects}
+
+Table~\ref{tab:calibmain} and Figure~\ref{fig:recall} give the main result
+on the held-out-participant component. Float LiteRT is prediction-identical
+to its PyTorch checkpoint at every seed. Quantized with the sequential-200
+calibration, mean directional recall drops from 0.487 to 0.354 while
+accuracy \emph{rises} from 0.507 to 0.570 --- the same accuracy illusion
+the shipped artifact showed, now reproduced under the corrected protocol.
+Quantized with any randomized 200-window selection, INT8 matches float to
+the third decimal (0.487). \texttt{falling\_fast} is the most sensitive
+class: 0.550 float, 0.236 under sequential-200, 0.547 under uniform-200.
+
+Table~\ref{tab:contrasts} reports the prespecified contrasts. The primary
+contrast --- range coverage versus participant-balanced random at 200 ---
+is $+0.06$ percentage points (95\% CI $-0.02$ to $+0.13$): once participant
+allocation is randomized, deliberately spreading selections across input-range
+cells adds nothing measurable. Uniform random versus sequential at 200 is
+$+13.38$ points (CI $+10.29$ to $+16.88$). Increasing any randomized
+strategy's budget from 200 to 1,000 changes recall by at most $+0.08$
+points, and sequential itself recovers fully at 1,000, where its window
+span finally reaches the full input range. The min--max observer arm is
+indistinguishable from the histogram observer given the same windows
+(0.354 vs.\ 0.354 sequential; 0.488 vs.\ 0.487 range coverage). The
+temporal component mirrors every pattern with a $+12.43$-point
+sequential effect.
+
 \begin{table}[t]
 \centering
-\caption{Per-class recall before and after static INT8 quantization.}
-\label{tab:recall}
-\small
-\begin{tabular}{lrrr}
+\caption{Held-out-participant metrics, averaged over five training seeds
+(and three draws for stochastic strategies). Budget 1,000 in parentheses.}
+\label{tab:calibmain}
+\footnotesize
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lccc@{}}
 \toprule
-Class & Float & INT8 & Change \\
+Model & Accuracy & Macro & Directional \\
 \midrule
-\texttt{falling\_fast} & 0.5119 & 0.1907 & $-0.3212$ \\
-\texttt{falling}       & 0.5484 & 0.4306 & $-0.1178$ \\
-\texttt{stable}        & 0.5225 & 0.6529 & $+0.1304$ \\
-\texttt{rising}        & 0.4761 & 0.3845 & $-0.0916$ \\
-\texttt{rising\_fast} & 0.4712 & 0.4090 & $-0.0622$ \\
-\midrule
-Directional mean & 0.5019 & 0.3537 & $-0.1482$ \\
+Float LiteRT ($=$ PyTorch) & 0.507 & 0.494 & 0.487 \\
+INT8, sequential & 0.570 (0.499) & 0.412 (0.492) & 0.354 (0.487) \\
+INT8, uniform random & 0.496 (0.497) & 0.492 (0.492) & 0.487 (0.488) \\
+INT8, balanced random & 0.497 (0.497) & 0.491 (0.492) & 0.487 (0.488) \\
+INT8, range coverage & 0.497 (0.496) & 0.492 (0.492) & 0.487 (0.488) \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Prespecified contrasts in mean directional recall (percentage
+points), paired participant-cluster bootstrap, 2,000 draws. No draw had an
+undefined endpoint.}
+\label{tab:contrasts}
+\footnotesize
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Contrast & Held-out & Temporal \\
+\midrule
+\emph{Primary:} range vs.\ balanced, 200 & $+0.06$ {\tiny[$-0.02,+0.13$]} & $+0.04$ {\tiny[$-0.04,+0.13$]} \\
+Range vs.\ uniform, 200 & $+0.01$ {\tiny[$-0.05,+0.07$]} & $+0.02$ {\tiny[$-0.07,+0.10$]} \\
+Uniform vs.\ sequential, 200 & $+13.38$ {\tiny[$+10.29,+16.88$]} & $+12.43$ {\tiny[$+10.28,+14.43$]} \\
+Uniform vs.\ sequential, 1,000 & $+0.05$ {\tiny[$-0.05,+0.15$]} & $+0.00$ {\tiny[$-0.12,+0.12$]} \\
+Uniform: 1,000 vs.\ 200 & $+0.02$ {\tiny[$-0.07,+0.10$]} & $-0.03$ {\tiny[$-0.12,+0.06$]} \\
+Balanced: 1,000 vs.\ 200 & $+0.08$ {\tiny[$+0.02,+0.15$]} & $+0.04$ {\tiny[$-0.05,+0.12$]} \\
+Range: 1,000 vs.\ 200 & $+0.03$ {\tiny[$-0.09,+0.16$]} & $-0.01$ {\tiny[$-0.11,+0.09$]} \\
+\bottomrule
+\end{tabular}%
+}
 \end{table}
 
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    ybar, bar width=6pt,
+    ybar, bar width=4.4pt,
     width=\columnwidth, height=5.4cm,
-    ymin=0, ymax=0.72,
-    ylabel={Recall}, ylabel near ticks,
+    ymin=0, ymax=0.74,
+    ylabel={Held-out recall}, ylabel near ticks,
     xtick={1,2,3,4,5,6.45},
     xticklabels={{falling fast},{falling},{stable},{rising},{rising fast},{directional mean}},
     x tick label style={font=\scriptsize, rotate=24, anchor=north east},
@@ -676,43 +844,115 @@ Directional mean & 0.5019 & 0.3537 & $-0.1482$ \\
     legend cell align=left,
     enlarge x limits=0.09,
 ]
-\addplot[draw=black!70, fill=black!18] coordinates
-  {(1,0.5119) (2,0.5484) (3,0.5225) (4,0.4761) (5,0.4712) (6.45,0.5019)};
-\addplot[draw=black!90, fill=black!65] coordinates
-  {(1,0.1907) (2,0.4306) (3,0.6529) (4,0.3845) (5,0.4090) (6.45,0.3537)};
-\legend{Float LiteRT, INT8 LiteRT}
+\addplot[draw=black!70, fill=black!15] coordinates
+  {(1,0.550) (2,0.441) (3,0.524) (4,0.402) (5,0.555) (6.45,0.487)};
+\addplot[draw=black, fill=black!75] coordinates
+  {(1,0.236) (2,0.383) (3,0.648) (4,0.339) (5,0.456) (6.45,0.354)};
+\addplot[draw=black!80, pattern=north east lines, pattern color=black!60] coordinates
+  {(1,0.547) (2,0.449) (3,0.509) (4,0.402) (5,0.551) (6.45,0.487)};
+\legend{Float, INT8 sequential 200, INT8 uniform 200}
 \end{axis}
 \end{tikzpicture}
-\caption{Per-class test recall before and after static INT8 quantization
-(values in Table~\ref{tab:recall}). Only \texttt{stable} improves; all four
-directional classes lose recall, \texttt{falling\_fast} most.}
+\caption{Per-class held-out recall, mean over five seeds (and three draws
+for the uniform arm). The sequential-200
+calibration collapses \texttt{falling\_fast} and inflates \texttt{stable};
+a uniform random selection of the same size restores the float profile.}
 \label{fig:recall}
 \end{figure}
 
-\subsection{Size, latency, and parity}
+\subsection{Mechanism: clipping, not resolution}
+\label{sec:mechanism}
 
-Table~\ref{tab:deployment} summarizes deployment measurements. INT8 reduced the
-artifact by 5,376 bytes, or 31.0\%. Observed on-device latency did not decrease.
-The unequal Android sample counts prevent a formal comparison there. On the
-iPhone, with 100 inferences per model, INT8 had the higher mean and p95
-latency in both rounds. Two uncontrolled rounds cannot establish a speed
-ordering, but neither phone shows an INT8 speed advantage.
+Table~\ref{tab:mechanism} decomposes the sequential-200 loss with the
+input-grid controls. Feeding the float model the clip-only image of the
+inputs reproduces essentially the entire 13.35-point float-to-INT8
+difference (float$-$clip $13.14$; float$-$QDQ $13.12$), so the coarser
+input grid itself costs nothing measurable and the remaining
+INT8-internal difference is 0.2 points. Under the sequential-200 range, 27.8\% of held-out windows
+have at least one clipped input slot by the rounded-code rule ---
+60.9\% of \texttt{falling\_fast} windows, the class that collapses ---
+against none under the randomized range: 3.5\% of held-out windows
+exceed its real-valued top of 400.8~\mgdl\ at the 401 sensor cap, but
+those readings round into the top code, so no input slot clips. Wider range coverage therefore did not trade recall
+for resolution in this model: the grid-resolution cost of covering
+39--401~\mgdl\ was unmeasurable.
 
-The iPhone's back-to-back benchmark measured mean latencies of
-2.83--2.85~$\mu$s for float and 3.69--3.72~$\mu$s for INT8 across three runs,
-again with INT8 slower. These values are roughly 20--30 times lower than the
-in-app means for the same code. Most of the in-app time therefore comes from
-calling the model once per replay tick rather than from its arithmetic.
+\begin{table}[t]
+\centering
+\caption{Mechanism controls on the held-out component (directional-recall
+differences in percentage points, seed means). QDQ = float model on the
+artifact's quantize--dequantize input grid; clip = float model on inputs
+clipped to the artifact's range without re-gridding. Stochastic arms average all three draws; sequential has one order.}
+\label{tab:mechanism}
+\footnotesize
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Calibration arm & Float$-$clip & Float$-$QDQ & QDQ$-$INT8 \\
+\midrule
+Sequential 200 & $+13.14$ & $+13.12$ & $+0.23$ \\
+Uniform 200 & $+0.01$ & $-0.20$ & $+0.17$ \\
+Range coverage 200 & $+0.01$ & $-0.20$ & $+0.16$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-The July conversion record\footnote{\url{https://github.com/mohamedmenasy/GlucoEdge/blob/513e940/docs/superpowers/specs/2026-07-01-litert-conversion-results.md}}
-reports a test maximum of 401 \mgdl\ and saturation in approximately 28\% of
-test windows. We did not recompute this figure, so that held-out glucose
-values stay unused until a locked re-evaluation;
-Section~\ref{sec:provenance} gives the corresponding development-data rates and
-the origin of the ceiling at 239.9~\mgdl. Test-set clipping counts and class
-breakdowns were not archived. Clipping could contribute to the recall loss,
-but these records cannot quantify its contribution for any class. Clipping prevents integer overflow but cannot recover
-information outside the representable range.
+\subsection{Baselines}
+
+On held-out participants the five-seed float CNN reaches 0.487 directional
+recall against 0.279 for the recent-slope baseline and 0.461 for logistic
+regression on the same 12 readings (Table~\ref{tab:baselines}). The
+constant-\texttt{stable} classifier has the highest accuracy of all
+(0.727) and zero directional recall, which is why accuracy cannot rank
+these models.
+
+\begin{table}[t]
+\centering
+\caption{Held-out baselines. The CNN row is the five-seed float mean;
+baselines are deterministic or single fits.}
+\label{tab:baselines}
+\footnotesize
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Model & Accuracy & Macro & Directional \\
+\midrule
+Constant \texttt{stable} & 0.727 & 0.200 & 0.000 \\
+Recent slope & 0.662 & 0.384 & 0.279 \\
+Logistic regression & 0.405 & 0.451 & 0.461 \\
+TrendCNN (float) & 0.507 & 0.494 & 0.487 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Historical comparison}
+
+The earlier revision reported accuracy 0.5184 and macro recall 0.5060 for
+float and 0.5866/0.4135 for INT8. Those numbers came from a different
+denominator --- the uncorrected aggregate frame, with context-target
+overlap and no gap mask --- and from the shipped sequential calibration,
+so they are not comparable to Table~\ref{tab:calibmain} row by row. The
+qualitative pattern they showed (accuracy up, every directional recall
+down) is exactly what the corrected protocol reproduces for the
+sequential arm.
+
+\subsection{Deployment costs, and historical device observations}
+
+Calibration coverage has no deployment cost in this model. All 100 matrix
+INT8 artifacts serialize to exactly 11,976 bytes regardless of strategy or
+budget (float: 17,352 bytes, a 31.0\% reduction), and all 110 INT8
+artifacts share a single operator inventory, so no graph change is
+attributable to any calibration arm. Offline preparation is
+also negligible: every sampler selects its windows in under 0.03~s, and
+INT8 export averages 0.5~s for a 200-window set and 0.8~s for a
+1,000-window set on the study host. The corrected calibration therefore
+changes nothing the device sees except the two quantization parameters.
+
+Table~\ref{tab:deployment} retains the historical device observations for
+the shipped artifacts; none of the new artifacts has been device-timed, and
+the planned paired-round phone benchmark remains future work. In those
+historical observations neither phone showed an INT8 latency advantage,
+and the iPhone's back-to-back benchmark (means 2.83--2.85~$\mu$s float,
+3.69--3.72~$\mu$s INT8) indicates that per-call overhead, not arithmetic,
+dominates the in-app path.
 
 All three Android instrumentation tests passed on the physical device. The
 \texttt{CompiledModel} path loaded both artifact hashes, matched float logits
@@ -727,9 +967,10 @@ same rounding rule on both sides.
 
 \begin{table}[t]
 \centering
-\caption{Artifact and physical-device observations. Timing ends before
-softmax and class selection. Android sample counts differ by model; iPhone
-ranges span two rounds of 100 inferences per model.}
+\caption{Historical artifact and physical-device observations for the
+shipped models (uncorrected protocol era). Timing ends before softmax and
+class selection. Android sample counts differ by model; iPhone ranges span
+two rounds of 100 inferences per model.}
 \label{tab:deployment}
 \footnotesize
 \begin{tabular}{@{}lrr@{}}
@@ -752,139 +993,106 @@ Golden vectors passed & 20/20 & 20/20 \\
 
 \section{Discussion}
 
-\subsection{Minority-class performance and deployment cost}
-
-INT8 produced a smaller model file and lower recall for every directional
-class. Integer arithmetic often reduces memory and can improve latency for compute-heavy
-networks \cite{jacob2018quantization}; here the network is only 2,909 parameters,
-so fixed invocation and data-movement costs may dominate the measured path.
-The iPhone's back-to-back benchmark supports this: the same calls ran 20--30
-times faster when issued consecutively.
-Mobile acceleration studies and device benchmarks also show why performance
-must be measured for a particular model, runtime, and device
-\cite{lane2016deepx,ignatov2019aibenchmark,banbury2021mlperftiny}. The observed
-storage saving was a 5.25-KiB file reduction.
-
-The choice of metric changes how this trade-off appears. The stable class
-receives approximately three quarters of the weight in accuracy and one fifth
-in macro recall. Averaging only the directional recalls makes the
-14.82-point loss clear. Float better preserves directional performance in
-these results, which is why \project uses it by default. This choice applies
-to the measured models and does not rank quantization methods in general.
-
-The 5.25-KiB saving concerns model storage. We did not measure whether it
-reduced application size or working memory. The phone ran both models at the
-reported latencies. The uncontrolled workloads, and on Android the unequal
-sample counts, prevent a formal speed comparison. Across the two phones,
-which differ in hardware, operating system, and LiteRT version, INT8 was
-never the faster model. Calibration preparation time was also not
-measured.
-
-\subsection{What the calibration evidence identifies}
+\subsection{What nominal sample count hides}
 \label{sec:calibevidence}
 
-The 200 calibration windows were not the small representative subset of
-training or validation data that official guidance recommends for estimating
-tensor ranges \cite{googleRepresentativeData,googleLiteRTQuantization}. They
-cover one participant's 17.5 hours, and the input ceiling matches their
-maximum, below readings found in about a quarter of training windows. Prior PTQ work
-identifies clipping and range estimation as error sources
-\cite{banner2019ptq}, optimizes weight rounding
-\cite{nagel2020adaround}, and improves quantization with small calibration
-sets \cite{hubara2021smallcalibration}. These studies suggest explanations to
-test, but do not identify the main source of error in this CGM model.
+Official guidance asks for a small representative calibration set
+\cite{googleRepresentativeData,googleLiteRTQuantization}, and prior PTQ work
+treats clipping, range estimation, and rounding as the levers
+\cite{banner2019ptq,nagel2020adaround,hubara2021smallcalibration}. This
+study's sharpest observation is that \emph{nominal sample count said
+nothing}: the sequential-200 and uniform-200 sets have identical size and
+differ by 13.4 points of held-out directional recall, while the 200- and
+1,000-window uniform sets differ by nothing. What mattered was measured
+coverage --- participants spanned and, through them, the input range.
+Overlapping sliding windows make this failure easy to produce: the
+toolchain-default pattern of taking the first $N$ windows concentrates an
+entire calibration set inside a few hours of one or two sensors.
 
-Broader range coverage is not guaranteed to improve recall. For a fixed
-integer code range, increasing the represented interval increases the scale
-$s$ and thus the spacing between adjacent representable inputs. Less clipping
-therefore comes at the cost of coarser resolution. The future-derived
-class depends on a difference between two readings; a high absolute glucose
-value does not by itself identify a rapid rise or fall. The aggregate
-saturation figure does not tell us whether clipping occurs more often in
-any particular directional class.
+Once the selection is randomized at all, the refinements evaluated here
+are exhausted. Stratifying by input-range cells on top of participant
+balancing --- the prespecified primary contrast --- moves the endpoint by
+six hundredths of a point. The histogram and min--max observers agree.
+The feared resolution trade-off, where covering 39--401~\mgdl\ coarsens
+the grid by 60\%, costs nothing measurable, consistent with a label that
+depends on the difference between readings rather than their absolute
+code. For this model class, calibration design reduces to one rule:
+do not let contiguous window order pick your calibration data.
 
-A follow-up experiment could compare random calibration selection with
-selection designed to cover the input range, while keeping model weights,
-quantizer, calibration budget, and participant allocation fixed. Selection
-must use development inputs without tuning to test labels or test ranges.
-Passing quantized and then dequantized inputs through the float model would
-measure input-only loss for comparison with full INT8 loss. The remaining
-difference could reflect internal quantization and its interaction with input
-error. Before this comparison, the validation-row targets must be removed
-from the test frame. Evaluation
-should then report each directional recall, paired participant-level
-uncertainty, and clipped-input fractions by class. Device measurements would
-need identical workloads and controlled repeated runs. These experiments
-remain to be done.
+The mechanism controls localize the sequential-arm error at the input
+edge: clipping alone reproduces the loss, the quantized grid without
+clipping is harmless, and the INT8 interior contributes a quarter point.
+The class asymmetry follows directly --- 61\% of \texttt{falling\_fast}
+windows contain a reading above the sequential range, since fast falls
+start high. A model that cannot see how high the trajectory started
+cannot recognize a fast fall.
 
-The parity tests check agreement for particular inputs and artifact hashes.
-Unit tests cover exact rounding ties and out-of-range values in the Kotlin
-and Swift quantizers, but model execution has been compared only on the tested vectors.
-Runtime agreement alone cannot
-separate calibration error from other quantization effects. It also does not
-validate the labels, cohort split, probability calibration, clinical safety,
-or usefulness to a person with diabetes.
+\subsection{Scope of the accuracy illusion}
+
+The sequential-arm INT8 model is a worse clinical-shape classifier with
+better accuracy (0.570 vs.\ 0.507): clipping pushes predictions toward
+\texttt{stable}, the class holding three quarters of the weight.
+Any pipeline that gates a quantized model on raw accuracy would have
+promoted the broken artifact. Directional (minority-class) recall, or any
+class-balanced metric, exposes it immediately
+\cite{brodersen2010balanced}. This is the practical reading of the study
+for small imbalanced time-series deployments.
+
+Parity and runtime agreement are necessary but orthogonal checks: the
+Python, Kotlin, and Swift clients agree bit-exactly on dequantized INT8
+outputs for the tested vectors, yet parity says nothing about whether the
+artifact's input range fits the population. Runtime agreement also does
+not validate the labels, cohort split, probability calibration, clinical
+safety, or usefulness to a person with diabetes.
 
 \section{Limitations}
 \label{sec:limitations}
 
 The results should be read with the following limitations in mind.
 \begin{enumerate}
-    \item The deployed checkpoint comes from one seed. Training and implementation
-    choices can affect benchmark results \cite{bouthillier2021variance}, but we
-    did not measure across-seed variability or calculate confidence intervals.
-    We also did not evaluate probability calibration, event-level performance, or
-    input-dependent temporal baselines beyond the constant-\texttt{stable}
-    comparator.
-    \item Stride-one windows are overlapping and statistically dependent, so
-    their totals are not independent event counts
-    \cite{bergmeir2018crossvalidation}. Because GlucoBench interpolates before
-    window construction, only 56.1\% of test windows have all inputs and the
-    target endpoint on original readings, and 76.5\% contain no gap-filled
-    value. Interpolated inputs can depend on later
-    readings, so this retrospective preprocessing may use information that
-    would be unavailable in real time. Results are not stratified by interpolation
-    status.
-    \item GlucoBench adds prefix context to validation and in-distribution test
-    frames so sequence models can form initial histories. The current
-    \project dataset builder lets every prefix row start a window and does
-    not mask context-only targets. As a result, 17,266 test windows (13.6\%)
-    score targets in validation rows, and 19,402 validation windows (35.1\%)
-    repeat training windows (Table~\ref{tab:provenance}). Using earlier
-    readings as inputs can be legitimate. No test target lies in a training
-    row, but scoring context-only targets blurs the temporal boundary between
-    validation and test. A corrected evaluation must mask
-    context-only targets, verify disjoint scored participant/segment/time
-    keys, and report temporal and held-out-participant components separately.
-    \item The aggregate test frame mixes temporal holdouts with participants
-    held out by GlucoBench. The source cohort comprised older adults with
-    long-standing type-1 diabetes and blinded CGM collection
-    \cite{weinstock2016risk}, and no cross-dataset validation was performed.
-    We therefore cannot assess transfer across cohorts and collection pipelines
-    \cite{ghimire2024generalize}. No participant-stratified,
-    demographic, daytime/nighttime, or subgroup results are available.
-    \item The five labels are deterministic transformations of a future CGM
-    point, not expert annotations. Their thresholds simplify heterogeneous
-    commercial trend-arrow conventions. The CGM-only model omits meal, insulin,
-    activity, illness, and other covariates.
-    \item The INT8 calibration set consists of the first 200 validation windows,
-    all from one participant's 17.5 hours, not a randomized or stratified
-    sample. The observed saturation is therefore
-    specific to this conversion protocol. It should not be generalized to INT8.
-    Without comparisons of calibration samplers or budgets, we cannot estimate
-    the effect of coverage, a dose--response relation, or possible recall recovery.
-    \item The phone latency observations use two devices that differ in
-    hardware, operating system, LiteRT version (2.1.0 and 2.3.0), and timer.
-    Android sample counts are unequal. The iPhone counts are equal but cover
-    only two rounds, recorded with a debug build of the application code.
-    Warm-up, temperature, and processor frequency were not controlled, and
-    repeated runs were not analyzed statistically. Calibration time,
-    model-load time, energy, and
-    memory use were not measured. The internal timing excludes softmax and
-    class selection.
-    \item The application replays synthetic or locally extracted historical
-    traces. It does not ingest a live sensor stream and has not undergone
-    prospective, external, usability, or clinical validation.
+    \item This is a locked, corrected reanalysis, not a fresh test. The
+    held-out participants were scored once before under the flawed
+    aggregate protocol, and the five-class decision was informed by a
+    historical test run. The protocol, samplers, and endpoint were frozen
+    before the new held-out labels were read, but prior exposure cannot be
+    undone by re-splitting \cite{kapoor2023leakage}.
+    \item One dataset, one cohort, one architecture, one quantizer. The
+    source cohort comprised older adults with long-standing type-1
+    diabetes and blinded CGM collection \cite{weinstock2016risk}; no
+    cross-dataset validation was performed
+    \cite{ghimire2024generalize}, and the null results for range
+    stratification, budget, and observer are statements about this
+    2,909-parameter CNN with per-tensor affine input quantization, not
+    about PTQ in general. Larger models, other datasets, or other
+    quantizers may behave differently
+    \cite{bouthillier2021variance,hubara2021smallcalibration}.
+    \item Stride-one windows remain overlapping and dependent
+    \cite{bergmeir2018crossvalidation}; uncertainty therefore comes from
+    participant-cluster bootstrap intervals conditional on the fitted
+    models and calibration sets, with model-seed and draw variation
+    averaged inside each bootstrap draw rather than treated as
+    independent participants.
+    \item The gap-fill mask removes windows around missing readings, but
+    the retained grid still contains formatter re-gridding between
+    adjacent readings, and interpolation precedes windowing, so
+    retrospective preprocessing may use information unavailable in real
+    time. The protocol froze three sensitivity tiers (exact-observed
+    windows; gap-filled inputs with gap-free endpoints; any gap-filled
+    endpoint); none of the three has been evaluated, so results for
+    windows outside the primary mask are unreported, not implied.
+    \item The five labels are deterministic transformations of a future
+    CGM point, not expert annotations, and the CGM-only model omits meal,
+    insulin, activity, illness, and other covariates. Probability
+    calibration and event-level performance were not evaluated.
+    \item None of the 110 new artifacts has been device-timed. The phone
+    observations in Table~\ref{tab:deployment} are historical, from two
+    devices differing in hardware, OS, LiteRT version, and timer, with
+    unequal Android sample counts and uncontrolled conditions. Energy and
+    memory were not measured.
+    \item The application replays synthetic or locally extracted
+    historical traces. It does not ingest a live sensor stream and has
+    not undergone prospective, external, usability, or clinical
+    validation.
 \end{enumerate}
 
 \section{Reproducibility and Ethics}
@@ -931,6 +1139,25 @@ data. Its aggregate output,
 including the GlucoBench commit and a SHA-256 hash of the Weinstock data file,
 is versioned as \texttt{paper/results/split\_audit.json}.
 
+The calibration-coverage study itself is versioned under
+\texttt{paper/results/calibration-coverage/}: the frozen protocol
+(\texttt{protocol.json}), the sanitized study environment
+(\texttt{environment.txt}; a single virtual environment with the
+conversion pins, PyTorch 2.12.1, and NumPy 2.5.3, reconciling the
+previously recorded drift), the eligibility audit
+(\texttt{data\_availability.json}), the complete aggregate results
+with contrasts, intervals, coverage, and all 100 planned cells
+(\texttt{aggregate\_r1.json}), and the artifact summary --- operator
+inventories, sizes, and distinct-hash counts
+(\texttt{artifacts\_summary.json}); per-artifact SHA-256 hashes live in
+the local run manifest. Checkpoints, selected window keys,
+per-window predictions, and participant-level summaries remain local and
+are regenerable from the committed runner
+(\texttt{experiments/calibration\_coverage.py}) with GlucoBench cloned;
+every published number regenerates from the cached predictions via one
+analysis command. The shipped application artifacts and their hashes are
+unchanged by this study.
+
 \subsection{Data availability and research-use scope}
 
 The CGM data are public research data accessed through GlucoBench under the
@@ -951,30 +1178,36 @@ We do not claim an institutional ethics determination for this work.
 OpenAI Codex assisted with language editing during the September manuscript
 revision, checked sources, and compared claims with repository code and
 recorded results. Claude Code (Anthropic) wrote the provenance audit script
-and the Kotlin rounding fix, implemented the iOS client, and drafted the
-corresponding manuscript edits.
+and the Kotlin rounding fix, implemented the iOS client, implemented and
+executed the calibration-coverage study pipeline under the frozen protocol,
+and drafted the corresponding manuscript revisions.
 The draft requires author review.
 Funding, competing interests, and CRediT author contributions remain to be
 confirmed by the author before submission.
 
 \section{Conclusion}
 
-\project follows a compact five-class CGM trend model from segment-aware
-window construction to offline execution on Android and iOS. The implementation
-documents fixed-shape conversion, integer input handling, artifact provenance,
-and cross-runtime parity. Under the recorded calibration protocol, INT8
-saved 5.25 KiB while reducing five-class macro recall by 9.25 percentage
-points and mean directional recall by 14.82 points. Its higher accuracy
-comes from improved stable-class recall and that class's large share of the
-test windows. The INT8 input range was derived from calibration windows drawn
-from a single participant, which makes calibration coverage the natural next
-variable to manipulate. Neither phone showed an INT8 latency advantage,
-including the iPhone, where both models had equal sample counts.
+On a corrected, provenance-masked protocol with five training seeds and
+100 paired INT8 artifacts, calibration-data coverage fully determined
+whether static INT8 quantization damaged this compact CGM trend
+classifier. The toolchain-default sequential selection, whose 200 windows
+span two participants and cap the input range at 251~\mgdl, cost 13.4
+points of held-out directional recall while raising raw accuracy --- an
+illusion a class-balanced metric exposes. Any randomized selection of the
+same 200 windows restored float-level directional recall; range-aware
+stratification, a five-fold budget, and a min--max observer moved it by
+at most eight hundredths of a point; and clip-only controls attributed the loss to input-range
+clipping rather than grid resolution. Every INT8 artifact is
+byte-identical in size and selection takes milliseconds, so the corrected
+calibration is free at deployment time. In this setting, coverage means
+covering participants; sample count, stratification, and observer choice
+were the wrong knobs.
 
-These results provide a baseline for a controlled calibration-coverage study.
-That study needs corrected target boundaries, comparisons of calibration
-selections, repeated seeds, and separate participant-level evaluation.
-External validation would follow. This work remains a research prototype.
+The conclusions are scoped to one cohort, one architecture, and one
+quantizer, on a reanalysis of previously touched data. Device timing of
+the new artifacts under a paired-round protocol, the exact-coincidence
+sensitivity tier, and confirmation on an unused public cohort remain
+future work. \project remains a research prototype, not a medical device.
 
 \bibliographystyle{unsrtnat}
 \renewcommand{\bibfont}{\small}

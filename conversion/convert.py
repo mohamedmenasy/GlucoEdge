@@ -19,7 +19,8 @@ def convert_float(model, sample_input: torch.Tensor, out_path: Path) -> None:
     edge_model.export(str(out_path))
 
 
-def convert_int8(model, sample_input, calibration_inputs, out_path: Path) -> None:
+def convert_int8(model, sample_input, calibration_inputs, out_path: Path,
+                 observer: str = "histogram") -> None:
     import litert_torch
     from litert_torch.quantize.pt2e_quantizer import PT2EQuantizer, get_symmetric_quantization_config
     from litert_torch.quantize.quant_config import QuantConfig
@@ -27,9 +28,22 @@ def convert_int8(model, sample_input, calibration_inputs, out_path: Path) -> Non
 
     exported = torch.export.export(model, (sample_input,)).module()
 
-    quantizer = PT2EQuantizer().set_global(
-        get_symmetric_quantization_config(is_per_channel=True, is_dynamic=False)
-    )
+    config = get_symmetric_quantization_config(is_per_channel=True, is_dynamic=False)
+    if observer == "minmax":
+        # Observer arm (plan Amendment 3): min-max activation ranges in place
+        # of the default histogram observer. get_symmetric_quantization_config
+        # is lru_cached, so swap specs on immutable copies, never in place.
+        from dataclasses import replace
+
+        from torchao.quantization.pt2e.observer import MinMaxObserver
+
+        act = replace(config.input_activation,
+                      observer_or_fake_quant_ctr=MinMaxObserver.with_args(eps=2**-12))
+        config = replace(config, input_activation=act, output_activation=act)
+    elif observer != "histogram":
+        raise ValueError(f"unknown observer {observer!r}")
+
+    quantizer = PT2EQuantizer().set_global(config)
     prepared = prepare_pt2e(exported, quantizer)
 
     for calib_input in calibration_inputs:
@@ -55,7 +69,20 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", choices=["iglu", "weinstock"], required=True)
     parser.add_argument("--classes", choices=["5", "3"], default="5")
+    # Explicit paths so calibration-coverage matrix runs cannot overwrite
+    # one another (or the historical artifacts). Defaults preserve the
+    # original CLI behavior exactly.
+    parser.add_argument("--checkpoint", type=Path, default=None)
+    parser.add_argument("--float-out", type=Path, default=None)
+    parser.add_argument("--int8-out", type=Path, default=None)
+    parser.add_argument("--calibration-selection", type=Path, default=None,
+                        help="JSON from conversion.calibration.select; its window "
+                             "indices address the validation dataset. Default: the "
+                             "historical first-200 sequential windows.")
     args = parser.parse_args()
+
+    import hashlib
+    import json
 
     from training.dataset import GlucoseTrendDataset
     from training.labeling import FIVE_CLASSES, THREE_CLASSES, THREE_CLASS_MAP
@@ -63,24 +90,42 @@ def main():
 
     results_dir = GLUCOEDGE_ROOT / "results"
     num_classes = 5 if args.classes == "5" else 3
-    checkpoint_path = results_dir / f"{args.dataset}_{args.classes}class_model.pt"
+    checkpoint_path = args.checkpoint or results_dir / f"{args.dataset}_{args.classes}class_model.pt"
 
     model = load_checkpoint(checkpoint_path, num_classes)
     sample_input = torch.zeros(1, 1, 12, dtype=torch.float32)
 
-    float_path = results_dir / "model_float.tflite"
+    float_path = args.float_out or results_dir / "model_float.tflite"
+    float_path.parent.mkdir(parents=True, exist_ok=True)
     convert_float(model, sample_input, float_path)
     print(f"wrote {float_path}")
 
     classes, collapse_map = (FIVE_CLASSES, None) if args.classes == "5" else (THREE_CLASSES, THREE_CLASS_MAP)
     formatter = load_formatter(args.dataset)
     val_ds = GlucoseTrendDataset(formatter.val_data, classes=classes, collapse_map=collapse_map)
-    calibration_inputs = build_calibration_inputs(val_ds)
+    selection = None
+    if args.calibration_selection:
+        selection = json.loads(args.calibration_selection.read_text())
+        calibration_inputs = [val_ds[i][0].unsqueeze(0) for i in selection["indices"]]
+    else:
+        calibration_inputs = build_calibration_inputs(val_ds)
     print(f"calibration windows: {len(calibration_inputs)}")
 
-    int8_path = results_dir / "model_int8.tflite"
+    int8_path = args.int8_out or results_dir / "model_int8.tflite"
+    int8_path.parent.mkdir(parents=True, exist_ok=True)
     convert_int8(model, sample_input, calibration_inputs, int8_path)
     print(f"wrote {int8_path}")
+
+    if selection is not None:
+        meta = {
+            "checkpoint": checkpoint_path.name,
+            "selection": selection,
+            "float_sha256": hashlib.sha256(float_path.read_bytes()).hexdigest(),
+            "int8_sha256": hashlib.sha256(int8_path.read_bytes()).hexdigest(),
+        }
+        meta_path = int8_path.with_suffix(".json")
+        meta_path.write_text(json.dumps(meta, indent=2) + "\n")
+        print(f"wrote {meta_path}")
 
 
 if __name__ == "__main__":

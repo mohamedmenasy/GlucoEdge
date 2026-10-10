@@ -1,0 +1,86 @@
+# Study environment, frozen 2026-10-10 (Task 1).
+# Single venv: conversion/requirements.txt installed first, then root
+# packages (pandas, scikit-learn, PyYAML, pytest) WITHOUT the root torch/numpy
+# pins - torch==2.3.0 and numpy==1.26.4 cannot coexist with litert-torch 0.9.1.
+# Root requirements.txt stays as the CI/pytest environment; this file records
+# the environment that trains, converts, and evaluates the study.
+# python: Python 3.12.12; platform: Darwin arm64
+absl-py==2.5.1
+ai-edge-litert==2.1.5
+ai-edge-quantizer==0.7.0
+annotated-doc==0.0.5
+anyio==4.14.2
+backports.strenum==1.2.8
+certifi==2026.7.22
+charset-normalizer==3.5.2
+click==8.5.0
+cloudpickle==3.1.2
+filelock==4.1.0
+fire==0.7.1
+flatbuffers==25.12.19
+fsspec==2026.9.0
+h11==0.16.0
+hf-xet==1.7.0
+httpcore2==2.13.1
+httpx2==2.13.1
+huggingface_hub==2.2.0
+idna==3.20
+immutabledict==4.2.1
+iniconfig==2.3.1
+jax==0.11.2
+jaxlib==0.11.2
+jaxtyping==0.3.11
+Jinja2==3.1.6
+joblib==1.6.0
+kagglehub==1.0.2
+kagglesdk==0.1.37
+lark==1.3.1
+litert-converter==0.2.0
+litert-lm-builder==0.18.0
+litert-torch==0.9.1
+markdown-it-py==4.2.0
+MarkupSafe==3.0.4
+mdurl==0.1.2
+ml_dtypes==0.6.0
+mpmath==1.3.0
+multipledispatch==1.0.0
+networkx==3.7
+numpy==2.5.3
+opt_einsum==3.4.0
+ordered-set==4.1.0
+packaging==26.3
+pandas==2.2.2
+pluggy==1.6.0
+protobuf==7.36.2
+Pygments==2.21.0
+pytest==9.1.1
+python-dateutil==2.9.0.post0
+pytz==2026.5
+PyYAML==6.0.1
+regex==2026.9.29
+requests==2.34.2
+rich==15.0.0
+safetensors==0.8.0
+scikit-learn==1.4.2
+scipy==1.18.1
+sentencepiece==0.2.2
+setuptools==81.0.0
+shellingham==1.5.4
+six==1.17.0
+sympy==1.14.0
+tabulate==0.10.0
+termcolor==3.3.0
+threadpoolctl==3.7.0
+tokenizers==0.23.3
+tomli==2.5.0
+torch==2.12.1
+torchao==0.17.0
+tqdm==4.70.1
+transformers==5.19.0
+truststore==0.10.4
+typer==0.27.3
+typing_extensions==4.12.2
+tzdata==2026.5
+urllib3==2.8.0
+wadler_lindig==0.1.7
+xdsl==0.28.0

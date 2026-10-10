@@ -20,23 +20,11 @@ from pathlib import Path
 
 import numpy as np
 
+from training.splits import MAX_ADJACENT_GAP, OWNERS, observation_status, row_owner  # noqa: F401
+
 GLUCOEDGE_ROOT = Path(__file__).resolve().parent.parent
 INT8_MODEL = GLUCOEDGE_ROOT / "android" / "app" / "src" / "main" / "assets" / "trend_int8.tflite"
 OUT_PATH = GLUCOEDGE_ROOT / "paper" / "results" / "split_audit.json"
-OWNERS = ("train", "val", "test", "held_out")
-# Minute-rounded readings more than 1.5 sensor intervals apart have at least
-# one missing reading between them.
-MAX_ADJACENT_GAP = np.timedelta64(450, "s")
-
-
-def row_owner(n_rows, train_idx, val_idx, test_idx, held_out_idx):
-    """Split that scores each formatter row. GlucoBench prefixes val/test
-    frames with context rows from the preceding split, so a row listed in
-    several splits belongs to the earliest one."""
-    owner = np.full(n_rows, "", dtype=object)
-    for name, idx in (("held_out", held_out_idx), ("test", test_idx), ("val", val_idx), ("train", train_idx)):
-        owner[np.asarray(idx, dtype=int)] = name
-    return owner
 
 
 def window_provenance(row_ids, owner):
@@ -49,27 +37,6 @@ def window_provenance(row_ids, owner):
         "target_owner": {name: targets.get(name, 0) for name in OWNERS},
         "training_copies": sum(bool((owner[rows] == "train").all()) for rows in row_ids),
     }
-
-
-def observation_status(grid, readings):
-    """Per grid row (by position): is it an original reading, and is it free
-    of gap filling - an original reading, or between two consecutive readings
-    of the same participant at most MAX_ADJACENT_GAP apart? Both frames hold
-    `id` and minute-rounded `time`."""
-    grid = grid.reset_index(drop=True)
-    on_reading = np.zeros(len(grid), dtype=bool)
-    no_gap_fill = np.zeros(len(grid), dtype=bool)
-    reading_times = {pid: np.sort(g["time"].to_numpy()) for pid, g in readings.groupby("id")}
-    for pid, g in grid.groupby("id"):
-        times, t = reading_times[pid], g["time"].to_numpy()
-        pos = np.searchsorted(times, t)  # first reading at or after t
-        nxt = times[np.minimum(pos, len(times) - 1)]
-        prv = times[np.maximum(pos - 1, 0)]
-        hit = (pos < len(times)) & (nxt == t)
-        bracketed = (pos > 0) & (pos < len(times)) & (nxt - prv <= MAX_ADJACENT_GAP)
-        on_reading[g.index] = hit
-        no_gap_fill[g.index] = hit | bracketed
-    return on_reading, no_gap_fill
 
 
 def main():

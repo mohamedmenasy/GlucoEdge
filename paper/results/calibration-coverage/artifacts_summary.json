@@ -1,0 +1,32 @@
+{
+  "generated_by": "artifact manifest pass over run r1 (full manifest local)",
+  "int8_artifacts": 110,
+  "float_artifacts": 5,
+  "int8_distinct_operator_inventories": 1,
+  "int8_operator_inventory": [
+    "ADD",
+    "CONV_2D",
+    "DEPTHWISE_CONV_2D",
+    "DEQUANTIZE",
+    "FULLY_CONNECTED",
+    "MUL",
+    "QUANTIZE",
+    "RESHAPE",
+    "SUM",
+    "TRANSPOSE"
+  ],
+  "float_operator_inventory": [
+    "ADD",
+    "CONV_2D",
+    "DEPTHWISE_CONV_2D",
+    "FULLY_CONNECTED",
+    "RESHAPE",
+    "SUM",
+    "TRANSPOSE"
+  ],
+  "int8_sizes_bytes": [
+    11976
+  ],
+  "int8_distinct_sha256": 110,
+  "float_size_bytes": 17352
+}
