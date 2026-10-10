@@ -1,0 +1,13 @@
+{
+  "study": "delta-encoded inputs (D12)",
+  "dataset": "weinstock",
+  "disclosure": "post-hoc experiment on previously touched held-out data (the main study already read these labels); predictions below were frozen before any delta-model held-out metric was computed",
+  "variants": {"plain": "11 consecutive differences", "anchor": "11 differences + last value / 16.0"},
+  "selections": "reused byte-identically from run r1 (same eligible validation windows; samplers are label-free and representation-independent)",
+  "float_gate": "a variant proceeds to INT8 only if its five-seed held-out directional-recall mean >= 0.482 (absolute baseline 0.487 minus 0.5pp); ties prefer plain",
+  "int8_arms": ["sequential_200_d0", "uniform_random_200_d101", "uniform_random_200_d102", "uniform_random_200_d103"],
+  "prediction": "for a delta-encoded input the uniform-minus-sequential directional-recall difference is NEAR ZERO: 200 sequential windows trivially cover a +/-30 mg/dL delta range",
+  "ship_gate": "float gate passed AND INT8-under-sequential within 0.5pp of the variant's own float",
+  "training_seeds": [0, 1, 2, 3, 4],
+  "bootstrap": {"n_boot": 2000, "seed": 20261010}
+}
