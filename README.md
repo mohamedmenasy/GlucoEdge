@@ -117,8 +117,9 @@ tries to merge that permission in.
   exercises `CompiledModel` — verified 3/3 on a Galaxy S22 Ultra
   (Android 16): float logits within 1e-5, INT8 outputs bit-exact. That
   device run used the pre-study assets; the 2026-10-10 study artifacts
-  pass the same goldens on the iOS simulator suite, with the on-device
-  re-run pending.
+  pass the same goldens on the iOS simulator suite. The Android test
+  device is no longer available, so its record stays historical and the
+  on-device re-run is planned on iOS only.
 
 The app shows measured on-device inference latency; numbers from an
 emulator are labeled as such and are not device measurements.
