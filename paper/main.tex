@@ -8,11 +8,13 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \usepackage{xurl}
 \usepackage{xspace}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage[hidelinks]{hyperref}
-\usetikzlibrary{arrows.meta,positioning}
+\usetikzlibrary{arrows.meta,positioning,patterns}
 
 \newcommand{\mgdl}{\ensuremath{\mathrm{mg/dL}}}
 \newcommand{\project}{\textsc{GlucoEdge}\xspace}
@@ -28,9 +30,9 @@ Independent Researcher\\
 \maketitle
 
 \begin{abstract}
-We study how INT8 quantization changes a compact glucose trend classifier
-and assess whether limited calibration coverage could explain the observed
-errors. \project is an open-source Android and iOS prototype that
+We report what static INT8 quantization did to a compact glucose trend
+classifier and trace the resulting input range back to its calibration
+data. \project is an open-source Android and iOS prototype that
 uses 12 five-minute continuous glucose monitor (CGM) readings to predict one
 of five rate-of-change classes over the next 15 minutes. A 2,909-parameter
 convolutional network was trained
@@ -44,8 +46,9 @@ declined. Their mean fell from 0.5019 to 0.3537. A provenance audit shows
 that the 200 calibration windows came from one participant's 17.5 hours of
 data and that the resulting INT8 input range ends at 239.9 \mgdl, below
 readings in 24.4\% of training windows. Clipping is therefore a plausible
-source of error, but its contribution has not been isolated by comparing
-calibration selections. On a Galaxy S22 Ultra, timed inference-path
+source of error; isolating its contribution requires the controlled
+calibration-coverage comparison this paper specifies but does not run.
+On a Galaxy S22 Ultra, timed inference-path
 mean/p95 latencies were
 0.334/0.540 ms for float ($n=100$) and 0.484/0.665 ms for INT8 ($n=21$),
 excluding softmax and class selection. On an iPhone 18 Pro Max with equal
@@ -54,9 +57,7 @@ for float and 0.101--0.110 ms for INT8, and the same golden vectors passed.
 These uncontrolled observations show no INT8 latency benefit on either phone.
 Context-prefix overlap (13.6\% of test windows
 score targets in validation rows; none score training rows) and test-informed
-class selection also limit the predictive conclusions. These results describe the
-converted models; they do not show whether broader calibration coverage would
-recover minority-class recall. \project is a
+class selection also limit the predictive conclusions. \project is a
 research demonstration, not a medical device or treatment system.
 \end{abstract}
 
@@ -93,15 +94,23 @@ errors:
 accuracy can increase as predictions concentrate on a majority class even while
 minority-class recall declines \cite{brodersen2010balanced}.
 
-The motivating research question is: \emph{How does calibration-data coverage
-affect minority-class performance and deployment cost in compact glucose trend
-classifiers?} Here, coverage refers to the input values and trajectories
-represented during quantizer calibration, not calibration of predicted
-probabilities. We have results from one trained checkpoint, one calibration
-selection, matched float/INT8 evaluations, and one phone, plus an audit of
-window provenance and calibration-set composition. These results show the
-observed trade-off and where the input-range limit came from. They cannot
-establish what would change if calibration coverage alone were varied.
+This paper answers three questions about one such deployment. First, does
+conversion itself change the model? Float LiteRT reproduces the checkpoint's
+reported metrics exactly, and golden-vector tests show that the Python,
+Kotlin, and Swift runtimes agree on the shipped artifacts. Second, what did
+static INT8 quantization under the toolchain's default calibration protocol
+do to the five classes? Accuracy rose while recall fell for every directional
+class --- a change that raw accuracy conceals and macro recall exposes.
+Third, where did the INT8 input range come from? A provenance audit traces it
+to a single participant's 17.5 hours of data, whose maximum set a ceiling
+below readings found in a quarter of training windows. These answers
+motivate, but do not settle, a larger question: \emph{how does
+calibration-data coverage affect minority-class performance and deployment
+cost in compact glucose trend classifiers?} Here, coverage refers to the
+input values and trajectories represented during quantizer calibration, not
+calibration of predicted probabilities. Answering it requires varying
+calibration selection under controls this study did not have;
+Section~\ref{sec:calibevidence} specifies that comparison.
 
 This paper follows the model from public CGM preprocessing through conversion
 to offline replay on Android and iOS. It reports:
@@ -527,6 +536,34 @@ spanning 17.5 hours, with 178 windows repeating training windows. The largest
 calibration input, 240.0~\mgdl, matches the upper end of the INT8 input range,
 239.9~\mgdl. In development data, 24.4\% of training windows and 26.3\% of
 validation windows contain at least one reading above that range.
+Figure~\ref{fig:range} shows the resulting ceiling against the development
+inputs.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[x=0.0152cm]
+\draw[-{Latex[length=1.6mm]}, black!60] (0,0) -- (445,0);
+\foreach \x in {0,100,200,300,400}
+  \draw[black!60] (\x,0) -- (\x,-0.09) node[below, font=\scriptsize] {\x};
+\node[below=0.38cm, font=\scriptsize, black!70] at (215,0) {Input glucose (\mgdl)};
+\draw[dashed, black!80] (239.9,-0.05) -- (239.9,1.95);
+\node[above, font=\scriptsize] at (239.9,1.95) {239.9};
+\draw[fill=black!55, draw=none] (0,0.25) rectangle (239.9,0.72);
+\node[font=\scriptsize, text=white] at (120,0.485) {INT8 representable};
+\draw[pattern=north east lines, pattern color=black!55, draw=none]
+  (239.9,0.25) rectangle (432,0.72);
+\draw[-{Latex[length=1.4mm]}, black!55] (432,0.485) -- (444,0.485);
+\node[font=\scriptsize, fill=white, inner sep=1.5pt] at (338,0.485) {clipped};
+\draw[fill=black] (240,0.95) -- (236.5,1.18) -- (243.5,1.18) -- cycle;
+\node[anchor=south east, align=right, font=\scriptsize] at (236,1.22)
+  {calibration maximum 240.0\\(1 participant, 211 readings, 17.5\,h)};
+\end{tikzpicture}
+\caption{The INT8 input range ends at 239.9~\mgdl, the quantized image of the
+calibration-set maximum. Above that ceiling lie 18.5\% of training readings,
+and 24.4\% of training windows contain at least one such reading
+(validation: 20.5\% and 26.3\%). Inputs there are clipped to 239.9~\mgdl.}
+\label{fig:range}
+\end{figure}
 
 \begin{table}[t]
 \centering
@@ -565,7 +602,8 @@ reported classification metrics. The constant majority-class baseline reaches
 directional class.
 
 INT8 accuracy increased by 6.82 percentage points relative to float, while
-macro recall decreased by 9.25 points. Table~\ref{tab:recall} shows where the
+macro recall decreased by 9.25 points. Table~\ref{tab:recall} and
+Figure~\ref{fig:recall} show where the
 change occurred: recall improved only for \texttt{stable}. It fell for every
 minority class. The largest loss was in \texttt{falling\_fast}, whose recall
 fell from 0.5119 to 0.1907, a 62.7\% relative reduction. Mean directional
@@ -618,6 +656,39 @@ Directional mean & 0.5019 & 0.3537 & $-0.1482$ \\
 \end{tabular}
 \end{table}
 
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    ybar, bar width=6pt,
+    width=\columnwidth, height=5.4cm,
+    ymin=0, ymax=0.72,
+    ylabel={Recall}, ylabel near ticks,
+    xtick={1,2,3,4,5,6.45},
+    xticklabels={{falling fast},{falling},{stable},{rising},{rising fast},{directional mean}},
+    x tick label style={font=\scriptsize, rotate=24, anchor=north east},
+    ytick={0,0.1,0.2,0.3,0.4,0.5,0.6,0.7},
+    yticklabel style={font=\scriptsize},
+    ymajorgrids, major grid style={black!12},
+    axis x line*=bottom, axis y line*=left, axis line style={black!50},
+    legend style={at={(0.02,0.98)}, anchor=north west, font=\scriptsize,
+                  draw=none, fill=none},
+    legend cell align=left,
+    enlarge x limits=0.09,
+]
+\addplot[draw=black!70, fill=black!18] coordinates
+  {(1,0.5119) (2,0.5484) (3,0.5225) (4,0.4761) (5,0.4712) (6.45,0.5019)};
+\addplot[draw=black!90, fill=black!65] coordinates
+  {(1,0.1907) (2,0.4306) (3,0.6529) (4,0.3845) (5,0.4090) (6.45,0.3537)};
+\legend{Float LiteRT, INT8 LiteRT}
+\end{axis}
+\end{tikzpicture}
+\caption{Per-class test recall before and after static INT8 quantization
+(values in Table~\ref{tab:recall}). Only \texttt{stable} improves; all four
+directional classes lose recall, \texttt{falling\_fast} most.}
+\label{fig:recall}
+\end{figure}
+
 \subsection{Size, latency, and parity}
 
 Table~\ref{tab:deployment} summarizes deployment measurements. INT8 reduced the
@@ -652,8 +723,7 @@ bit-exact INT8 outputs. The iPhone run used the half-to-even input rounding
 described above, which the July Android run predates. Python, Kotlin, and
 Swift therefore agreed on the tested vectors. Model outputs may
 still differ on untested inputs, although input quantization now follows the
-same rounding rule on both sides. These tests also cannot establish whether
-calibration caused the predictive loss.
+same rounding rule on both sides.
 
 \begin{table}[t]
 \centering
@@ -708,10 +778,10 @@ reported latencies. The uncontrolled workloads, and on Android the unequal
 sample counts, prevent a formal speed comparison. Across the two phones,
 which differ in hardware, operating system, and LiteRT version, INT8 was
 never the faster model. Calibration preparation time was also not
-measured. The results therefore cannot tell us how changing calibration
-coverage would affect either preparation cost or runtime cost.
+measured.
 
 \subsection{What the calibration evidence identifies}
+\label{sec:calibevidence}
 
 The 200 calibration windows were not the small representative subset of
 training or validation data that official guidance recommends for estimating
@@ -897,12 +967,9 @@ saved 5.25 KiB while reducing five-class macro recall by 9.25 percentage
 points and mean directional recall by 14.82 points. Its higher accuracy
 comes from improved stable-class recall and that class's large share of the
 test windows. The INT8 input range was derived from calibration windows drawn
-from a single participant, which makes calibration coverage worth
-investigating, but this comparison cannot establish whether broader coverage
-would recover recall or how it would affect preparation and deployment cost.
-Neither phone showed an INT8 latency advantage, including the iPhone, where
-both models had equal sample counts. These measurements were not controlled
-benchmarks.
+from a single participant, which makes calibration coverage the natural next
+variable to manipulate. Neither phone showed an INT8 latency advantage,
+including the iPhone, where both models had equal sample counts.
 
 These results provide a baseline for a controlled calibration-coverage study.
 That study needs corrected target boundaries, comparisons of calibration

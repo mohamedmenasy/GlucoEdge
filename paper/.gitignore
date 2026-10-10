@@ -1,0 +1,9 @@
+# LaTeX/Tectonic scratch files. Keep main.pdf and main.bbl as deliverables.
+*.aux
+*.blg
+*.log
+*.out
+*.xdv
+*.synctex.gz
+tmp/
+glucoedge-arxiv-source.zip

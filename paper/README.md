@@ -31,6 +31,15 @@ latency on an iPhone 18 Pro Max (n=100 per model, two rounds), plus a
 back-to-back benchmark that separates per-call overhead from the model's
 arithmetic. No model was retrained, reconverted, or re-evaluated.
 
+An October 2026 strengthening pass reframes the introduction around the
+three questions the recorded evidence answers (conversion parity, the INT8
+class-wise trade-off, and the provenance of the input range), with the
+calibration-coverage question stated as the motivated follow-up. It adds
+two figures built from already-published numbers (per-class recall before
+and after INT8; the INT8 input range against development data) and removes
+caveats that repeated ones already made in the Limitations section. No
+numbers changed.
+
 ## Build
 
 ```bash
@@ -48,7 +57,7 @@ with the LaTeX sources in an arXiv submission.
 - **Author:** Mohamed Menasy
 - **Primary category:** `cs.LG`
 - **Possible cross-lists:** `eess.SP`, `q-bio.QM`
-- **Comments:** 10 pages, 1 figure, 6 tables. Source code and model artifacts are
+- **Comments:** 11 pages, 3 figures, 6 tables. Source code and model artifacts are
   available at <https://github.com/mohamedmenasy/GlucoEdge>.
 
 Before submission, confirm the author name, email, affiliation, category, and
