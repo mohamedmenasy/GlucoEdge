@@ -1,25 +1,39 @@
 # Bundled model provenance
 
-Both models are artifacts of the 2026-10-10 calibration-coverage study
-(run `r1`; protocol frozen at commit d63cc8f, study code merged via PR #11):
-training seed 0 on the corrected eligible-window splits (no-gap-fill mask),
-INT8 calibrated on the study's `uniform_random_200_d101` selection — 200
-uniformly random eligible validation windows, draw seed 101. Reproduce with:
-- `venv/bin/python -m experiments.calibration_coverage train --run-id r1`
-- `venv/bin/python -m experiments.calibration_coverage select --run-id r1`
-- `venv/bin/python -m experiments.calibration_coverage convert --run-id r1`
+Both models are the DELTA-ENCODED (anchor variant) artifacts of the
+2026-10-10 delta-inputs experiment (run `delta-r1`, protocol frozen before
+any metric was read; spec
+docs/superpowers/specs/2026-10-10-second-cohort-and-delta-inputs-design.md):
+training seed 0 on the study's eligible weinstock windows, inputs = 11
+consecutive differences + last reading / 16 (both clients apply this
+transform in `DeltaEncoding` before quantization; golden vectors pin
+Python/Kotlin/Swift to the same bytes). INT8 is calibrated on the study's
+`uniform_random_200_d101` selection. Reproduce with:
+- `venv/bin/python -m experiments.delta_inputs train --run-id delta-r1 --variant anchor`
+- `venv/bin/python -m experiments.delta_inputs convert --run-id delta-r1 --variant anchor`
 
-These are `seed0_float.tflite` and `seed0_int8_uniform_random_200_d101.tflite`
-from that run, copied byte-identically. Held-out-participant metrics
-(paper/results/calibration-coverage/aggregate_r1.json): float macro recall
-0.4884 / directional recall 0.5087; INT8 0.4857 / 0.5069 — the INT8 input
-range now reaches 400.8 mg/dL (the previous sequential calibration capped it
-at 239.9 and cost 13.4 points of held-out directional recall; see the paper).
+Held-out-participant directional recall
+(paper/results/calibration-coverage/delta_inputs_r1.json): float 0.5088,
+INT8 (uniform-200) 0.5092 — above the absolute-input baseline (0.487) —
+and the INT8 input grid is 6.4x finer (scale 0.247 vs 1.572 mg/dL/code),
+which makes quantization nearly calibration-proof: even the
+toolchain-default sequential selection costs only ~0.5 pp here (the frozen
+ship gate passed at 0.4955 vs the 0.5 criterion — a thin margin, stated
+plainly; the shipped INT8 uses the uniform selection, where no gap is
+resolvable).
 
 | file | sha256 | bytes |
 |---|---|---|
-| `trend_float.tflite` | `5a0f0744618b9126634af9d817e7dc171b86392ff22e2a1cd97b19b4cecfd24a` | 17352 |
-| `trend_int8.tflite` | `9f2f26f5da5c2964abe9eaca71626c812d4710de4d698b7d83deee04fc5187a4` | 11976 |
+| `trend_float.tflite` | `c30560f7283e4927a4b63ff0ffdd34f4108e035905b80c4ed4fd01b479dbb07a` | 17352 |
+| `trend_int8.tflite` | `8590a3d25c409a46659cba3dab97f649c54b57061022e01cae0feec2f5366388` | 11976 |
+
+Verification state: simulator suite 51/51 green against these bytes
+(golden parity incl. the Swift delta transform, INT8 bit-exact); the
+on-device parity re-run is PENDING — the iPhone was detached before it
+could run. The previous bundled pair (absolute-input study seed-0,
+shipped earlier on 2026-10-10) WAS device-verified on the iPhone that
+day: float `5a0f0744…`, INT8 `9f2f26f5…` — now historical; see git
+history and the paper.
 
 Golden parity with these exact bytes is green on the iOS simulator suite
 (48/48, INT8 bit-exact) and the goldens pin both sha256s. On-device

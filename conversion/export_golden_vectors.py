@@ -12,6 +12,7 @@ import numpy as np
 
 from conversion.benchmark import _dequantize_output, _quantize_input
 from conversion.synthetic_trace import generate_trace
+from training.deltas import delta_windows
 
 ASSETS = Path("android/app/src/main/assets")
 OUT = Path("android/app/src/androidTest/assets/golden_vectors.json")
@@ -22,9 +23,13 @@ MIN_TOTAL = 16
 
 
 def _run(interpreter, window: np.ndarray) -> np.ndarray:
+    """`window` is ABSOLUTE mg/dL; the same delta encoding the clients apply
+    runs here, so the goldens' `window` field stays absolute and parity
+    exercises each client's own transform."""
     inp = interpreter.get_input_details()[0]
     out = interpreter.get_output_details()[0]
-    interpreter.set_tensor(inp["index"], _quantize_input(window, inp))
+    encoded = delta_windows(window[None, :], anchor=True)[0]
+    interpreter.set_tensor(inp["index"], _quantize_input(encoded, inp))
     interpreter.invoke()
     return interpreter.get_tensor(out["index"])
 

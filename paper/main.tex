@@ -57,8 +57,14 @@ rather than grid resolution, and every INT8 artifact is byte-identical in
 size, so the fix costs nothing at deployment time: calibration coverage
 here means covering participants, not tuning budgets or samplers. The CNN
 outperforms recent-slope and logistic-regression baselines on directional
-recall. Prior single-device latency observations are reported as historical
-context; the new artifacts have not been device-timed. \project is a
+recall. A paired-round benchmark on one phone finds the eight calibration
+arms latency-indistinguishable; the sequential-coverage effect reproduces
+on two further cohorts under prespecified paired predictions, with
+magnitude tracking each cohort's coverage deficit; and re-encoding the
+input as consecutive differences plus a scaled anchor raises float
+directional recall to 0.509 while shrinking the INT8 input grid
+$6.4\times$, leaving quantization nearly calibration-proof --- the
+bundled application models now use this encoding. \project is a
 research demonstration, not a medical device or treatment system.
 \end{abstract}
 
@@ -1079,9 +1085,12 @@ INT8 export averages 0.5~s for a 200-window set and 0.8~s for a
 1,000-window set on the study host. The corrected calibration therefore
 changes nothing the device sees except the two quantization parameters.
 The repository's bundled application models were accordingly replaced
-with the study's seed-0 float artifact and its uniform-200 INT8 artifact;
-both client golden-parity suites pass against the new files bit-exactly
-on the continuous-integration simulators.
+with the study's seed-0 float artifact and its uniform-200 INT8
+artifact, and subsequently with the delta-encoded pair after that
+experiment passed its frozen gates (Table~\ref{tab:delta}); both clients
+apply the same delta transform before quantization, and both
+golden-parity suites pass against the bundled files bit-exactly on the
+continuous-integration simulators.
 
 The prespecified nine-artifact benchmark was then executed on the
 iPhone~18~Pro~Max (iPhone19,3, iOS~27.0.1), the only study device still
@@ -1348,8 +1357,8 @@ are regenerable from the committed runner
 every published number regenerates from the cached predictions via one
 analysis command. After the study's publication within the repository,
 the bundled application artifacts were replaced by its seed-0 float and
-uniform-200 INT8 models, with hashes and provenance recorded in the
-application's model manifest.
+uniform-200 INT8 models, and later by the delta-encoded pair, with
+hashes and provenance recorded in the application's model manifest.
 
 \subsection{Data availability and research-use scope}
 

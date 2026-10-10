@@ -61,8 +61,11 @@ class TrendClassifier private constructor(private val engine: Engine) : Classifi
 
     override fun classify(window: FloatArray): Prediction {
         require(window.size == 12) { "expected a 12-reading window" }
+        // Delta encoding runs before the timed region: the timer's definition
+        // (quantize + run + dequantize, no softmax) is unchanged from the paper.
+        val encoded = DeltaEncoding.encode(window)
         val start = System.nanoTime()
-        val logits = engine.runInference(window)
+        val logits = engine.runInference(encoded)
         val elapsed = System.nanoTime() - start
         val probs = QuantizationMath.softmax(logits)
         val cls = probs.indices.maxBy { probs[it] }
