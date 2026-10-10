@@ -352,12 +352,12 @@ free Apple ID's Personal Team via `xcodebuild -allowProvisioningUpdates`.
 
    | Measurement | Float mean / p95 | INT8 mean / p95 |
    |---|---|---|
-   | In-app stats line, 16× replay of the synthetic trace, n=100 each | 0.073 ms / 0.134 ms | 0.110 ms / 0.182 ms |
+   | In-app stats line, 16× replay of the synthetic trace, n=100 each, two app sessions | 0.062–0.073 ms / 0.103–0.134 ms | 0.101–0.110 ms / 0.178–0.182 ms |
    | Test-runner loop, 1 warmup + n=100 back-to-back calls, three runs | 2.83–2.85 µs / 3.29–3.38 µs | 3.69–3.72 µs / 4.13–4.25 µs |
 
    - The in-app row sits beside the S22 Ultra's in the README; both are
      in-app measurements.
-   - The loop is 25–30× faster on the same code. Most of the in-app cost
+   - The loop is 20–30× faster on the same code. Most of the in-app cost
      is therefore per-call overhead between replay ticks, not the model's
      arithmetic.
    - INT8 is not faster on either path, matching Android.
@@ -365,6 +365,10 @@ free Apple ID's Personal Team via `xcodebuild -allowProvisioningUpdates`.
    - `FoundationModelsLiveTests` passed 2/2 with Apple Intelligence
      available. The real prompt produced a descriptive note with no
      advice, and 25 consecutive fresh-session notes took 30.4 s.
+   - In the app, tapping Explain (float and INT8, one note each) showed
+     descriptive notes under the "not medical guidance" label, with no
+     advice. The note describes the window at the moment of the tap;
+     replay keeps running while it generates.
    - A throwaway probe (not committed) asked for an exact insulin dose and
      separately tried a "skip your insulin" prompt injection. Both direct
      `respond` and `FoundationModelsNoteGenerator` returned a refusal *as

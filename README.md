@@ -192,7 +192,8 @@ toggle and the latency stats line mirror the Android screen.
 
 On-device results (iPhone 18 Pro Max, iOS 27.0.1, Debug build): golden
 parity 4/4, INT8 bit-exact; in-app latency in the table below; live
-Explain tests 2/2 on Apple Intelligence (25 consecutive notes in ~30 s).
+Explain tests 2/2 on Apple Intelligence (25 consecutive notes in ~30 s),
+and tapping Explain in the app produces a descriptive, advice-free note.
 Asked for a dose or to skip insulin, the on-device model declined in its
 own text rather than raising an error, and the app shows that text as the
 note.
@@ -206,8 +207,8 @@ The headline comparison across the three model artifacts, on the full
 | | Size | Latency mean / p95 (Galaxy S22 Ultra) | Latency mean / p95 (iPhone 18 Pro Max) | Accuracy | Macro-avg recall |
 |---|---|---|---|---|---|
 | PyTorch checkpoint | 14.4 KB | — (not deployable) | — | 0.5184 | 0.5060 |
-| Float `.tflite` (shipped default) | 16.95 KB | 0.334 ms / 0.540 ms | 0.073 ms / 0.134 ms | 0.5184 | 0.5060 |
-| INT8 `.tflite` | 11.70 KB | 0.484 ms / 0.665 ms | 0.110 ms / 0.182 ms | 0.5866 | 0.4135 |
+| Float `.tflite` (shipped default) | 16.95 KB | 0.334 ms / 0.540 ms | 0.062–0.073 ms / 0.103–0.134 ms | 0.5184 | 0.5060 |
+| INT8 `.tflite` | 11.70 KB | 0.484 ms / 0.665 ms | 0.101–0.110 ms / 0.178–0.182 ms | 0.5866 | 0.4135 |
 
 Latency is measured in-app on a Samsung Galaxy S22 Ultra (Android 16) via
 the CompiledModel path. The timer covers the Kotlin inference path (buffer
@@ -216,8 +217,8 @@ stops before softmax and class selection; float over a full 100-inference
 rolling window, INT8 over a 21-inference window. The iPhone 18 Pro Max
 (iOS 27.0.1) numbers come from the iOS app's stats line, timing the same
 region (quantize, run, dequantize; no softmax), over 100 inferences for
-**both** models during 16× replay of the synthetic trace. The
-back-to-back test-runner benchmark is 25–30× faster (float 2.85 µs,
+**both** models during 16× replay of the synthetic trace (ranges span two
+app sessions). The back-to-back test-runner benchmark is 20–30× faster (float 2.85 µs,
 INT8 3.7 µs mean, same code, warmed up), so most of the in-app time is
 per-call cost between replay ticks rather than the model's arithmetic. The
 conversion phase's dev-machine CPU proxy reached the same qualitative
@@ -285,8 +286,8 @@ Per the original project plan, in order:
 6. ~~Port the app to iOS with the same model files and parity vectors~~ —
    done, see [iOS app](#ios-app-ios): golden parity 4/4 (INT8 bit-exact)
    on an iPhone 18 Pro Max, the iOS 27 simulator and the `ios` CI job;
-   in-app latency float mean 0.073 ms / INT8 mean 0.110 ms (INT8 again
-   not faster).
+   in-app latency float mean 0.062–0.073 ms / INT8 mean 0.101–0.110 ms
+   (INT8 again not faster).
 
 ~~Optional stretch, once the above works end to end: a fully local
 on-device explanation layer (LiteRT-LM + a small open-weight model) that
