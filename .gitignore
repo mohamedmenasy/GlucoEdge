@@ -29,3 +29,8 @@ venv/
 
 # Local worktrees for isolated feature work
 .worktrees/
+
+# iOS
+ios/Config/Local.xcconfig
+xcuserdata/
+*.xcuserdatad

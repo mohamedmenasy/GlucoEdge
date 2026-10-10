@@ -33,3 +33,24 @@ jobs:
       - name: Build and unit-test the app
         working-directory: android
         run: ./gradlew --no-daemon :app:assembleDebug :app:testDebugUnitTest :app:checkNoInternetPermission :app:checkNativeLibProvenance
+
+  ios:
+    runs-on: macos-26
+    env:
+      # LiteRT's repo keeps Android/Linux prebuilts (unused by its Swift
+      # package) in Git LFS, and SwiftPM's mirror lacks those objects for a
+      # pinned revision, so `git lfs pull` fails. Fetch no LFS objects.
+      GIT_CONFIG_COUNT: "1"
+      GIT_CONFIG_KEY_0: lfs.fetchexclude
+      GIT_CONFIG_VALUE_0: "*"
+    steps:
+      - uses: actions/checkout@v4
+      - name: No-network source guard
+        run: ios/scripts/check_no_network.sh
+      - name: Build and test on simulator
+        run: |
+          xcodebuild test \
+            -project ios/GlucoEdge.xcodeproj \
+            -scheme GlucoEdge \
+            -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+            CODE_SIGNING_ALLOWED=NO
