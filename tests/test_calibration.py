@@ -167,3 +167,13 @@ def test_build_pool_computes_input_extremes_and_window_keys():
     assert list(pool["input_min"]) == [90.0, 80.0]
     assert list(pool["input_max"]) == [120.0, 130.0]
     assert list(pool["participant"]) == ["p1", "p1"]
+
+
+def test_selection_cells_filter_by_strategy_and_budget():
+    from experiments.calibration_coverage import selection_cells
+    cells = selection_cells(strategies=("sequential", "uniform_random"),
+                            budgets=(200,))
+    assert ("sequential", 200, 0) in cells
+    assert ("uniform_random", 200, 101) in cells
+    assert all(b == 200 for _, b, _ in cells)
+    assert not any(s.startswith("participant") for s, _, _ in cells)

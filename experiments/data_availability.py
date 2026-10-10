@@ -46,27 +46,47 @@ def split_summary(ds, owner, split, no_gap_fill, classes=None):
     return summary
 
 
-def load_weinstock_context():
+def cohort_interval(times):
+    """Modal positive spacing of a time array (np.timedelta64[s])."""
+    diffs = np.diff(np.sort(times))
+    diffs = diffs[diffs > np.timedelta64(0, "s")]
+    vals, counts = np.unique(diffs, return_counts=True)
+    return vals[np.argmax(counts)].astype("timedelta64[s]")
+
+
+def load_cohort_context(dataset="weinstock"):
     """Formatter plus the provenance arrays every study stage shares:
-    (formatter, owner, on_reading, no_gap_fill)."""
+    (formatter, owner, on_reading, no_gap_fill). The no-gap-fill threshold
+    scales to 1.5x the cohort's modal grid interval."""
     import pandas as pd
 
     from training.train import GLUCOBENCH_ROOT, load_formatter
 
-    formatter = load_formatter("weinstock")
+    formatter = load_formatter(dataset)
     data = formatter.data
     assert data.index.equals(pd.RangeIndex(len(data))), "row ids must be positions"
     owner = row_owner(len(data), formatter.train_idx, formatter.val_idx,
                       formatter.test_idx, formatter.test_idx_ood)
 
-    csv_path = GLUCOBENCH_ROOT / "raw_data" / "weinstock.csv"
+    csv_path = GLUCOBENCH_ROOT / "raw_data" / f"{dataset}.csv"
     raw = pd.read_csv(csv_path, usecols=["id", "time"])
     raw["time"] = pd.to_datetime(raw["time"]).dt.round("1min")  # the formatter's own rounding
     encoder = formatter.encoders["id"]
     readings = raw[raw["id"].isin(encoder.classes_)].assign(
         id=lambda d: encoder.transform(d["id"]).astype(np.float32))
-    on_reading, no_gap_fill = observation_status(data[["id", "time"]], readings)
+    # Per participant: a global sort would interleave participants and
+    # yield sub-interval diffs. Modal of the per-participant modal intervals.
+    per = np.array([cohort_interval(g.to_numpy())
+                    for _, g in data.groupby("id")["time"] if len(g) > 1])
+    vals, counts = np.unique(per, return_counts=True)
+    max_gap = (1.5 * vals[np.argmax(counts)]).astype("timedelta64[s]")
+    on_reading, no_gap_fill = observation_status(data[["id", "time"]], readings,
+                                                 max_gap=max_gap)
     return formatter, owner, on_reading, no_gap_fill
+
+
+def load_weinstock_context():
+    return load_cohort_context()
 
 
 def main():
