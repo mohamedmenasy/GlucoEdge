@@ -961,6 +961,54 @@ Gap-filled endpoint & 2{,}010 & 0.501 & 0.383 & 0.497 & $+0.113$ $[+0.071, +0.15
 \end{tabular}}
 \end{table}
 
+\subsection{Second-cohort confirmation}
+
+Two further GlucoBench cohorts, untouched by every preceding analysis,
+received a reduced prespecified matrix (five seeds; sequential versus
+uniform random at budget 200; per-cohort protocols frozen before any of
+that cohort's evaluation labels were read). The predictions were paired:
+a positive uniform$-$sequential difference on dubosson (type~1 diabetes,
+nine participants, readings to 400~mg/dL) and a near-zero difference on
+hall (57 mostly non-diabetic participants, maximum 303~mg/dL). Dubosson's
+held-out split is a single participant, so its frozen protocol assigns
+the contrast to the temporal component (six clusters) and reports
+held-out descriptively; hall keeps held-out (six participants) primary.
+
+Both predictions held, and the magnitudes line up with the mechanism
+(Table~\ref{tab:confirmation}): the effect tracks the gap between the
+sequential calibration ceiling and the population range. Weinstock's
+ceiling of 239.9 against a 401 maximum cost 13.4 points; dubosson's 286
+against 400 costs $+2.0$ $[-0.0, +3.1]$; hall's 165 against 303 costs
+$+1.3$ $[-0.1, +3.3]$ on the primary component --- near zero as
+predicted, though hall's better-powered temporal secondary (50
+participants) resolves a small real effect of $+4.3$ $[+1.1, +7.3]$,
+consistent with the thin tail of readings above its sequential ceiling.
+In every cohort the sequential selection again collapsed to two early
+participants, and uniform calibration again sits within about a point of
+the float model. Full per-seed records:
+\texttt{confirmation\_dubosson.json}, \texttt{confirmation\_hall.json}.
+
+\begin{table}[t]
+\centering
+\caption{Second-cohort confirmation (directional recall; five-seed
+means, uniform over three draws). $\Delta$ = uniform$-$sequential paired
+cluster bootstrap; dubosson held-out is one participant and gets no
+interval by its frozen protocol.}
+\label{tab:confirmation}
+\footnotesize
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}llcccc@{}}
+\toprule
+Cohort & Component & Float & Seq.\ 200 & Unif.\ 200 & $\Delta$ [95\% CI] \\
+\midrule
+dubosson & temporal (contrast) & 0.489 & 0.458 & 0.478 & $+0.020$ $[-0.000, +0.031]$ \\
+dubosson & held-out (1 part.) & 0.481 & 0.472 & 0.475 & $+0.003$ (descriptive) \\
+hall & held-out (primary) & 0.393 & 0.375 & 0.388 & $+0.013$ $[-0.001, +0.033]$ \\
+hall & temporal & 0.428 & 0.378 & 0.421 & $+0.043$ $[+0.011, +0.073]$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
 \subsection{Historical comparison}
 
 The earlier revision reported accuracy 0.5184 and macro recall 0.5060 for
@@ -1144,11 +1192,13 @@ The results should be read with the following limitations in mind.
     historical test run. The protocol, samplers, and endpoint were frozen
     before the new held-out labels were read, but prior exposure cannot be
     undone by re-splitting \cite{kapoor2023leakage}.
-    \item One dataset, one cohort, one architecture, one quantizer. The
+    \item One architecture, one quantizer, and one primary cohort. The
     source cohort comprised older adults with long-standing type-1
-    diabetes and blinded CGM collection \cite{weinstock2016risk}; no
-    cross-dataset validation was performed
-    \cite{ghimire2024generalize}, and the null results for range
+    diabetes and blinded CGM collection \cite{weinstock2016risk}. The
+    sequential-versus-uniform effect was confirmed on two further
+    cohorts with prespecified paired predictions
+    (Table~\ref{tab:confirmation}), but all other contrasts remain
+    single-cohort \cite{ghimire2024generalize}, and the null results for range
     stratification, budget, and observer are statements about this
     2,909-parameter CNN with per-tensor affine input quantization, not
     about PTQ in general. Larger models, other datasets, or other
@@ -1249,8 +1299,10 @@ per-window predictions, and participant-level summaries remain local and
 are regenerable from the committed runner
 (\texttt{experiments/calibration\_coverage.py}) with GlucoBench cloned;
 every published number regenerates from the cached predictions via one
-analysis command. The shipped application artifacts and their hashes are
-unchanged by this study.
+analysis command. After the study's publication within the repository,
+the bundled application artifacts were replaced by its seed-0 float and
+uniform-200 INT8 models, with hashes and provenance recorded in the
+application's model manifest.
 
 \subsection{Data availability and research-use scope}
 
@@ -1297,12 +1349,13 @@ calibration is free at deployment time. In this setting, coverage means
 covering participants; sample count, stratification, and observer choice
 were the wrong knobs.
 
-The conclusions are scoped to one cohort, one architecture, and one
+The conclusions are scoped to one primary cohort, one architecture, and one
 quantizer, on a reanalysis of previously touched data; the frozen
 sensitivity tiers reproduce both headline findings, and the paired-round
 device benchmark measured the calibration fix as latency-free on the one
-remaining phone. Confirmation on an unused public cohort remains future
-work. \project remains a research prototype, not a medical device.
+remaining phone, and the sequential-versus-uniform effect was confirmed
+on two further cohorts with prespecified paired predictions whose
+magnitudes track the calibration-coverage deficit. \project remains a research prototype, not a medical device.
 
 \bibliographystyle{unsrtnat}
 \renewcommand{\bibfont}{\small}

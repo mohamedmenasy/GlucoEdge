@@ -75,6 +75,17 @@ measured, not argued, as deployment-free. New Results table
 Summary JSON: `results/calibration-coverage/device_benchmark_ios_r1.json`.
 Pages/figures/tables: 14 pages, 3 figures, 12 tables.
 
+A second-cohort confirmation addendum runs a reduced prespecified matrix
+(5 seeds, sequential vs uniform at budget 200, per-cohort protocol frozen
+before any evaluation label was read) on two untouched GlucoBench cohorts
+with paired predictions: positive on dubosson (wide-range T1D), near zero
+on hall (narrow-range). Both held; effect magnitude tracks the
+sequential-ceiling deficit (240/401 -> +13.4; 286/400 -> +2.0;
+165/303 -> +1.3 primary). New Results subsection + table
+(tab:confirmation); Limitations and conclusion updated. Records:
+`results/calibration-coverage/confirmation_{dubosson,hall}.json`. Now 13
+tables.
+
 ## Build
 
 ```bash
@@ -92,7 +103,7 @@ with the LaTeX sources in an arXiv submission.
 - **Author:** Mohamed Menasy
 - **Primary category:** `cs.LG`
 - **Possible cross-lists:** `eess.SP`, `q-bio.QM`
-- **Comments:** 14 pages, 3 figures, 12 tables. Source code and model artifacts are
+- **Comments:** 14 pages, 3 figures, 13 tables. Source code and model artifacts are
   available at <https://github.com/mohamedmenasy/GlucoEdge>.
 
 Before submission, confirm the author name, email, affiliation, category, and
