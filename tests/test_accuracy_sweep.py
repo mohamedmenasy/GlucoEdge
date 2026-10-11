@@ -67,3 +67,38 @@ def test_paired_rows_intersects_on_keys_in_a_order():
     ia, ib = paired_rows(ka, kb)
     assert ia == [0, 2]
     assert ib == [1, 0]
+
+
+def test_protocol_guard_refuses_untracked_file(tmp_path, monkeypatch):
+    import subprocess
+
+    import experiments.accuracy_sweep as sweep
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    p = tmp_path / "protocol_sweep_r1.json"
+    monkeypatch.setattr(sweep, "PROTOCOL", p)
+    assert not sweep.protocol_is_committed()      # missing
+    p.write_text("{}")
+    assert not sweep.protocol_is_committed()      # untracked
+    subprocess.run(["git", "-C", str(tmp_path), "add", p.name], check=True)
+    subprocess.run(["git", "-C", str(tmp_path), "-c", "user.email=t@t",
+                    "-c", "user.name=t", "commit", "-qm", "freeze"], check=True)
+    assert sweep.protocol_is_committed()          # tracked + clean
+    p.write_text('{"dirty": true}')
+    assert not sweep.protocol_is_committed()      # dirty
+
+
+def test_gate_results_known_outcomes():
+    import experiments.accuracy_sweep as sweep
+    y = np.array([0, 1, 2, 3, 4] * 20)
+    pids = np.array([f"p{i % 4}" for i in range(100)])
+    perfect = y.copy()
+    worse = y.copy()
+    worse[:30] = (worse[:30] + 1) % 5
+    g = sweep.gate_results(y, pids, cand_int8=perfect, cand_float=perfect,
+                           champ_int8=worse, n_boot=200)
+    assert g["gate1_beats_champion"] is True
+    assert g["gate2_int8_within_half_pp_of_float"] is True
+    g2 = sweep.gate_results(y, pids, cand_int8=worse, cand_float=perfect,
+                            champ_int8=perfect, n_boot=200)
+    assert g2["gate1_beats_champion"] is False
+    assert g2["gate2_int8_within_half_pp_of_float"] is False

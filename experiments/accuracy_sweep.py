@@ -263,3 +263,249 @@ def stage_select(run_id, stage):
                "winner": dict(a, ensemble=bool(carry))}
     _write_json(run / "selection" / f"{stage}.json", out)
     print(json.dumps({k: out[k] for k in out if k != "table"}, indent=1))
+
+
+# --- stage: calib (selections for the winner's window length) -----------------
+
+
+def stage_calib(run_id):
+    from conversion.calibration import build_pool, select
+
+    run = _run_dir(run_id)
+    winner = _read_selection(run, "D")["winner"]
+    wds, owner, ngf = _data("weinstock", winner["length"])
+    val_idx = _eligible(wds["val"], owner, ngf, "val")
+    pool = build_pool(wds["val"], val_idx)
+    out = run / "selections"
+    out.mkdir(exist_ok=True)
+    for strategy, draw in (("sequential", 0), ("uniform_random", 101)):
+        path = out / f"{strategy}_200_d{draw}.json"
+        if path.exists():
+            continue
+        sel = select(pool, strategy, 200, seed=draw)
+        sel["draw"] = draw
+        _write_json(path, sel)
+        print(f"selected {path.name}")
+
+
+# --- stage: convert ---------------------------------------------------------------
+
+
+def stage_convert(run_id):
+    import torch
+
+    from conversion.common import load_checkpoint
+    from conversion.convert import convert_float, convert_int8
+
+    run = _run_dir(run_id)
+    winner = _read_selection(run, "D")["winner"]
+    wds, _, _ = _data("weinstock", winner["length"])
+    art = run / "artifacts"
+    art.mkdir(exist_ok=True)
+    sample = torch.zeros(1, 1, winner["length"], dtype=torch.float32)
+    for seed in FINAL_SEEDS:
+        model = load_checkpoint(run / "checkpoints" / f"{winner['name']}_seed{seed}.pt", 5)
+        fpath = art / f"winner_seed{seed}_float.tflite"
+        if not fpath.exists():
+            convert_float(model, sample, fpath)
+            print(f"converted {fpath.name}")
+        for sel_path in sorted((run / "selections").glob("*_200_d*.json")):
+            ipath = art / f"winner_seed{seed}_int8_{sel_path.stem}.tflite"
+            if ipath.exists():
+                continue
+            sel = json.loads(sel_path.read_text())
+            ws = np.stack([wds["val"].windows[i] for i in sel["indices"]])
+            calib = [torch.from_numpy(w[None, None, :]) for w in delta_windows(ws, True)]
+            timings = convert_int8(model, sample, calib, ipath)
+            _write_json(ipath.with_suffix(".json"), {"selection": sel_path.stem, **timings})
+            print(f"converted {ipath.name}")
+
+
+# --- stage: evaluate (locked gate: the one held-out read) ----------------------
+
+
+def protocol_is_committed():
+    """True iff PROTOCOL is git-tracked and identical to its committed
+    content."""
+    if not PROTOCOL.exists():
+        return False
+    cwd = str(PROTOCOL.parent)
+    tracked = subprocess.run(["git", "ls-files", "--error-unmatch", PROTOCOL.name],
+                             cwd=cwd, capture_output=True)
+    if tracked.returncode != 0:
+        return False
+    dirty = subprocess.run(["git", "diff", "--quiet", "HEAD", "--", PROTOCOL.name],
+                           cwd=cwd, capture_output=True)
+    return dirty.returncode == 0
+
+
+def _tflite_logits(path, windows):
+    """Float logits for delta windows of any length; dequantizes INT8 IO."""
+    from ai_edge_litert.interpreter import Interpreter
+    interp = Interpreter(model_path=str(path))
+    interp.allocate_tensors()
+    inp = interp.get_input_details()[0]
+    out = interp.get_output_details()[0]
+    logits = np.empty((len(windows), 5), dtype=np.float32)
+    is_int8 = inp["dtype"] == np.int8
+    scale, zp = inp["quantization"]
+    o_scale, o_zp = out["quantization"]
+    for k, w in enumerate(windows):
+        x = w.reshape(1, 1, -1).astype(np.float32)
+        if is_int8:
+            info = np.iinfo(inp["dtype"])
+            x = np.clip(np.round(x / scale) + zp, info.min, info.max).astype(np.int8)
+        interp.set_tensor(inp["index"], x)
+        interp.invoke()
+        y = interp.get_tensor(out["index"])[0].astype(np.float32)
+        if out["dtype"] == np.int8:
+            y = (y - o_zp) * o_scale
+        logits[k] = y
+    return logits
+
+
+def _component_windows(length, split):
+    ds, owner, ngf = _data("weinstock", length)
+    idx = _eligible(ds["test"], owner, ngf, split)
+    t = ds["test"]
+    keys = [[str(t.participants[i]), str(t.anchor_times[i])] for i in idx]
+    meta = {"labels": [int(t.labels[i]) for i in idx],
+            "participants": [str(t.participants[i]) for i in idx],
+            "keys": keys}
+    windows = delta_windows(np.stack([t.windows[i] for i in idx]), True)
+    return windows, meta
+
+
+def stage_evaluate(run_id):
+    if not protocol_is_committed():
+        raise SystemExit("REFUSED: commit paper/results/calibration-coverage/"
+                         "protocol_sweep_r1.json (clean) before evaluate")
+    run = _run_dir(run_id)
+    winner = _read_selection(run, "D")["winner"]
+    for comp, split in (("held_out", "held_out"), ("temporal", "test")):
+        base = run / "eval" / comp
+        base.mkdir(parents=True, exist_ok=True)
+        w_windows, w_meta = _component_windows(winner["length"], split)
+        if not (base / "winner_meta.json").exists():
+            _write_json(base / "winner_meta.json", w_meta)
+        c_windows, c_meta = ((w_windows, w_meta) if winner["length"] == CHAMPION["length"]
+                             else _component_windows(CHAMPION["length"], split))
+        if not (base / "champion_meta.json").exists():
+            _write_json(base / "champion_meta.json", c_meta)
+        for seed in FINAL_SEEDS:
+            for art in sorted((run / "artifacts").glob(f"winner_seed{seed}_*.tflite")):
+                p = base / f"{art.stem}_logits.npy"
+                if not p.exists():
+                    np.save(p, _tflite_logits(art, w_windows))
+                    print(f"{comp}/{art.stem} evaluated")
+        for kind in ("float", "int8"):
+            p = base / f"champion_{kind}_preds.npy"
+            if not p.exists():
+                np.save(p, _tflite_logits(CHAMPION[kind], c_windows).argmax(axis=1))
+                print(f"{comp}/champion_{kind} evaluated")
+
+
+# --- stage: analyze ----------------------------------------------------------------
+
+
+def gate_results(y, pids, cand_int8, cand_float, champ_int8, n_boot=2000):
+    from experiments.analyze_calibration_coverage import (
+        confusion_counts, macro_f1, paired_cluster_bootstrap)
+    contrast = paired_cluster_bootstrap(y, pids, [(cand_int8, champ_int8)],
+                                        metric=macro_f1, n_boot=n_boot)
+    ci_low = contrast["ci95"][0] if contrast["ci95"] else None
+    f_float = macro_f1(confusion_counts(y, cand_float))
+    f_int8 = macro_f1(confusion_counts(y, cand_int8))
+    return {
+        "contrast_int8_vs_champion": contrast,
+        "candidate_float_macro_f1": f_float,
+        "candidate_int8_macro_f1": f_int8,
+        "champion_int8_macro_f1": macro_f1(confusion_counts(y, champ_int8)),
+        "gate1_beats_champion": bool(contrast["delta"] is not None
+                                     and contrast["delta"] > 0
+                                     and ci_low is not None and ci_low > -0.005),
+        "gate2_int8_within_half_pp_of_float": bool(f_float - f_int8 <= 0.005),
+    }
+
+
+def stage_analyze(run_id, n_boot=2000):
+    from experiments.analyze_calibration_coverage import confusion_counts, macro_f1
+
+    run = _run_dir(run_id)
+    sel_d = _read_selection(run, "D")
+    winner = sel_d["winner"]
+    out = {"run_id": run_id,
+           "selection_trail": {s: _read_selection(run, s) for s in "ABCD"},
+           "components": {}}
+    ship_arm = "int8_uniform_random_200_d101"
+    for comp in ("held_out", "temporal"):
+        base = run / "eval" / comp
+        w_meta = json.loads((base / "winner_meta.json").read_text())
+        c_meta = json.loads((base / "champion_meta.json").read_text())
+        ia, ib = paired_rows([tuple(k) for k in w_meta["keys"]],
+                             [tuple(k) for k in c_meta["keys"]])
+        y = np.array(w_meta["labels"])[ia]
+        pids = np.array(w_meta["participants"])[ia]
+        champ = np.load(base / "champion_int8_preds.npy")[ib]
+
+        def cand(kind):
+            stack = [np.load(base / f"winner_seed{s}_{kind}_logits.npy")
+                     for s in FINAL_SEEDS]
+            if winner.get("ensemble"):
+                return np.mean(stack, axis=0).argmax(axis=1)[ia]
+            return stack[sel_d["best_seed"]].argmax(axis=1)[ia]
+
+        per_seed = {str(s): {
+            k: macro_f1(confusion_counts(
+                np.array(w_meta["labels"]),
+                np.load(base / f"winner_seed{s}_{k}_logits.npy").argmax(axis=1)))
+            for k in ("float", ship_arm, "int8_sequential_200_d0")}
+            for s in FINAL_SEEDS}
+        out["components"][comp] = {
+            "paired_windows": len(ia),
+            "winner_only_windows": len(w_meta["keys"]) - len(ia),
+            "per_seed_full_split": per_seed,
+            "gates": gate_results(y, pids, cand(ship_arm), cand("float"),
+                                  champ, n_boot=n_boot),
+        }
+    out["ship"] = {
+        "candidate": "ensemble of 5 seeds" if winner.get("ensemble")
+                     else f"seed {sel_d['best_seed']}",
+        "gate3_note": ("ensemble ships only if gate1 point delta >= +1.0pp"
+                       if winner.get("ensemble") else "single-model candidate"),
+    }
+    g = out["components"]["held_out"]["gates"]
+    if winner.get("ensemble"):
+        out["ship"]["gate3_point_delta_ok"] = bool(
+            g["contrast_int8_vs_champion"]["delta"] is not None
+            and g["contrast_int8_vs_champion"]["delta"] >= 0.01)
+    out["ship"]["all_gates_pass"] = bool(
+        g["gate1_beats_champion"] and g["gate2_int8_within_half_pp_of_float"]
+        and out["ship"].get("gate3_point_delta_ok", True))
+    (run / "analysis").mkdir(exist_ok=True)
+    _write_json(run / "analysis" / "sweep_aggregate.json", out)
+    print("wrote", run / "analysis" / "sweep_aggregate.json")
+    return out
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("stage", choices=["precheck", "train", "select",
+                                          "calib", "convert", "evaluate", "analyze"])
+    parser.add_argument("--run-id", required=True)
+    parser.add_argument("--stage-name", choices=list("ABCD"),
+                        help="required for train/select")
+    args = parser.parse_args()
+    if args.stage in ("train", "select"):
+        if not args.stage_name:
+            parser.error("--stage-name required")
+        {"train": stage_train, "select": stage_select}[args.stage](args.run_id, args.stage_name)
+    else:
+        {"precheck": stage_precheck, "calib": stage_calib,
+         "convert": stage_convert, "evaluate": stage_evaluate,
+         "analyze": stage_analyze}[args.stage](args.run_id)
+
+
+if __name__ == "__main__":
+    main()
