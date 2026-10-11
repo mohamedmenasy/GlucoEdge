@@ -84,3 +84,32 @@ def test_set_seed_makes_model_init_reproducible():
 
     for p_a, p_b in zip(model_a.parameters(), model_b.parameters()):
         assert torch.equal(p_a, p_b)
+
+
+def test_train_model_accepts_injected_model_and_criterion():
+    import torch
+
+    from training.model import TrendCNN
+    from training.train import train_model
+
+    class Tiny:
+        labels = [0, 1, 2, 3, 4, 0, 1, 2]
+
+        def __len__(self):
+            return len(self.labels)
+
+        def __getitem__(self, i):
+            torch.manual_seed(i)
+            return torch.randn(1, 12), self.labels[i]
+
+    calls = []
+
+    def spy_criterion(logits, targets):
+        calls.append(1)
+        return torch.nn.functional.cross_entropy(logits, targets)
+
+    injected = TrendCNN(num_classes=5, channels=(48, 72))
+    out = train_model(Tiny(), Tiny(), 5, 1, torch.device("cpu"),
+                      model=injected, criterion=spy_criterion)
+    assert out is injected
+    assert calls  # criterion actually used
