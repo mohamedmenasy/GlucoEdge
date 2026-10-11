@@ -1291,8 +1291,10 @@ The results should be read with the following limitations in mind.
     memory were not measured. The remaining 101 matrix artifacts, and
     the confirmation-cohort and delta-encoded artifacts, were not
     device-timed; all share one operator inventory and byte size with
-    the timed ones, and the bundled delta pair passed on-device parity
-    without latency measurement.
+    the timed ones, and the bundled delta pair passed on-device parity, with
+    a single live in-app session (100 inferences per model, one round)
+    observing 0.080~ms float and 0.086~ms INT8 means --- an
+    observation, not a paired-protocol measurement.
     \item The application replays synthetic or locally extracted
     historical traces. It does not ingest a live sensor stream and has
     not undergone prospective, external, usability, or clinical

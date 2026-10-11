@@ -32,7 +32,11 @@ resolvable).
 Verification state: simulator suite 51/51 green against these bytes
 (golden parity incl. the Swift delta transform, INT8 bit-exact), and
 DEVICE-VERIFIED on the iPhone 18 Pro Max on 2026-10-11: golden parity +
-delta-transform suites 7/7 on device, INT8 bit-exact. The previous bundled pair (absolute-input study seed-0,
+delta-transform suites 7/7 on device, INT8 bit-exact. A live in-app
+session the same day (CompiledModel, n=100 per model, one round,
+synthetic trace, timer = quantize+run+dequantize) recorded float
+0.080 ms mean / 0.140 ms p95 and INT8 0.086 ms / 0.160 ms, with the
+Explain feature producing descriptive, advice-free notes. The previous bundled pair (absolute-input study seed-0,
 shipped earlier on 2026-10-10) WAS device-verified on the iPhone that
 day: float `5a0f0744…`, INT8 `9f2f26f5…` — now historical; see git
 history and the paper.
