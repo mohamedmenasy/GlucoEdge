@@ -30,9 +30,9 @@ resolvable).
 | `trend_int8.tflite` | `8590a3d25c409a46659cba3dab97f649c54b57061022e01cae0feec2f5366388` | 11976 |
 
 Verification state: simulator suite 51/51 green against these bytes
-(golden parity incl. the Swift delta transform, INT8 bit-exact); the
-on-device parity re-run is PENDING — the iPhone was detached before it
-could run. The previous bundled pair (absolute-input study seed-0,
+(golden parity incl. the Swift delta transform, INT8 bit-exact), and
+DEVICE-VERIFIED on the iPhone 18 Pro Max on 2026-10-11: golden parity +
+delta-transform suites 7/7 on device, INT8 bit-exact. The previous bundled pair (absolute-input study seed-0,
 shipped earlier on 2026-10-10) WAS device-verified on the iPhone that
 day: float `5a0f0744…`, INT8 `9f2f26f5…` — now historical; see git
 history and the paper.
