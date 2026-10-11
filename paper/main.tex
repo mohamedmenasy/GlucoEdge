@@ -1090,7 +1090,9 @@ artifact, and subsequently with the delta-encoded pair after that
 experiment passed its frozen gates (Table~\ref{tab:delta}); both clients
 apply the same delta transform before quantization, and both
 golden-parity suites pass against the bundled files bit-exactly on the
-continuous-integration simulators.
+continuous-integration simulators, and the delta pair was subsequently
+verified on the iPhone itself (golden-parity and transform suites on
+device, INT8 bit-exact).
 
 The prespecified nine-artifact benchmark was then executed on the
 iPhone~18~Pro~Max (iPhone19,3, iOS~27.0.1), the only study device still
@@ -1286,9 +1288,11 @@ The results should be read with the following limitations in mind.
     are not evidence across devices, the Android device from the
     historical observations is no longer available, initialization was
     measured within-process rather than process-cold, and energy and
-    memory were not measured. The remaining 101 artifacts were not
-    device-timed; they share one operator inventory and byte size with
-    the timed ones.
+    memory were not measured. The remaining 101 matrix artifacts, and
+    the confirmation-cohort and delta-encoded artifacts, were not
+    device-timed; all share one operator inventory and byte size with
+    the timed ones, and the bundled delta pair passed on-device parity
+    without latency measurement.
     \item The application replays synthetic or locally extracted
     historical traces. It does not ingest a live sensor stream and has
     not undergone prospective, external, usability, or clinical
