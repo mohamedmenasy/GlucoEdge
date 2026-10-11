@@ -14,6 +14,7 @@
 \usepackage{xurl}
 \usepackage{xspace}
 \usepackage[numbers,sort&compress]{natbib}
+
 \usepackage[hidelinks]{hyperref}
 \usetikzlibrary{arrows.meta,positioning,patterns}
 
@@ -1090,9 +1091,8 @@ artifact, and subsequently with the delta-encoded pair after that
 experiment passed its frozen gates (Table~\ref{tab:delta}); both clients
 apply the same delta transform before quantization, and both
 golden-parity suites pass against the bundled files bit-exactly on the
-continuous-integration simulators, and the delta pair was subsequently
-verified on the iPhone itself (golden-parity and transform suites on
-device, INT8 bit-exact).
+continuous-integration simulators; the delta pair also passed on-device
+golden parity (INT8 bit-exact).
 
 The prespecified nine-artifact benchmark was then executed on the
 iPhone~18~Pro~Max (iPhone19,3, iOS~27.0.1), the only study device still
@@ -1418,7 +1418,7 @@ on two further cohorts with prespecified paired predictions whose
 magnitudes track the calibration-coverage deficit. \project remains a research prototype, not a medical device.
 
 \bibliographystyle{unsrtnat}
-\renewcommand{\bibfont}{\small}
+\renewcommand{\bibfont}{\footnotesize}
 \setlength{\bibsep}{2pt}
 \bibliography{references}
 
