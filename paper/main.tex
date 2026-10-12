@@ -1063,6 +1063,88 @@ Deltas + anchor/16 & 0.509 & 0.504 & 0.509 & $+0.005$ $[+0.004, +0.007]$ \\
 \end{tabular}}
 \end{table}
 
+\subsection{Accuracy sweep: staged selection with one pre-registered read}
+
+Having settled the input encoding, a staged greedy sweep asked whether
+loss design, capacity, window length, multi-cohort pooling, or seed
+ensembling improves the classifier. All selection used validation
+macro-F1 only (three-seed means on eligible Weinstock validation
+windows); the held-out and temporal splits were read exactly once, after
+the full selection trail, the winner, and the gates were frozen in a
+committed protocol (\texttt{protocol\_sweep\_r1.json}). Stage~A compared
+four losses at the baseline architecture: a distance-weighted
+cross-entropy (adding $\lambda \sum_j p_j\,|j-y|$, $\lambda=0.5$) beat
+weighted cross-entropy by 4.6 points (0.427 versus 0.381), with ordinal
+label smoothing (0.390) and focal loss (0.380) behind. Stage~B swept
+capacity and window length under that loss: quadrupling the channel
+widths to $(96,144)$ (42{,}725 parameters) added 1.2 points (0.439), while
+longer 2-hour windows helped at no capacity. Stage~C's pooled
+three-cohort training lost 1.6 points against single-cohort training,
+and Stage~D's five-seed mean-logit ensemble failed to beat the best
+single seed (0.4426 versus 0.4430), so a single model proceeded to the
+confirmatory read.
+
+Table~\ref{tab:sweep} reports that read. The winner's INT8 model beats
+the bundled INT8 champion by $+5.7$ macro-F1 points on held-out
+(participant-cluster bootstrap, 2{,}000 draws) and $+5.5$ on temporal,
+with INT8 within half a point of its own float on both splits ---
+every pre-registered gate passes. Macro-F1 is this study's endpoint and
+is not comparable to the directional-recall numbers of the preceding
+sections; the champion encoding's held-out directional recall remains
+as reported in Table~\ref{tab:delta} (five-seed means).
+
+The winner did not ship. A post-hoc descriptive read of the same cached
+predictions --- unregistered, computed after the gates were scored, and
+changing nothing about them --- decomposes the macro-F1 gain by class
+(Table~\ref{tab:sweeprecall}): the distance penalty buys its win almost
+entirely on the majority \emph{stable} class ($+0.21$ recall held-out),
+while directional recall, the quantity the preceding studies and the
+bundled artifacts are built around, falls from 0.517 to 0.438 held-out
+and from 0.497 to 0.406 temporally. A pre-registered endpoint can pass
+every gate and still optimize the wrong thing; the bundled pair is
+retained, and any future round should gate on a directional endpoint.
+Full record: \texttt{accuracy\_sweep\_r1.json}.
+
+\begin{table}[t]
+\centering
+\caption{Post-hoc per-class recall, winner INT8 versus champion INT8 on
+the paired held-out windows (descriptive only; the pre-registered
+macro-F1 gates above are unchanged).}
+\label{tab:sweeprecall}
+\footnotesize
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Class & Winner INT8 & Champion INT8 \\
+\midrule
+falling\_fast & 0.503 & 0.572 \\
+falling & 0.432 & 0.552 \\
+stable & 0.688 & 0.475 \\
+rising & 0.365 & 0.334 \\
+rising\_fast & 0.454 & 0.612 \\
+\midrule
+Directional (non-stable) mean & 0.438 & 0.517 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Pre-registered confirmatory read (macro-F1, paired windows;
+winner = distance-weighted CE, $(96,144)$ channels, 1-hour window,
+seed 1). Delta is winner INT8 minus champion INT8,
+participant-cluster bootstrap CI.}
+\label{tab:sweep}
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Split & Winner float & Winner INT8 & Champion INT8 & $\Delta$ [95\% CI] \\
+\midrule
+Held-out & 0.425 & 0.425 & 0.368 & $+0.057$ $[+0.052, +0.063]$ \\
+Temporal & 0.417 & 0.418 & 0.362 & $+0.055$ $[+0.048, +0.061]$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Historical comparison}
 
 The earlier revision reported accuracy 0.5184 and macro recall 0.5060 for

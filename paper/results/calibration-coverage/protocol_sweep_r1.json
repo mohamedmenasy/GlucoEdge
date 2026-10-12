@@ -1,0 +1,201 @@
+{
+  "study": "accuracy-sweep",
+  "run_id": "sweep-r1",
+  "spec": "docs/superpowers/specs/2026-10-11-accuracy-sweep-design.md",
+  "frozen_date_utc": "2026-10-11",
+  "glucoedge_commit_at_freeze": "fff7ac3",
+  "selection_trail": {
+    "A": {
+      "stage": "A",
+      "table": {
+        "A_ce": {
+          "per_seed": {
+            "0": 0.37523357303812227,
+            "1": 0.3904578206696482,
+            "2": 0.37671283329794225
+          },
+          "mean": 0.3808014090019043
+        },
+        "A_ordinal_smooth": {
+          "per_seed": {
+            "0": 0.3880917322807671,
+            "1": 0.39576907783904025,
+            "2": 0.38641796917267834
+          },
+          "mean": 0.3900929264308286
+        },
+        "A_distance_ce": {
+          "per_seed": {
+            "0": 0.4233395054969562,
+            "1": 0.4308852610057244,
+            "2": 0.4273047872588191
+          },
+          "mean": 0.4271765179204999
+        },
+        "A_focal": {
+          "per_seed": {
+            "0": 0.3772994097133354,
+            "1": 0.3901498984005966,
+            "2": 0.3737240591865124
+          },
+          "mean": 0.3803911224334815
+        }
+      },
+      "winner": {
+        "name": "A_distance_ce",
+        "loss": "distance_ce",
+        "channels": [
+          24,
+          36
+        ],
+        "length": 12,
+        "pooled": false
+      }
+    },
+    "B": {
+      "stage": "B",
+      "table": {
+        "B_c24x36_L24": {
+          "per_seed": {
+            "0": 0.43144633100997254,
+            "1": 0.41372806613086394,
+            "2": 0.4291733979456113
+          },
+          "mean": 0.4247825983621493
+        },
+        "B_c48x72_L12": {
+          "per_seed": {
+            "0": 0.426056501171362,
+            "1": 0.43206913399730534,
+            "2": 0.42252813608579176
+          },
+          "mean": 0.426884590418153
+        },
+        "B_c48x72_L24": {
+          "per_seed": {
+            "0": 0.4319243091223667,
+            "1": 0.4225199576842461,
+            "2": 0.4273366926036011
+          },
+          "mean": 0.4272603198034046
+        },
+        "B_c96x144_L12": {
+          "per_seed": {
+            "0": 0.43840333770255907,
+            "1": 0.4429860322665,
+            "2": 0.4348168504624354
+          },
+          "mean": 0.4387354068104982
+        },
+        "B_c96x144_L24": {
+          "per_seed": {
+            "0": 0.4375808481621988,
+            "1": 0.42237907064090807,
+            "2": 0.42864064586106465
+          },
+          "mean": 0.42953352155472385
+        },
+        "A_distance_ce": {
+          "per_seed": {
+            "0": 0.4233395054969562,
+            "1": 0.4308852610057244,
+            "2": 0.4273047872588191
+          },
+          "mean": 0.4271765179204999
+        }
+      },
+      "winner": {
+        "name": "B_c96x144_L12",
+        "loss": "distance_ce",
+        "channels": [
+          96,
+          144
+        ],
+        "length": 12,
+        "pooled": false
+      }
+    },
+    "C": {
+      "stage": "C",
+      "table": {
+        "C_pooled": {
+          "per_seed": {
+            "0": 0.42053997171049334,
+            "1": 0.432028213887856,
+            "2": 0.41643452648027035
+          },
+          "mean": 0.42300090402620655
+        },
+        "B_c96x144_L12": {
+          "per_seed": {
+            "0": 0.43840333770255907,
+            "1": 0.4429860322665,
+            "2": 0.4348168504624354
+          },
+          "mean": 0.4387354068104982
+        }
+      },
+      "winner": {
+        "name": "B_c96x144_L12",
+        "loss": "distance_ce",
+        "channels": [
+          96,
+          144
+        ],
+        "length": 12,
+        "pooled": false
+      }
+    },
+    "D": {
+      "stage": "D",
+      "table": {
+        "per_seed": {
+          "0": 0.43840333770255907,
+          "1": 0.4429860322665,
+          "2": 0.4348168504624354,
+          "3": 0.43736037468100564,
+          "4": 0.4364314230812657
+        }
+      },
+      "ensemble_val_f1": 0.4425974046188156,
+      "best_seed_val_f1": 0.4429860322665,
+      "best_seed": 1,
+      "carry_ensemble": false,
+      "winner": {
+        "name": "B_c96x144_L12",
+        "loss": "distance_ce",
+        "channels": [
+          96,
+          144
+        ],
+        "length": 12,
+        "pooled": false,
+        "ensemble": false
+      }
+    }
+  },
+  "winner": {
+    "name": "B_c96x144_L12",
+    "loss": "distance_ce",
+    "channels": [
+      96,
+      144
+    ],
+    "length": 12,
+    "pooled": false,
+    "ensemble": false
+  },
+  "champion": {
+    "float_sha256": "c30560f7283e4927a4b63ff0ffdd34f4108e035905b80c4ed4fd01b479dbb07a",
+    "int8_sha256": "8590a3d25c409a46659cba3dab97f649c54b57061022e01cae0feec2f5366388"
+  },
+  "prediction": "winner INT8 (uniform_random_200_d101) >= champion INT8 on held-out macro-F1",
+  "primary_endpoint": "held_out paired macro-F1 delta, participant-cluster bootstrap, 2000 draws, seed 20261010",
+  "secondary_endpoint": "temporal, same recipe",
+  "pairing": "intersection on (participant, anchor_time); winner-only windows reported, excluded from the contrast",
+  "gates": {
+    "1": "delta > 0 and CI lower bound > -0.5pp",
+    "2": "winner INT8 within 0.5pp of winner's own float",
+    "3": "ensemble ships only if Stage D margin passed and gate-1 point delta >= +1.0pp"
+  }
+}

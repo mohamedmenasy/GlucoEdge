@@ -1,0 +1,321 @@
+{
+  "run_id": "sweep-r1",
+  "selection_trail": {
+    "A": {
+      "stage": "A",
+      "table": {
+        "A_ce": {
+          "per_seed": {
+            "0": 0.37523357303812227,
+            "1": 0.3904578206696482,
+            "2": 0.37671283329794225
+          },
+          "mean": 0.3808014090019043
+        },
+        "A_ordinal_smooth": {
+          "per_seed": {
+            "0": 0.3880917322807671,
+            "1": 0.39576907783904025,
+            "2": 0.38641796917267834
+          },
+          "mean": 0.3900929264308286
+        },
+        "A_distance_ce": {
+          "per_seed": {
+            "0": 0.4233395054969562,
+            "1": 0.4308852610057244,
+            "2": 0.4273047872588191
+          },
+          "mean": 0.4271765179204999
+        },
+        "A_focal": {
+          "per_seed": {
+            "0": 0.3772994097133354,
+            "1": 0.3901498984005966,
+            "2": 0.3737240591865124
+          },
+          "mean": 0.3803911224334815
+        }
+      },
+      "winner": {
+        "name": "A_distance_ce",
+        "loss": "distance_ce",
+        "channels": [
+          24,
+          36
+        ],
+        "length": 12,
+        "pooled": false
+      }
+    },
+    "B": {
+      "stage": "B",
+      "table": {
+        "B_c24x36_L24": {
+          "per_seed": {
+            "0": 0.43144633100997254,
+            "1": 0.41372806613086394,
+            "2": 0.4291733979456113
+          },
+          "mean": 0.4247825983621493
+        },
+        "B_c48x72_L12": {
+          "per_seed": {
+            "0": 0.426056501171362,
+            "1": 0.43206913399730534,
+            "2": 0.42252813608579176
+          },
+          "mean": 0.426884590418153
+        },
+        "B_c48x72_L24": {
+          "per_seed": {
+            "0": 0.4319243091223667,
+            "1": 0.4225199576842461,
+            "2": 0.4273366926036011
+          },
+          "mean": 0.4272603198034046
+        },
+        "B_c96x144_L12": {
+          "per_seed": {
+            "0": 0.43840333770255907,
+            "1": 0.4429860322665,
+            "2": 0.4348168504624354
+          },
+          "mean": 0.4387354068104982
+        },
+        "B_c96x144_L24": {
+          "per_seed": {
+            "0": 0.4375808481621988,
+            "1": 0.42237907064090807,
+            "2": 0.42864064586106465
+          },
+          "mean": 0.42953352155472385
+        },
+        "A_distance_ce": {
+          "per_seed": {
+            "0": 0.4233395054969562,
+            "1": 0.4308852610057244,
+            "2": 0.4273047872588191
+          },
+          "mean": 0.4271765179204999
+        }
+      },
+      "winner": {
+        "name": "B_c96x144_L12",
+        "loss": "distance_ce",
+        "channels": [
+          96,
+          144
+        ],
+        "length": 12,
+        "pooled": false
+      }
+    },
+    "C": {
+      "stage": "C",
+      "table": {
+        "C_pooled": {
+          "per_seed": {
+            "0": 0.42053997171049334,
+            "1": 0.432028213887856,
+            "2": 0.41643452648027035
+          },
+          "mean": 0.42300090402620655
+        },
+        "B_c96x144_L12": {
+          "per_seed": {
+            "0": 0.43840333770255907,
+            "1": 0.4429860322665,
+            "2": 0.4348168504624354
+          },
+          "mean": 0.4387354068104982
+        }
+      },
+      "winner": {
+        "name": "B_c96x144_L12",
+        "loss": "distance_ce",
+        "channels": [
+          96,
+          144
+        ],
+        "length": 12,
+        "pooled": false
+      }
+    },
+    "D": {
+      "stage": "D",
+      "table": {
+        "per_seed": {
+          "0": 0.43840333770255907,
+          "1": 0.4429860322665,
+          "2": 0.4348168504624354,
+          "3": 0.43736037468100564,
+          "4": 0.4364314230812657
+        }
+      },
+      "ensemble_val_f1": 0.4425974046188156,
+      "best_seed_val_f1": 0.4429860322665,
+      "best_seed": 1,
+      "carry_ensemble": false,
+      "winner": {
+        "name": "B_c96x144_L12",
+        "loss": "distance_ce",
+        "channels": [
+          96,
+          144
+        ],
+        "length": 12,
+        "pooled": false,
+        "ensemble": false
+      }
+    }
+  },
+  "components": {
+    "held_out": {
+      "paired_windows": 46376,
+      "winner_only_windows": 0,
+      "per_seed_full_split": {
+        "0": {
+          "float": 0.4182434441086033,
+          "int8_uniform_random_200_d101": 0.41764358696070625,
+          "int8_sequential_200_d0": 0.4169714147091982
+        },
+        "1": {
+          "float": 0.4246999813727282,
+          "int8_uniform_random_200_d101": 0.4252740537949212,
+          "int8_sequential_200_d0": 0.427479432074771
+        },
+        "2": {
+          "float": 0.420223999604732,
+          "int8_uniform_random_200_d101": 0.4193304365626872,
+          "int8_sequential_200_d0": 0.4198769248787455
+        },
+        "3": {
+          "float": 0.4226787320393406,
+          "int8_uniform_random_200_d101": 0.42274229487344794,
+          "int8_sequential_200_d0": 0.42292856213337393
+        },
+        "4": {
+          "float": 0.4217861984509699,
+          "int8_uniform_random_200_d101": 0.4198733486723384,
+          "int8_sequential_200_d0": 0.4216369596808958
+        }
+      },
+      "gates": {
+        "contrast_int8_vs_champion": {
+          "delta": 0.05684286517361259,
+          "ci95": [
+            0.05160169624284361,
+            0.06346500367513537
+          ],
+          "undefined_fraction": 0.0,
+          "n_boot": 2000,
+          "seed": 20261010
+        },
+        "candidate_float_macro_f1": 0.4246999813727282,
+        "candidate_int8_macro_f1": 0.4252740537949212,
+        "champion_int8_macro_f1": 0.36843118862130864,
+        "gate1_beats_champion": true,
+        "gate2_int8_within_half_pp_of_float": true
+      }
+    },
+    "temporal": {
+      "paired_windows": 37361,
+      "winner_only_windows": 0,
+      "per_seed_full_split": {
+        "0": {
+          "float": 0.4048527730255242,
+          "int8_uniform_random_200_d101": 0.4039102777377514,
+          "int8_sequential_200_d0": 0.4052398642890506
+        },
+        "1": {
+          "float": 0.4172705635317981,
+          "int8_uniform_random_200_d101": 0.41752551733038423,
+          "int8_sequential_200_d0": 0.42046439068778946
+        },
+        "2": {
+          "float": 0.41143069167617075,
+          "int8_uniform_random_200_d101": 0.4094731802470421,
+          "int8_sequential_200_d0": 0.4115825824570235
+        },
+        "3": {
+          "float": 0.4152331748489563,
+          "int8_uniform_random_200_d101": 0.4151084441169969,
+          "int8_sequential_200_d0": 0.416623454964807
+        },
+        "4": {
+          "float": 0.41533349119193685,
+          "int8_uniform_random_200_d101": 0.4120699194921908,
+          "int8_sequential_200_d0": 0.4133115511266726
+        }
+      },
+      "gates": {
+        "contrast_int8_vs_champion": {
+          "delta": 0.05521080876495804,
+          "ci95": [
+            0.04781462593874829,
+            0.06148307196302125
+          ],
+          "undefined_fraction": 0.0,
+          "n_boot": 2000,
+          "seed": 20261010
+        },
+        "candidate_float_macro_f1": 0.4172705635317981,
+        "candidate_int8_macro_f1": 0.41752551733038423,
+        "champion_int8_macro_f1": 0.3623147085654262,
+        "gate1_beats_champion": true,
+        "gate2_int8_within_half_pp_of_float": true
+      }
+    }
+  },
+  "ship": {
+    "candidate": "seed 1",
+    "gate3_note": "single-model candidate",
+    "all_gates_pass": true
+  },
+  "protocol": "paper/results/calibration-coverage/protocol_sweep_r1.json",
+  "post_hoc_descriptive_recall": {
+    "note": "post-hoc, descriptive, unregistered: per-class and directional recall for the frozen candidate (seed 1, uniform INT8) vs the champion INT8, computed from the cached confirmatory-read predictions after the gates were scored",
+    "held_out": {
+      "winner_int8": {
+        "falling_fast": 0.5025,
+        "falling": 0.4323,
+        "stable": 0.6876,
+        "rising": 0.3647,
+        "rising_fast": 0.4536,
+        "macro_recall": 0.4881,
+        "directional_recall": 0.4383
+      },
+      "champion_int8": {
+        "falling_fast": 0.5723,
+        "falling": 0.5519,
+        "stable": 0.4754,
+        "rising": 0.3338,
+        "rising_fast": 0.6117,
+        "macro_recall": 0.509,
+        "directional_recall": 0.5174
+      }
+    },
+    "temporal": {
+      "winner_int8": {
+        "falling_fast": 0.4123,
+        "falling": 0.4083,
+        "stable": 0.7475,
+        "rising": 0.4092,
+        "rising_fast": 0.3944,
+        "macro_recall": 0.4743,
+        "directional_recall": 0.4061
+      },
+      "champion_int8": {
+        "falling_fast": 0.4816,
+        "falling": 0.5408,
+        "stable": 0.5373,
+        "rising": 0.3993,
+        "rising_fast": 0.5654,
+        "macro_recall": 0.5049,
+        "directional_recall": 0.4968
+      }
+    }
+  },
+  "ship_decision": "not shipped: pre-registered macro-F1 gates passed, but the post-hoc read shows the candidate trades directional recall for the macro-F1 gain; bundled pair retained"
+}

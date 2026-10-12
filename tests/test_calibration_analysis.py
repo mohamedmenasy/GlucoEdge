@@ -151,3 +151,20 @@ def test_qdq_from_detail_uses_the_artifact_scale_and_zero_point():
     out = qdq_from_detail(x, detail)
     assert out[0] == pytest.approx(0.0)
     assert out[1] == pytest.approx(2.0 * (127 - 10))  # clipped at the top code
+
+
+def test_macro_f1_matches_sklearn():
+    from sklearn.metrics import f1_score
+
+    from experiments.analyze_calibration_coverage import macro_f1
+    y = np.array([0, 0, 1, 2, 2, 3, 4, 4, 4])
+    p = np.array([0, 1, 1, 2, 3, 3, 4, 0, 4])
+    assert macro_f1(confusion_counts(y, p)) == pytest.approx(
+        f1_score(y, p, average="macro", labels=range(5), zero_division=0))
+
+
+def test_macro_f1_absent_class_counts_zero():
+    from experiments.analyze_calibration_coverage import macro_f1
+    y = np.array([0, 0, 1])   # classes 2,3,4 absent and never predicted
+    p = np.array([0, 0, 1])
+    assert macro_f1(confusion_counts(y, p)) == pytest.approx(2 / 5)

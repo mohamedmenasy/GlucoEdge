@@ -65,9 +65,10 @@ def class_weights(train_ds, num_classes: int) -> torch.Tensor:
     return torch.tensor(weights, dtype=torch.float32)
 
 
-def train_model(train_ds, val_ds, num_classes, epochs, device):
-    model = TrendCNN(num_classes=num_classes).to(device)
-    criterion = torch.nn.CrossEntropyLoss(weight=class_weights(train_ds, num_classes).to(device))
+def train_model(train_ds, val_ds, num_classes, epochs, device, model=None, criterion=None):
+    model = (model if model is not None else TrendCNN(num_classes=num_classes)).to(device)
+    if criterion is None:
+        criterion = torch.nn.CrossEntropyLoss(weight=class_weights(train_ds, num_classes).to(device))
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     train_loader = DataLoader(train_ds, batch_size=64, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=64)

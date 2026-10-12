@@ -39,6 +39,17 @@ def minority_macro_recall(cm):
     return float(np.mean(recalls(cm)[list(MINORITY)]))
 
 
+def macro_f1(cm):
+    """Macro-averaged F1 from confusion counts; a class with no support and
+    no predictions contributes 0 (sklearn zero_division=0 semantics)."""
+    tp = np.diag(cm).astype(float)
+    fp = cm.sum(axis=0) - tp
+    fn = cm.sum(axis=1) - tp
+    denom = 2 * tp + fp + fn
+    f1 = np.divide(2 * tp, denom, out=np.zeros_like(tp), where=denom > 0)
+    return float(f1.mean())
+
+
 def _clusters(participant_ids):
     participant_ids = np.asarray(participant_ids)
     participants = np.unique(participant_ids)
