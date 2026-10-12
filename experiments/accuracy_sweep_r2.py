@@ -28,7 +28,8 @@ def gate_results_r2(y, pids, cand_int8, cand_float, champ_int8, n_boot=2000):
     from experiments.analyze_calibration_coverage import (
         confusion_counts, paired_cluster_bootstrap)
     contrast = paired_cluster_bootstrap(y, pids, [(cand_int8, champ_int8)],
-                                        metric=directional_recall, n_boot=n_boot)
+                                        metric=directional_recall, n_boot=n_boot,
+                                        seed=BOOT_SEED)
     ci_low = contrast["ci95"][0] if contrast["ci95"] else None
     d_float = directional_recall(confusion_counts(y, cand_float))
     d_int8 = directional_recall(confusion_counts(y, cand_int8))
@@ -54,6 +55,7 @@ FINAL_SEEDS = (0, 1, 2, 3, 4)
 EPOCHS = 20
 MIXTURES = ("M0", "M1", "M2", "M3", "M4")
 SAMPLE_SEED = 20261012  # one fixed subject-draw seed; training seeds vary per run
+BOOT_SEED = 20261012  # pre-registered bootstrap seed (protocol_sweep_r2.json)
 
 
 def arm_r2(name, mixture, channels):

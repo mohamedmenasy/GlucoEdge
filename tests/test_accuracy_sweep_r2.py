@@ -37,6 +37,13 @@ def test_gate_results_r2_known_outcomes():
     assert g2["gate2_stable_floor"] is False
 
 
+def test_gate_bootstrap_uses_preregistered_r2_seed():
+    y = np.array([0, 1, 2, 3, 4] * 40)
+    pids = np.array([f"p{i % 4}" for i in range(200)])
+    g = gate_results_r2(y, pids, cand_int8=y, cand_float=y, champ_int8=y, n_boot=50)
+    assert g["contrast_int8_vs_champion"]["seed"] == 20261012
+
+
 def test_protocol_guard_accepts_explicit_path(tmp_path):
     import subprocess
     from experiments.accuracy_sweep import protocol_is_committed
