@@ -87,3 +87,10 @@ implementation compiles cleanly.
 parity suite passed 3/3 on a Samsung Galaxy S22 Ultra (SM-S908E, Android 16) with the device
 gate routing to `CompiledModel` - no SIGILL, float logits within 1e-5 of the Python benchmark,
 INT8 dequantized outputs bit-exact across all 20 vectors.
+
+## Accuracy sweep sweep-r1 (2026-10-11): not shipped
+
+A staged sweep (distance-weighted CE loss, 4x channels) beat the bundled INT8 pair by +5.7
+macro-F1 points on the pre-registered held-out read, but a post-hoc descriptive read showed
+it trades directional (minority-class) recall for that gain (0.438 vs 0.517 held-out), so the
+bundled pair stays. Full record: `paper/results/calibration-coverage/accuracy_sweep_r1.json`.

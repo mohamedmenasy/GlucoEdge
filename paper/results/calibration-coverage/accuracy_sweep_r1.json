@@ -273,5 +273,49 @@
     "gate3_note": "single-model candidate",
     "all_gates_pass": true
   },
-  "protocol": "paper/results/calibration-coverage/protocol_sweep_r1.json"
+  "protocol": "paper/results/calibration-coverage/protocol_sweep_r1.json",
+  "post_hoc_descriptive_recall": {
+    "note": "post-hoc, descriptive, unregistered: per-class and directional recall for the frozen candidate (seed 1, uniform INT8) vs the champion INT8, computed from the cached confirmatory-read predictions after the gates were scored",
+    "held_out": {
+      "winner_int8": {
+        "falling_fast": 0.5025,
+        "falling": 0.4323,
+        "stable": 0.6876,
+        "rising": 0.3647,
+        "rising_fast": 0.4536,
+        "macro_recall": 0.4881,
+        "directional_recall": 0.4383
+      },
+      "champion_int8": {
+        "falling_fast": 0.5723,
+        "falling": 0.5519,
+        "stable": 0.4754,
+        "rising": 0.3338,
+        "rising_fast": 0.6117,
+        "macro_recall": 0.509,
+        "directional_recall": 0.5174
+      }
+    },
+    "temporal": {
+      "winner_int8": {
+        "falling_fast": 0.4123,
+        "falling": 0.4083,
+        "stable": 0.7475,
+        "rising": 0.4092,
+        "rising_fast": 0.3944,
+        "macro_recall": 0.4743,
+        "directional_recall": 0.4061
+      },
+      "champion_int8": {
+        "falling_fast": 0.4816,
+        "falling": 0.5408,
+        "stable": 0.5373,
+        "rising": 0.3993,
+        "rising_fast": 0.5654,
+        "macro_recall": 0.5049,
+        "directional_recall": 0.4968
+      }
+    }
+  },
+  "ship_decision": "not shipped: pre-registered macro-F1 gates passed, but the post-hoc read shows the candidate trades directional recall for the macro-F1 gain; bundled pair retained"
 }

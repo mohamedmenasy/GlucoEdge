@@ -1091,8 +1091,41 @@ with INT8 within half a point of its own float on both splits ---
 every pre-registered gate passes. Macro-F1 is this study's endpoint and
 is not comparable to the directional-recall numbers of the preceding
 sections; the champion encoding's held-out directional recall remains
-as reported in Table~\ref{tab:delta} (five-seed means). Full record:
-\texttt{accuracy\_sweep\_r1.json}.
+as reported in Table~\ref{tab:delta} (five-seed means).
+
+The winner did not ship. A post-hoc descriptive read of the same cached
+predictions --- unregistered, computed after the gates were scored, and
+changing nothing about them --- decomposes the macro-F1 gain by class
+(Table~\ref{tab:sweeprecall}): the distance penalty buys its win almost
+entirely on the majority \emph{stable} class ($+0.21$ recall held-out),
+while directional recall, the quantity the preceding studies and the
+bundled artifacts are built around, falls from 0.517 to 0.438 held-out
+and from 0.497 to 0.406 temporally. A pre-registered endpoint can pass
+every gate and still optimize the wrong thing; the bundled pair is
+retained, and any future round should gate on a directional endpoint.
+Full record: \texttt{accuracy\_sweep\_r1.json}.
+
+\begin{table}[t]
+\centering
+\caption{Post-hoc per-class recall, winner INT8 versus champion INT8 on
+the paired held-out windows (descriptive only; the pre-registered
+macro-F1 gates above are unchanged).}
+\label{tab:sweeprecall}
+\footnotesize
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Class & Winner INT8 & Champion INT8 \\
+\midrule
+falling\_fast & 0.503 & 0.572 \\
+falling & 0.432 & 0.552 \\
+stable & 0.688 & 0.475 \\
+rising & 0.365 & 0.334 \\
+rising\_fast & 0.454 & 0.612 \\
+\midrule
+Directional (non-stable) mean & 0.438 & 0.517 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{table}[t]
 \centering
