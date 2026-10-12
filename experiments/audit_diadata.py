@@ -57,7 +57,13 @@ SENSOR_TABLE = {
 # The Database column's literal spellings may differ (e.g. "Replace-BG",
 # "Severe Hypoglycemia..."). The audit run reconciles observed names to
 # these keys via ALIASES; each addition is ledgered.
-ALIASES: dict[str, str] = {}
+ALIASES: dict[str, str] = {
+    "DLCP3": "DCLP3",              # DiaData's spelling of iDCL protocol 3
+    "RBG": "ReplaceBG",
+    "SHD": "SevereHypoOlderT1D",   # Severe Hypoglycemia in Older Adults w/ T1D
+    "ShanghaiT1D": "ShanghaiT1DM",
+    "DDATSHR": "CGM_HR_Adolescents",  # Diabetes Adolescents Time Series w/ HR
+}
 
 
 def _canon(name: str) -> str:

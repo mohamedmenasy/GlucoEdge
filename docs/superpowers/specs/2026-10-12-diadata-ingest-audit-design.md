@@ -148,3 +148,22 @@ or r2 is not worth its compute.
 - Exact mixture arms and ratios (depend on audit counts).
 - Directional-recall gate values and the stable-recall floor margin.
 - Whether (96,144) capacity re-wins under the new mixture.
+
+## Audit decision note (2026-10-12, run diadata-audit-r1)
+
+Included cohorts: CITY, DLCP3, PEDAP, RBG (ReplaceBG), SENCE, WISDM —
+all JAEB Dexcom native-5-min studies. Included subjects: 1,001; hours:
+4,720,389; total windows: 51.6M.
+Fast-class windows: 3,911,376 vs weinstock 38,998 — multiplier 100.3x.
+Decision rule (>= 2x): PASSED by two orders of magnitude. Proceed to the
+r2 spec.
+Excluded: D1NAMO (overlap: GlucoBench dubosson2018), SHD (overlap:
+GlucoBench weinstock2016 — exactly 200 subjects, confirming the match),
+RT-CGM (mixed sensors, per-subject interval not recoverable), HUPA-UCM +
+ShanghaiT1D (Libre 15-min native), DDATSHR + T1GDUJA (sensor
+undocumented). Collinear-triple fractions for included cohorts ran
+0.125-0.229 (integer-quantized Dexcom baseline), all far below the 0.5
+flag threshold; no cohort was excluded_flagged.
+Raw (non-imputed) variant used throughout; preprocessed variant never
+extracted. Zip sha256
+2271dd6b2806f2952916b5a99ced09afae689346053e261173691d40c3b543c9.
