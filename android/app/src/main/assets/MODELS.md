@@ -30,10 +30,12 @@ descriptive): directional 0.541 vs 0.522.
 | `trend_float.tflite` | `96eef43c37779534dab86312a6c7c65954fade0f5b2af0cfc3084dffb03b9a01` | 177336 |
 | `trend_int8.tflite` | `a887ea4e786e2b40ff6c235fef0cd70af1c4149421ac49358640da3715757c42` | 55216 |
 
-Verification state: NOT yet device-verified — verified at ship time on
-the Android JVM suite and the iOS simulator suite (golden parity, INT8
-bit-exact; results in the ship PR). On-device verification (iPhone
-18 Pro Max) is pending the next time the phone is attached.
+Verification state: DEVICE-VERIFIED on the iPhone 18 Pro Max on
+2026-10-12, the day these bytes shipped: the full test run — 51 tests in
+13 suites, golden parity (INT8 bit-exact against these sha256s) and the
+Swift delta transform included — passed on device. Also verified on the
+Android JVM suite and the iOS simulator suite at ship time (CI 3/3 on
+the ship PR).
 
 The previous bundled pair — the 2026-10-10 delta-inputs `delta-r1`
 anchor seed-0 artifacts, float `c30560f7…` (17,352 bytes), INT8
