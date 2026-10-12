@@ -22,6 +22,14 @@ def _main_csvs(root: Path) -> list[Path]:
     return sorted(p for p in root.rglob("*.csv") if "HeartRate" not in p.name)
 
 
+def _safe_name(cohort) -> str:
+    """Cohort names come from a downloaded CSV (untrusted); they become
+    cache filenames, so strip anything that could traverse paths."""
+    cleaned = "".join(c if c.isalnum() or c in "._-" else "_" for c in str(cohort))
+    cleaned = cleaned.lstrip(".")
+    return cleaned or "_"
+
+
 def split_to_cache(root: Path, cache_dir: Path) -> list[Path]:
     """One pass over the (large) main CSVs, split into one CSV per cohort.
     Cache lives under gitignored results/; DiaData itself is never written."""
@@ -33,14 +41,14 @@ def split_to_cache(root: Path, cache_dir: Path) -> list[Path]:
     for csv in _main_csvs(root):
         for chunk in pd.read_csv(csv, chunksize=2_000_000):
             for cohort, rows in chunk.groupby(COLUMNS["cohort"]):
-                out = cache_dir / f"{cohort}.csv"
+                out = cache_dir / f"{_safe_name(cohort)}.csv"
                 rows.to_csv(out, mode="a", header=out not in seen, index=False)
                 seen.add(out)
     return sorted(seen)
 
 
 def _cohort_frame(root: Path, cohort: str, cache_dir: Path) -> pd.DataFrame:
-    path = cache_dir / f"{cohort}.csv"
+    path = cache_dir / f"{_safe_name(cohort)}.csv"
     if not path.exists():
         split_to_cache(root, cache_dir)
     if not path.exists():  # cohort absent from the data

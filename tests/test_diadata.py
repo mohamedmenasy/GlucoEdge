@@ -53,6 +53,17 @@ def test_empty_cohort_returns_empty_frame(tmp_path):
     assert df.empty and list(df.columns) == ["id", "id_segment", "time", "gl"]
 
 
+def test_split_to_cache_sanitizes_hostile_cohort_names(tmp_path):
+    # Database values come from a downloaded CSV: untrusted. A traversal
+    # attempt must not escape cache_dir.
+    root = _write_main_csv(tmp_path, [_raw("../evil", 1, "2024-01-01", 3)])
+    cache = tmp_path / "cache"
+    files = split_to_cache(root, cache)
+    assert len(files) == 1
+    assert files[0].parent == cache
+    assert not (tmp_path / "evil.csv").exists()
+
+
 def test_split_to_cache_one_file_per_cohort(tmp_path):
     root = _write_main_csv(tmp_path, [_raw("CITY", 1, "2024-01-01", 3), _raw("WISDM", 2, "2024-01-01", 3)])
     files = split_to_cache(root, tmp_path / "cache")
