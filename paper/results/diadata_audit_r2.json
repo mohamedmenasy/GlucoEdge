@@ -1,0 +1,9 @@
+{
+  "cohort": "RT-CGM",
+  "rule": "admit iff modal within-segment interval == 300s and >=95% of intervals in [270s, 330s]",
+  "subjects_total": 451,
+  "subjects_admitted": 451,
+  "modal_interval_histogram_s": {
+    "300": 451
+  }
+}
