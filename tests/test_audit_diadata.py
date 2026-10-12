@@ -39,6 +39,44 @@ def test_verdict_unknown_cohort_and_flagging():
     assert verdict(excluded, 0.0) == SENSOR_TABLE[excluded]["base_verdict"]
 
 
+def test_main_handles_included_cohort_filtered_to_empty(tmp_path, monkeypatch):
+    # An included cohort whose rows all fail the glucose filter must flow
+    # through main() with zero counts, not crash on a missing label_windows.
+    import experiments.audit_diadata as audit
+    root = tmp_path / "DiaData"
+    root.mkdir()
+    f = pd.DataFrame({"ts": pd.date_range("2024-01-01", periods=5, freq="5min"),
+                      "PtID": 1, "GlucoseCGM": 0.0, "Database": "CITY"})
+    f.to_csv(root / "MDB_5min_sampling_raw.csv", index=False)
+    monkeypatch.setattr(audit, "DIADATA_ROOT", root)
+    monkeypatch.setattr(audit, "CACHE_DIR", tmp_path / "cache")
+    monkeypatch.setattr(audit, "OUT_LOCAL", tmp_path / "local.json")
+    monkeypatch.setattr(audit, "OUT_PUBLISHED", tmp_path / "published.json")
+    monkeypatch.setattr(audit, "_weinstock_fast_count",
+                        lambda: {c: 10 for c in ("falling_fast", "falling", "stable", "rising", "rising_fast")})
+    monkeypatch.setattr("sys.argv", ["audit_diadata"])
+    audit.main()
+    import json
+    out = json.loads((tmp_path / "published.json").read_text())
+    city = next(r for r in out["cohorts"] if r["cohort"] == "CITY")
+    assert city["verdict"] == "included" and sum(city["label_windows"].values()) == 0
+    assert out["summary"]["included_fast_class_windows"] == 0
+
+
+def test_dedupe_splits_removes_context_overlap_and_sorts():
+    # GlucoBench prepends context rows from train to val/test; the
+    # concatenated frame holds duplicate (id, id_segment, time) rows out
+    # of order, which would fabricate 15-minute-rate windows.
+    from experiments.audit_diadata import dedupe_splits
+    t = pd.date_range("2024-01-01", periods=6, freq="5min")
+    train = pd.DataFrame({"id": "w1", "id_segment": 0, "time": t[:4], "gl": 100.0})
+    val = pd.DataFrame({"id": "w1", "id_segment": 0, "time": t[2:], "gl": 100.0})  # 2 context rows overlap
+    out = dedupe_splits([train, val])
+    assert len(out) == 6
+    assert out["time"].is_monotonic_increasing
+    assert not out.duplicated(["id", "id_segment", "time"]).any()
+
+
 def test_label_window_counts_on_synthetic_frame():
     n = 40
     t = pd.date_range("2024-01-01", periods=n, freq="5min")

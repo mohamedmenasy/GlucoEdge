@@ -231,8 +231,8 @@
     "included_subjects": 1001,
     "included_hours": 4720388.7,
     "included_fast_class_windows": 3911376,
-    "weinstock_fast_class_windows": 38998,
-    "fast_class_multiplier": 100.3,
+    "weinstock_fast_class_windows": 40374,
+    "fast_class_multiplier": 96.88,
     "decision_rule_2x_passed": true
   }
 }

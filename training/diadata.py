@@ -3,6 +3,7 @@
 DiaData is an external, read-only sibling directory (like GlucoBench).
 Research use of a public benchmark collection — not a medical device.
 """
+import shutil
 from pathlib import Path
 from typing import Sequence
 
@@ -18,17 +19,20 @@ def segment_ids(times: pd.Series) -> np.ndarray:
     return gaps.cumsum().to_numpy()
 
 
+def _default_cache_dir() -> Path:
+    # Must live under the repo's gitignored results/, never outside it.
+    return Path(__file__).resolve().parents[1] / "results" / "diadata_cache"
+
+
 def _main_csvs(root: Path) -> list[Path]:
-    csvs = sorted(
-        p for p in root.rglob("*.csv")
-        if "HeartRate" not in p.name
-        and "__MACOSX" not in p.parts
-        and not p.name.startswith("._")  # AppleDouble metadata, not data
+    """Exactly the raw main-database CSV. The preprocessed variant
+    interpolates gaps (label contamination) and the SDB* files are
+    subsets of MDB; matching the exact raw filename excludes both, plus
+    AppleDouble junk."""
+    return sorted(
+        p for p in root.rglob("MDB_5min_sampling_raw.csv")
+        if "__MACOSX" not in p.parts and not p.name.startswith("._")
     )
-    # The subdatabases (SDB*) are subsets of the main database; reading
-    # both would double-count rows. Prefer MDB files when present.
-    mdb = [p for p in csvs if p.name.startswith("MDB")]
-    return mdb or csvs
 
 
 def _safe_name(cohort) -> str:
@@ -42,18 +46,28 @@ def _safe_name(cohort) -> str:
 def split_to_cache(root: Path, cache_dir: Path) -> list[Path]:
     """One pass over the (large) main CSVs, split into one CSV per cohort.
     Cache lives under gitignored results/; DiaData itself is never written."""
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    existing = sorted(cache_dir.glob("*.csv"))
-    if existing:  # cache hit; a rerun must not append duplicates
-        return existing
+    if cache_dir.exists() and any(cache_dir.glob("*.csv")):
+        return sorted(cache_dir.glob("*.csv"))  # cache hit; never append twice
+    sources = _main_csvs(root)
+    if not sources:
+        raise FileNotFoundError(f"no MDB_5min_sampling_raw.csv under {root}")
+    # Build into a .partial dir and rename at the end: an interrupted
+    # split must never be mistaken for a complete cache.
+    partial = cache_dir.with_name(cache_dir.name + ".partial")
+    if partial.exists():
+        shutil.rmtree(partial)
+    partial.mkdir(parents=True)
     seen: set[Path] = set()
-    for csv in _main_csvs(root):
+    for csv in sources:
         for chunk in pd.read_csv(csv, chunksize=2_000_000):
             for cohort, rows in chunk.groupby(COLUMNS["cohort"]):
-                out = cache_dir / f"{_safe_name(cohort)}.csv"
+                out = partial / f"{_safe_name(cohort)}.csv"
                 rows.to_csv(out, mode="a", header=out not in seen, index=False)
                 seen.add(out)
-    return sorted(seen)
+    if cache_dir.exists():
+        cache_dir.rmdir()  # empty leftover; a non-empty dir returned above
+    partial.rename(cache_dir)
+    return sorted(cache_dir.glob("*.csv"))
 
 
 def _cohort_frame(root: Path, cohort: str, cache_dir: Path) -> pd.DataFrame:
@@ -66,7 +80,7 @@ def _cohort_frame(root: Path, cohort: str, cache_dir: Path) -> pd.DataFrame:
 
 
 def load_diadata(root: Path, include_cohorts: Sequence[str], cache_dir: Path | None = None) -> pd.DataFrame:
-    cache_dir = cache_dir or root.parent / "results" / "diadata_cache"
+    cache_dir = cache_dir or _default_cache_dir()
     parts = []
     for cohort in include_cohorts:
         raw = _cohort_frame(root, cohort, cache_dir)

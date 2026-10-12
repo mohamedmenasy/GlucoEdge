@@ -103,20 +103,19 @@ def _cohort_report(name: str) -> dict:
     frame = load_diadata(DIADATA_ROOT, [name], cache_dir=CACHE_DIR)
     row = SENSOR_TABLE.get(_canon(name), {})
     if frame.empty:
-        return {"cohort": name, "subjects": 0, "hours": 0.0, "segments": 0,
-                "collinear_fraction": 0.0, "verdict": verdict(name, 0.0),
-                "sensor": row.get("sensor", "unknown"), "citation": row.get("citation", "")}
-    cf = collinear_fraction(frame["gl"].to_numpy(), frame["id_segment"].to_numpy()
-                            + pd.factorize(frame["id"])[0] * 10**9)
+        cf = 0.0
+    else:
+        cf = collinear_fraction(frame["gl"].to_numpy(), frame["id_segment"].to_numpy()
+                                + pd.factorize(frame["id"])[0] * 10**9)
     v = verdict(name, cf)
     report = {
         "cohort": name,
         "sensor": row.get("sensor", "unknown"),
         "interval_min": row.get("interval_min"),
         "citation": row.get("citation", ""),
-        "subjects": int(frame["id"].nunique()),
+        "subjects": int(frame["id"].nunique()) if not frame.empty else 0,
         "hours": round(len(frame) * 5 / 60.0, 1),
-        "segments": int(frame.groupby("id")["id_segment"].nunique().sum()),
+        "segments": int(frame.groupby("id")["id_segment"].nunique().sum()) if not frame.empty else 0,
         "collinear_fraction": round(cf, 4),
         "verdict": v,
     }
@@ -125,12 +124,21 @@ def _cohort_report(name: str) -> dict:
     return report
 
 
+def dedupe_splits(frames: list) -> pd.DataFrame:
+    """GlucoBench prepends context rows from train to val/test, so a
+    plain concat holds duplicate (id, id_segment, time) rows out of
+    order — windows over those would carry fabricated rates."""
+    out = pd.concat(frames, ignore_index=True)
+    out = out.sort_values(["id", "id_segment", "time"])
+    return out.drop_duplicates(["id", "id_segment", "time"], keep="first").reset_index(drop=True)
+
+
 def _weinstock_fast_count() -> dict:
     """Weinstock fast-class window count under the same rule (full frame,
     no split provenance — this is a data-volume comparison, not an eval)."""
     from training.train import load_formatter
     formatter = load_formatter("weinstock")
-    frame = pd.concat([formatter.train_data, formatter.val_data, formatter.test_data])
+    frame = dedupe_splits([formatter.train_data, formatter.val_data, formatter.test_data])
     return label_window_counts(frame)
 
 

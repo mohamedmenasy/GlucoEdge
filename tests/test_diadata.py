@@ -16,7 +16,7 @@ def _raw(cohort, pid, start, n, step_min=5):
 def _write_main_csv(tmp_path, frames):
     root = tmp_path / "DiaData"
     root.mkdir()
-    pd.concat(frames).to_csv(root / "main.csv", index=False)
+    pd.concat(frames).to_csv(root / "MDB_5min_sampling_raw.csv", index=False)
     return root
 
 
@@ -64,15 +64,44 @@ def test_split_to_cache_sanitizes_hostile_cohort_names(tmp_path):
     assert not (tmp_path / "evil.csv").exists()
 
 
-def test_main_csvs_prefer_mdb_and_skip_appledouble(tmp_path):
+def test_main_csvs_exact_raw_mdb_only(tmp_path):
     from training.diadata import _main_csvs
     root = tmp_path / "DiaData"
     (root / "__MACOSX").mkdir(parents=True)
+    (root / "preprocessed").mkdir()
     (root / "MDB_5min_sampling_raw.csv").write_text("ts,PtID,GlucoseCGM,Database\n")
     (root / "SDBI_5min_sampling_raw.csv").write_text("ts,PtID,GlucoseCGM,Database,Sex\n")
+    (root / "preprocessed" / "MDB_5min_sampling_preprocessed.csv").write_text("ts,PtID,GlucoseCGM,Database\n")
     (root / "__MACOSX" / "._MDB_5min_sampling_raw.csv").write_text("junk")
     got = _main_csvs(root)
-    assert [p.name for p in got] == ["MDB_5min_sampling_raw.csv"]  # SDB* are MDB subsets; AppleDouble junk skipped
+    # exact raw MDB only: SDB subsets, the interpolated preprocessed MDB,
+    # and AppleDouble junk are all invisible
+    assert [p.name for p in got] == ["MDB_5min_sampling_raw.csv"]
+
+
+def test_split_to_cache_missing_source_raises(tmp_path):
+    (tmp_path / "DiaData").mkdir()
+    with pytest.raises(FileNotFoundError):
+        split_to_cache(tmp_path / "DiaData", tmp_path / "cache")
+    with pytest.raises(FileNotFoundError):
+        split_to_cache(tmp_path / "nonexistent", tmp_path / "cache")
+
+
+def test_split_to_cache_ignores_interrupted_partial(tmp_path):
+    root = _write_main_csv(tmp_path, [_raw("CITY", 1, "2024-01-01", 3)])
+    cache = tmp_path / "cache"
+    partial = tmp_path / "cache.partial"
+    partial.mkdir()
+    (partial / "CITY.csv").write_text("ts,PtID,GlucoseCGM,Database\n")  # truncated leftover
+    files = split_to_cache(root, cache)
+    assert files and files[0].parent == cache
+    assert len(pd.read_csv(cache / "CITY.csv")) == 3  # rebuilt fresh, not the truncated leftover
+
+
+def test_default_cache_dir_inside_repo_results(tmp_path):
+    from training.diadata import _default_cache_dir
+    repo_results = Path(__file__).resolve().parents[1] / "results"
+    assert _default_cache_dir() == repo_results / "diadata_cache"
 
 
 def test_split_to_cache_one_file_per_cohort(tmp_path):

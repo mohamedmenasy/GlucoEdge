@@ -154,7 +154,12 @@ or r2 is not worth its compute.
 Included cohorts: CITY, DLCP3, PEDAP, RBG (ReplaceBG), SENCE, WISDM —
 all JAEB Dexcom native-5-min studies. Included subjects: 1,001; hours:
 4,720,389; total windows: 51.6M.
-Fast-class windows: 3,911,376 vs weinstock 38,998 — multiplier 100.3x.
+Fast-class windows: 3,911,376 vs weinstock 40,374 — multiplier 96.9x.
+(The first run's weinstock baseline of 38,998 counted GlucoBench's
+duplicated context rows; the final review caught it, the concat is now
+deduped on (id, id_segment, time), and the audit was rerun. The same
+study through the DiaData pipeline (SHD) gives 31,091 — the rule
+passes under every baseline, 96.9x to 125.8x.)
 Decision rule (>= 2x): PASSED by two orders of magnitude. Proceed to the
 r2 spec.
 Excluded: D1NAMO (overlap: GlucoBench dubosson2018), SHD (overlap:
