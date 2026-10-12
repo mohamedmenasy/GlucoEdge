@@ -35,7 +35,12 @@ Verification state: DEVICE-VERIFIED on the iPhone 18 Pro Max on
 13 suites, golden parity (INT8 bit-exact against these sha256s) and the
 Swift delta transform included — passed on device. Also verified on the
 Android JVM suite and the iOS simulator suite at ship time (CI 3/3 on
-the ship PR).
+the ship PR). A live in-app session on the same device the same day
+(CompiledModel, n=100 per model, synthetic trace, timer =
+quantize+run+dequantize) recorded float 0.102 ms mean / 0.148 ms p95
+and INT8 0.149 ms / 0.212 ms — the 10x-parameter pair stays well under
+a quarter millisecond, with the Explain feature producing descriptive,
+advice-free notes.
 
 The previous bundled pair — the 2026-10-10 delta-inputs `delta-r1`
 anchor seed-0 artifacts, float `c30560f7…` (17,352 bytes), INT8
