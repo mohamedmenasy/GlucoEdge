@@ -82,3 +82,15 @@ def test_boot_seed_single_source():
     pids = np.array([f"p{i % 4}" for i in range(200)])
     g = r3.gate_results_r3(y, pids, cand_int8=y, cand_float=y, champ_int8=y, n_boot=50)
     assert g["contrast_int8_vs_champion"]["seed"] == 20261013
+
+
+def test_stage_evaluate_refuses_without_committed_r3_protocol(monkeypatch, tmp_path):
+    monkeypatch.setattr(r3, "PROTOCOL_R3", tmp_path / "protocol_sweep_r3.json")
+    with pytest.raises(SystemExit, match="REFUSED"):
+        r3.stage_evaluate("sweep-r3-test")
+
+
+def test_analyze_reports_pairing_rule_fields():
+    block = r3._pairing_block(n_winner=100, n_champion=100)
+    assert block == {"pairing_rule": "identical eligible windows by construction",
+                     "dropped_windows_winner": 0, "dropped_windows_champion": 0}
