@@ -1,0 +1,284 @@
+{
+ "study": "accuracy-sweep-r2",
+ "run_id": "sweep-r2",
+ "spec": "docs/superpowers/specs/2026-10-12-accuracy-sweep-r2-design.md",
+ "frozen_date_utc": "2026-10-12",
+ "glucoedge_commit_at_freeze": "b066232",
+ "smoke": {
+  "results": {
+   "64": {
+    "0": 0.5144132443292886,
+    "1": 0.49807907979111193
+   },
+   "512": {
+    "0": 0.5132031142456811,
+    "1": 0.5120121728524486
+   }
+  },
+  "mean64": 0.5062461620602002,
+  "frozen_batch": 512,
+  "mps_same_seed_abs_diff": 0.0,
+  "mps_seed_reproducible": true
+ },
+ "selection_trail": {
+  "M": {
+   "stage": "M",
+   "champion_val": {
+    "directional": 0.5188367056346577,
+    "stable": 0.5627656559931992
+   },
+   "stable_floor": 0.5127656559931991,
+   "table": {
+    "M_M0": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5132031142456811,
+       "stable": 0.6164635874185321
+      },
+      "1": {
+       "directional": 0.5120121728524486,
+       "stable": 0.5990365542646642
+      },
+      "2": {
+       "directional": 0.5096948605735434,
+       "stable": 0.5895437801076793
+      }
+     },
+     "mean_directional": 0.5116367158905577,
+     "mean_stable": 0.6016813072636252,
+     "disqualified": false
+    },
+    "M_M1": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5307081111725886,
+       "stable": 0.5596486256729952
+      },
+      "1": {
+       "directional": 0.5303995012839072,
+       "stable": 0.5605931803154812
+      },
+      "2": {
+       "directional": 0.5199638051345918,
+       "stable": 0.5877491262869557
+      }
+     },
+     "mean_directional": 0.5270238058636959,
+     "mean_stable": 0.5693303107584774,
+     "disqualified": false
+    },
+    "M_M2": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5374612474665705,
+       "stable": 0.527392084632096
+      },
+      "1": {
+       "directional": 0.5322830504667175,
+       "stable": 0.5489751582129027
+      },
+      "2": {
+       "directional": 0.5261351371511248,
+       "stable": 0.5601209029942382
+      }
+     },
+     "mean_directional": 0.5319598116948043,
+     "mean_stable": 0.545496048613079,
+     "disqualified": false
+    },
+    "M_M3": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5339271455509136,
+       "stable": 0.5398602059129121
+      },
+      "1": {
+       "directional": 0.5391284323822993,
+       "stable": 0.5388684235383017
+      },
+      "2": {
+       "directional": 0.5322059886351717,
+       "stable": 0.5407575328232739
+      }
+     },
+     "mean_directional": 0.5350871888561283,
+     "mean_stable": 0.5398287207581626,
+     "disqualified": false
+    },
+    "M_M4": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5259363775268967,
+       "stable": 0.589354869179182
+      },
+      "1": {
+       "directional": 0.5246376477810136,
+       "stable": 0.577831302540852
+      },
+      "2": {
+       "directional": 0.527136660813859,
+       "stable": 0.5630017946538207
+      }
+     },
+     "mean_directional": 0.5259035620405897,
+     "mean_stable": 0.5767293221246182,
+     "disqualified": false
+    }
+   },
+   "winner": {
+    "name": "M_M3",
+    "mixture": "M3",
+    "channels": [
+     96,
+     144
+    ],
+    "length": 12,
+    "loss": "ce",
+    "pooled": false
+   }
+  },
+  "C": {
+   "stage": "C",
+   "champion_val": {
+    "directional": 0.5188367056346577,
+    "stable": 0.5627656559931992
+   },
+   "stable_floor": 0.5127656559931991,
+   "table": {
+    "C_c24x36": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5216140952683505,
+       "stable": 0.5839709077170114
+      },
+      "1": {
+       "directional": 0.5317675948550755,
+       "stable": 0.5460942665533202
+      },
+      "2": {
+       "directional": 0.5238072361019164,
+       "stable": 0.5531311986398413
+      }
+     },
+     "mean_directional": 0.5257296420751141,
+     "mean_stable": 0.5610654576367243,
+     "disqualified": false
+    },
+    "C_c192x288": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5200490217294388,
+       "stable": 0.5769339756304902
+      },
+      "1": {
+       "directional": 0.5264291504319845,
+       "stable": 0.574241994899405
+      },
+      "2": {
+       "directional": 0.5260833834099021,
+       "stable": 0.5499197128553887
+      }
+     },
+     "mean_directional": 0.5241871851904418,
+     "mean_stable": 0.5670318944617613,
+     "disqualified": false
+    },
+    "M_M3": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5339271455509136,
+       "stable": 0.5398602059129121
+      },
+      "1": {
+       "directional": 0.5391284323822993,
+       "stable": 0.5388684235383017
+      },
+      "2": {
+       "directional": 0.5322059886351717,
+       "stable": 0.5407575328232739
+      }
+     },
+     "mean_directional": 0.5350871888561283,
+     "mean_stable": 0.5398287207581626,
+     "disqualified": false
+    }
+   },
+   "winner": {
+    "name": "M_M3",
+    "mixture": "M3",
+    "channels": [
+     96,
+     144
+    ],
+    "length": 12,
+    "loss": "ce",
+    "pooled": false
+   }
+  },
+  "S": {
+   "stage": "S",
+   "table": {
+    "per_seed": {
+     "0": {
+      "directional": 0.5339271455509136,
+      "stable": 0.5398602059129121
+     },
+     "1": {
+      "directional": 0.5391284323822993,
+      "stable": 0.5388684235383017
+     },
+     "2": {
+      "directional": 0.5322059886351717,
+      "stable": 0.5407575328232739
+     },
+     "3": {
+      "directional": 0.5250779440340179,
+      "stable": 0.5584207046377633
+     },
+     "4": {
+      "directional": 0.5308270884671717,
+      "stable": 0.5570983281382828
+     }
+    }
+   },
+   "best_seed": 1,
+   "winner": {
+    "name": "M_M3",
+    "mixture": "M3",
+    "channels": [
+     96,
+     144
+    ],
+    "length": 12,
+    "loss": "ce",
+    "pooled": false,
+    "ensemble": false
+   }
+  }
+ },
+ "winner": {
+  "name": "M_M3",
+  "mixture": "M3",
+  "channels": [
+   96,
+   144
+  ],
+  "length": 12,
+  "loss": "ce",
+  "pooled": false,
+  "ensemble": false,
+  "best_seed": 1
+ },
+ "champion": {
+  "float_sha256": "c30560f7283e4927a4b63ff0ffdd34f4108e035905b80c4ed4fd01b479dbb07a",
+  "int8_sha256": "8590a3d25c409a46659cba3dab97f649c54b57061022e01cae0feec2f5366388"
+ },
+ "prediction": "winner INT8 (uniform_random_200_d101) > champion INT8 on held-out directional recall without breaking the stable floor",
+ "primary_endpoint": "held_out directional recall delta, participant-cluster bootstrap, 2000 draws, seed 20261012",
+ "secondary_endpoints": "temporal same recipe; macro-F1 both splits; PEDAP zero-shot descriptive",
+ "gates": {
+  "1": "directional delta > 0 and CI lower bound > -0.5pp",
+  "2": "winner INT8 held_out stable recall >= champion INT8 stable recall - 2.0pp",
+  "3": "winner INT8 within 0.5pp of own float (directional recall)"
+ }
+}

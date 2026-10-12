@@ -230,6 +230,18 @@ accuracy for this single-label setting, gives each class equal weight and makes
 minority-class degradation visible \cite{brodersen2010balanced}. Macro recall
 still does not establish event-level or clinical performance.
 
+No published baseline exists for this exact task (five rate-of-change
+classes at a future sample, scored on held-out participants). The
+nearest classification results predict glucose
+\emph{level} bands, with recalls of 0.85--0.96 at 15-minute and 1-hour
+horizons under within-patient splits \cite{kistkins2023classification};
+level bands inherit the level's autocorrelation, three classes
+are coarser than five rate bands, and within-patient splits exploit
+person-specific dynamics a held-out protocol denies.
+Forecasting work evaluates RMSE, where direction surfaces only as a
+safety penalty on incoherent predicted variation
+\cite{debois2019coherent}.
+
 \subsection{Edge inference and quantization}
 
 One-dimensional CNNs extract local temporal features with compact feed-forward
@@ -1145,6 +1157,63 @@ Temporal & 0.417 & 0.418 & 0.362 & $+0.055$ $[+0.048, +0.061]$ \\
 \end{tabular}
 \end{table}
 
+\subsection{Accuracy sweep, round two: a directional endpoint and external training data}
+
+Round one's lesson fixed round two's design: the endpoint is directional
+recall (the mean recall of the four non-stable classes), guarded by a
+stable-recall floor at both selection and confirmation, with the same
+one-read discipline (\texttt{protocol\_sweep\_r2.json}, committed before
+any held-out label). The new ingredient is training data: the DiaData
+collection's overlap and sensor audit admitted six T1D cohorts (1{,}001
+subjects; \texttt{diadata\_audit\_r1.json}); five (898 subjects) fed
+training, capped near 15M windows per arm by whole-subject sampling,
+and the sixth, PEDAP (103), was excluded from all training as a
+zero-shot probe. Stage~M compared five mixtures at $(96,144)$:
+validation directional recall rose from 0.512 (Weinstock-only) through
+0.527 (natural proportions) and 0.532 (equal windows per cohort) to
+0.535 for DiaData-only training --- the winner never sees a Weinstock
+training window --- with stable recall (0.540) above the disqualifier
+floor. The gain tracks cohort balance as much as DiaData share: the
+equal-per-cohort mixture won on fewer DiaData windows (97.5\% versus
+97.8\% share). Fast-class oversampling tied natural proportions (0.526),
+a null expected here: re-balancing the class weights on the oversampled
+labels restores the same objective. Capacity brackets at $(24,36)$ and $(192,288)$ both lost
+(0.526, 0.524), and the best of five seeds reached 0.539 validation
+directional recall against the champion's 0.519.
+
+Table~\ref{tab:sweeptwo} reports the one confirmatory read. The winner's
+INT8 model beats the bundled champion by $+0.60$ directional-recall
+points held-out (participant-cluster bootstrap, 2{,}000 draws, CI lower
+bound $-0.06$, inside the $-0.5$-point non-inferiority margin), holds the
+stable floor ($0.459$ versus $0.475$, within the 2-point gate), and sits
+within $0.11$ points of its own float --- all three pre-registered gates
+pass, and the temporal split agrees in sign ($+0.50$). The cost surfaces
+in the cross-referenced secondary: macro-F1 slips slightly against the
+champion (0.364 versus 0.368 held-out), the mirror image of round one's
+tradeoff, bought this time in the intended direction. On the never-trained
+PEDAP cohort (7.0M windows, descriptive only), the winner's directional
+recall is 0.541 against the champion's 0.522, with stable recall lower
+for both models than on Weinstock. Full record:
+\texttt{accuracy\_sweep\_r2.json}.
+
+\begin{table}[t]
+\centering
+\caption{Round-two pre-registered confirmatory read (directional recall,
+paired windows; winner = DiaData-only mixture, $(96,144)$ channels,
+1-hour window, seed 1). Delta is winner INT8 minus champion INT8,
+participant-cluster bootstrap CI.}
+\label{tab:sweeptwo}
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Split & Winner float & Winner INT8 & Champion INT8 & $\Delta$ [95\% CI] \\
+\midrule
+Held-out & 0.524 & 0.523 & 0.517 & $+0.006$ $[-0.001, +0.013]$ \\
+Temporal & 0.506 & 0.502 & 0.497 & $+0.005$ $[-0.004, +0.014]$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Historical comparison}
 
 The earlier revision reported accuracy 0.5184 and macro recall 0.5060 for
@@ -1502,8 +1571,8 @@ on two further cohorts with prespecified paired predictions whose
 magnitudes track the calibration-coverage deficit. \project remains a research prototype, not a medical device.
 
 \bibliographystyle{unsrtnat}
-\renewcommand{\bibfont}{\footnotesize}
-\setlength{\bibsep}{2pt}
+\renewcommand{\bibfont}{\scriptsize}
+\setlength{\bibsep}{0.5pt}
 \bibliography{references}
 
 \end{document}

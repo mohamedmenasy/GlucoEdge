@@ -22,6 +22,12 @@ GLUCOEDGE_ROOT = Path(__file__).resolve().parent.parent
 GLUCOBENCH_ROOT = GLUCOEDGE_ROOT / "GlucoBench"
 
 
+def resolve_device(prefer: str = "mps") -> torch.device:
+    if prefer == "mps" and torch.backends.mps.is_available():
+        return torch.device("mps")
+    return torch.device("cpu")
+
+
 def set_seed(seed: int) -> None:
     torch.manual_seed(seed)
 
@@ -65,13 +71,13 @@ def class_weights(train_ds, num_classes: int) -> torch.Tensor:
     return torch.tensor(weights, dtype=torch.float32)
 
 
-def train_model(train_ds, val_ds, num_classes, epochs, device, model=None, criterion=None):
+def train_model(train_ds, val_ds, num_classes, epochs, device, model=None, criterion=None, batch_size=64):
     model = (model if model is not None else TrendCNN(num_classes=num_classes)).to(device)
     if criterion is None:
         criterion = torch.nn.CrossEntropyLoss(weight=class_weights(train_ds, num_classes).to(device))
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-    train_loader = DataLoader(train_ds, batch_size=64, shuffle=True)
-    val_loader = DataLoader(val_ds, batch_size=64)
+    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_ds, batch_size=max(batch_size, 64))
 
     for epoch in range(epochs):
         model.train()
