@@ -53,6 +53,13 @@ class TensorView3(TensorView):
         return torch.from_numpy(self.x[k]), int(self.y[k])
 
 
+def _hours_of(times):
+    """Fractional hour-of-day for datetime64 arrays or Timestamp sequences."""
+    import pandas as pd
+    idx = pd.DatetimeIndex(np.asarray(times))
+    return (idx.hour + idx.minute / 60 + idx.second / 3600).to_numpy(float)
+
+
 _HOUR_CACHE = {}
 
 
@@ -75,8 +82,7 @@ def _diadata_windows_r3(cohort):
                              cache_dir=GLUCOEDGE_ROOT / "results" / "diadata_cache")
         ds = GlucoseTrendDataset(frame, classes=FIVE_CLASSES, input_length=12)
         w = delta_windows(np.stack(ds.windows), True).astype(np.float32)
-        hours = np.array([t.hour + t.minute / 60 + t.second / 3600
-                          for t in ds.anchor_times], dtype=np.float64)
+        hours = _hours_of(ds.anchor_times)
         out = (w, np.asarray(ds.labels, dtype=np.int64),
                np.asarray([str(p) for p in ds.participants]), hours)
         cache.parent.mkdir(parents=True, exist_ok=True)
@@ -159,8 +165,7 @@ def _val_view_r3(features):
     t = ds["val"]
     w = delta_windows(np.stack([t.windows[i] for i in idx]), True).astype(np.float32)
     y = np.asarray([t.labels[i] for i in idx], dtype=np.int64)
-    hours = np.array([t.anchor_times[i].hour + t.anchor_times[i].minute / 60
-                      + t.anchor_times[i].second / 3600 for i in idx])
+    hours = _hours_of([t.anchor_times[i] for i in idx])
     return TensorView3(_with_features(w, hours, features), y)
 
 
@@ -365,8 +370,7 @@ def _winner_ckpt(run, winner, seed):
 
 def _hours_from_keys(keys):
     import pandas as pd
-    ts = [pd.Timestamp(k[1]) for k in keys]
-    return np.array([t.hour + t.minute / 60 + t.second / 3600 for t in ts])
+    return _hours_of([pd.Timestamp(k[1]) for k in keys])
 
 
 def _tflite_logits_r3(path, x3):
@@ -420,9 +424,7 @@ def stage_convert(run_id):
             sel = json.loads(sel_path.read_text())
             ws = np.stack([ds["val"].windows[i] for i in sel["indices"]])
             dws = delta_windows(ws, True).astype(np.float32)
-            hours = np.array([ds["val"].anchor_times[i].hour
-                              + ds["val"].anchor_times[i].minute / 60
-                              + ds["val"].anchor_times[i].second / 3600
+            hours = _hours_of([ds["val"].anchor_times[i]
                               for i in sel["indices"]])
             x3 = _with_features(dws, hours, winner["features"])
             calib = [torch.from_numpy(w[None]) for w in x3]

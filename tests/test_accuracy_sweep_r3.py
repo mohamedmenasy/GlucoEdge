@@ -94,3 +94,13 @@ def test_analyze_reports_pairing_rule_fields():
     block = r3._pairing_block(n_winner=100, n_champion=100)
     assert block == {"pairing_rule": "identical eligible windows by construction",
                      "dropped_windows_winner": 0, "dropped_windows_champion": 0}
+
+
+def test_hours_of_handles_datetime64_and_timestamps():
+    import pandas as pd
+    t64 = np.array(["2020-01-01T13:30:00", "2020-01-01T00:05:00"],
+                   dtype="datetime64[s]")
+    out = r3._hours_of(t64)
+    assert out[0] == pytest.approx(13.5) and out[1] == pytest.approx(5 / 60)
+    tpd = [pd.Timestamp("2020-01-01 06:15:00")]
+    assert r3._hours_of(tpd)[0] == pytest.approx(6.25)
