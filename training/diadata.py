@@ -19,7 +19,16 @@ def segment_ids(times: pd.Series) -> np.ndarray:
 
 
 def _main_csvs(root: Path) -> list[Path]:
-    return sorted(p for p in root.rglob("*.csv") if "HeartRate" not in p.name)
+    csvs = sorted(
+        p for p in root.rglob("*.csv")
+        if "HeartRate" not in p.name
+        and "__MACOSX" not in p.parts
+        and not p.name.startswith("._")  # AppleDouble metadata, not data
+    )
+    # The subdatabases (SDB*) are subsets of the main database; reading
+    # both would double-count rows. Prefer MDB files when present.
+    mdb = [p for p in csvs if p.name.startswith("MDB")]
+    return mdb or csvs
 
 
 def _safe_name(cohort) -> str:

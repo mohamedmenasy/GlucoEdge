@@ -64,6 +64,17 @@ def test_split_to_cache_sanitizes_hostile_cohort_names(tmp_path):
     assert not (tmp_path / "evil.csv").exists()
 
 
+def test_main_csvs_prefer_mdb_and_skip_appledouble(tmp_path):
+    from training.diadata import _main_csvs
+    root = tmp_path / "DiaData"
+    (root / "__MACOSX").mkdir(parents=True)
+    (root / "MDB_5min_sampling_raw.csv").write_text("ts,PtID,GlucoseCGM,Database\n")
+    (root / "SDBI_5min_sampling_raw.csv").write_text("ts,PtID,GlucoseCGM,Database,Sex\n")
+    (root / "__MACOSX" / "._MDB_5min_sampling_raw.csv").write_text("junk")
+    got = _main_csvs(root)
+    assert [p.name for p in got] == ["MDB_5min_sampling_raw.csv"]  # SDB* are MDB subsets; AppleDouble junk skipped
+
+
 def test_split_to_cache_one_file_per_cohort(tmp_path):
     root = _write_main_csv(tmp_path, [_raw("CITY", 1, "2024-01-01", 3), _raw("WISDM", 2, "2024-01-01", 3)])
     files = split_to_cache(root, tmp_path / "cache")
