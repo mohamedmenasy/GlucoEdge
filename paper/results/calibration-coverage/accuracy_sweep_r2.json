@@ -1,0 +1,392 @@
+{
+ "protocol": "paper/results/calibration-coverage/protocol_sweep_r2.json",
+ "run_id": "sweep-r2",
+ "selection_trail": {
+  "M": {
+   "stage": "M",
+   "champion_val": {
+    "directional": 0.5188367056346577,
+    "stable": 0.5627656559931992
+   },
+   "stable_floor": 0.5127656559931991,
+   "table": {
+    "M_M0": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5132031142456811,
+       "stable": 0.6164635874185321
+      },
+      "1": {
+       "directional": 0.5120121728524486,
+       "stable": 0.5990365542646642
+      },
+      "2": {
+       "directional": 0.5096948605735434,
+       "stable": 0.5895437801076793
+      }
+     },
+     "mean_directional": 0.5116367158905577,
+     "mean_stable": 0.6016813072636252,
+     "disqualified": false
+    },
+    "M_M1": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5307081111725886,
+       "stable": 0.5596486256729952
+      },
+      "1": {
+       "directional": 0.5303995012839072,
+       "stable": 0.5605931803154812
+      },
+      "2": {
+       "directional": 0.5199638051345918,
+       "stable": 0.5877491262869557
+      }
+     },
+     "mean_directional": 0.5270238058636959,
+     "mean_stable": 0.5693303107584774,
+     "disqualified": false
+    },
+    "M_M2": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5374612474665705,
+       "stable": 0.527392084632096
+      },
+      "1": {
+       "directional": 0.5322830504667175,
+       "stable": 0.5489751582129027
+      },
+      "2": {
+       "directional": 0.5261351371511248,
+       "stable": 0.5601209029942382
+      }
+     },
+     "mean_directional": 0.5319598116948043,
+     "mean_stable": 0.545496048613079,
+     "disqualified": false
+    },
+    "M_M3": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5339271455509136,
+       "stable": 0.5398602059129121
+      },
+      "1": {
+       "directional": 0.5391284323822993,
+       "stable": 0.5388684235383017
+      },
+      "2": {
+       "directional": 0.5322059886351717,
+       "stable": 0.5407575328232739
+      }
+     },
+     "mean_directional": 0.5350871888561283,
+     "mean_stable": 0.5398287207581626,
+     "disqualified": false
+    },
+    "M_M4": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5259363775268967,
+       "stable": 0.589354869179182
+      },
+      "1": {
+       "directional": 0.5246376477810136,
+       "stable": 0.577831302540852
+      },
+      "2": {
+       "directional": 0.527136660813859,
+       "stable": 0.5630017946538207
+      }
+     },
+     "mean_directional": 0.5259035620405897,
+     "mean_stable": 0.5767293221246182,
+     "disqualified": false
+    }
+   },
+   "winner": {
+    "name": "M_M3",
+    "mixture": "M3",
+    "channels": [
+     96,
+     144
+    ],
+    "length": 12,
+    "loss": "ce",
+    "pooled": false
+   }
+  },
+  "C": {
+   "stage": "C",
+   "champion_val": {
+    "directional": 0.5188367056346577,
+    "stable": 0.5627656559931992
+   },
+   "stable_floor": 0.5127656559931991,
+   "table": {
+    "C_c24x36": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5216140952683505,
+       "stable": 0.5839709077170114
+      },
+      "1": {
+       "directional": 0.5317675948550755,
+       "stable": 0.5460942665533202
+      },
+      "2": {
+       "directional": 0.5238072361019164,
+       "stable": 0.5531311986398413
+      }
+     },
+     "mean_directional": 0.5257296420751141,
+     "mean_stable": 0.5610654576367243,
+     "disqualified": false
+    },
+    "C_c192x288": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5200490217294388,
+       "stable": 0.5769339756304902
+      },
+      "1": {
+       "directional": 0.5264291504319845,
+       "stable": 0.574241994899405
+      },
+      "2": {
+       "directional": 0.5260833834099021,
+       "stable": 0.5499197128553887
+      }
+     },
+     "mean_directional": 0.5241871851904418,
+     "mean_stable": 0.5670318944617613,
+     "disqualified": false
+    },
+    "M_M3": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5339271455509136,
+       "stable": 0.5398602059129121
+      },
+      "1": {
+       "directional": 0.5391284323822993,
+       "stable": 0.5388684235383017
+      },
+      "2": {
+       "directional": 0.5322059886351717,
+       "stable": 0.5407575328232739
+      }
+     },
+     "mean_directional": 0.5350871888561283,
+     "mean_stable": 0.5398287207581626,
+     "disqualified": false
+    }
+   },
+   "winner": {
+    "name": "M_M3",
+    "mixture": "M3",
+    "channels": [
+     96,
+     144
+    ],
+    "length": 12,
+    "loss": "ce",
+    "pooled": false
+   }
+  },
+  "S": {
+   "stage": "S",
+   "table": {
+    "per_seed": {
+     "0": {
+      "directional": 0.5339271455509136,
+      "stable": 0.5398602059129121
+     },
+     "1": {
+      "directional": 0.5391284323822993,
+      "stable": 0.5388684235383017
+     },
+     "2": {
+      "directional": 0.5322059886351717,
+      "stable": 0.5407575328232739
+     },
+     "3": {
+      "directional": 0.5250779440340179,
+      "stable": 0.5584207046377633
+     },
+     "4": {
+      "directional": 0.5308270884671717,
+      "stable": 0.5570983281382828
+     }
+    }
+   },
+   "best_seed": 1,
+   "winner": {
+    "name": "M_M3",
+    "mixture": "M3",
+    "channels": [
+     96,
+     144
+    ],
+    "length": 12,
+    "loss": "ce",
+    "pooled": false,
+    "ensemble": false
+   }
+  }
+ },
+ "smoke": {
+  "results": {
+   "64": {
+    "0": 0.5144132443292886,
+    "1": 0.49807907979111193
+   },
+   "512": {
+    "0": 0.5132031142456811,
+    "1": 0.5120121728524486
+   }
+  },
+  "mean64": 0.5062461620602002,
+  "frozen_batch": 512,
+  "mps_same_seed_abs_diff": 0.0,
+  "mps_seed_reproducible": true
+ },
+ "components": {
+  "held_out": {
+   "windows": 46376,
+   "per_seed_directional": {
+    "0": {
+     "float": 0.5198603739687225,
+     "int8_uniform_random_200_d101": 0.5242344889957395,
+     "int8_sequential_200_d0": 0.5185575294863721
+    },
+    "1": {
+     "float": 0.5244450671977701,
+     "int8_uniform_random_200_d101": 0.5233865352051822,
+     "int8_sequential_200_d0": 0.517248513119928
+    },
+    "2": {
+     "float": 0.522886031377588,
+     "int8_uniform_random_200_d101": 0.5229302327089811,
+     "int8_sequential_200_d0": 0.5127048455589982
+    },
+    "3": {
+     "float": 0.52032570035617,
+     "int8_uniform_random_200_d101": 0.5268210880215755,
+     "int8_sequential_200_d0": 0.5167811863006727
+    },
+    "4": {
+     "float": 0.517073291859891,
+     "int8_uniform_random_200_d101": 0.5174402064380508,
+     "int8_sequential_200_d0": 0.5096726818235866
+    }
+   },
+   "macro_f1_candidate_int8": 0.36353818667254256,
+   "macro_f1_champion_int8": 0.36843118862130864,
+   "gates": {
+    "contrast_int8_vs_champion": {
+     "delta": 0.005955439944302809,
+     "ci95": [
+      -0.0005618126795122913,
+      0.013309265936541434
+     ],
+     "undefined_fraction": 0.0,
+     "n_boot": 2000,
+     "seed": 20261012
+    },
+    "candidate_float_directional": 0.5244450671977701,
+    "candidate_int8_directional": 0.5233865352051822,
+    "champion_int8_directional": 0.5174310952608794,
+    "candidate_int8_stable": 0.4585496069998517,
+    "champion_int8_stable": 0.4753967076968708,
+    "gate1_beats_champion": true,
+    "gate2_stable_floor": true,
+    "gate3_int8_within_half_pp_of_float": true
+   }
+  },
+  "temporal": {
+   "windows": 37361,
+   "per_seed_directional": {
+    "0": {
+     "float": 0.5111690342425002,
+     "int8_uniform_random_200_d101": 0.510066283106752,
+     "int8_sequential_200_d0": 0.5063335968450913
+    },
+    "1": {
+     "float": 0.5064282872910764,
+     "int8_uniform_random_200_d101": 0.5017234675044953,
+     "int8_sequential_200_d0": 0.4981528122129175
+    },
+    "2": {
+     "float": 0.507125945283891,
+     "int8_uniform_random_200_d101": 0.5088551383341476,
+     "int8_sequential_200_d0": 0.49984504906340943
+    },
+    "3": {
+     "float": 0.5002095966576708,
+     "int8_uniform_random_200_d101": 0.5037203991252643,
+     "int8_sequential_200_d0": 0.499860871193594
+    },
+    "4": {
+     "float": 0.5022993899028964,
+     "int8_uniform_random_200_d101": 0.5009580349213796,
+     "int8_sequential_200_d0": 0.4994080876994551
+    }
+   },
+   "macro_f1_candidate_int8": 0.35572874693147183,
+   "macro_f1_champion_int8": 0.3623147085654262,
+   "gates": {
+    "contrast_int8_vs_champion": {
+     "delta": 0.004955465709088724,
+     "ci95": [
+      -0.0036927337616246723,
+      0.014255904297709246
+     ],
+     "undefined_fraction": 0.0,
+     "n_boot": 2000,
+     "seed": 20261012
+    },
+    "candidate_float_directional": 0.5064282872910764,
+    "candidate_int8_directional": 0.5017234675044953,
+    "champion_int8_directional": 0.49676800179540653,
+    "candidate_int8_stable": 0.5195829713292789,
+    "champion_int8_stable": 0.5373066898349261,
+    "gate1_beats_champion": true,
+    "gate2_stable_floor": true,
+    "gate3_int8_within_half_pp_of_float": true
+   }
+  }
+ },
+ "pedap_zero_shot": {
+  "windows": 7003788,
+  "winner_int8": {
+   "directional": 0.5407023859901744,
+   "stable": 0.3941903936556735,
+   "per_class": {
+    "falling_fast": 0.6384380096816721,
+    "falling": 0.46019531202783204,
+    "stable": 0.3941903936556735,
+    "rising": 0.45345876957833864,
+    "rising_fast": 0.6107174526728549
+   }
+  },
+  "champion_int8": {
+   "directional": 0.5223390962520379,
+   "stable": 0.4026011055080673,
+   "per_class": {
+    "falling_fast": 0.5724562162274828,
+    "falling": 0.5501427973332776,
+    "stable": 0.4026011055080673,
+    "rising": 0.3415855130993465,
+    "rising_fast": 0.6251718583480447
+   }
+  },
+  "note": "descriptive; no gates; cohort never trained on"
+ },
+ "ship": {
+  "candidate": "seed 1",
+  "all_gates_pass": true
+ }
+}
