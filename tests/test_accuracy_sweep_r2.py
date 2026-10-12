@@ -48,3 +48,41 @@ def test_protocol_guard_accepts_explicit_path(tmp_path):
     subprocess.run(["git", "-C", str(tmp_path), "-c", "user.email=t@t",
                     "-c", "user.name=t", "commit", "-qm", "freeze"], check=True)
     assert protocol_is_committed(p)
+
+
+def test_stage_m_arms_cover_five_mixtures_at_96x144():
+    from experiments.accuracy_sweep_r2 import stage_m_arms
+    arms = stage_m_arms()
+    assert [a["mixture"] for a in arms] == ["M0", "M1", "M2", "M3", "M4"]
+    assert all(a["channels"] == [96, 144] and a["length"] == 12 for a in arms)
+
+
+def test_stage_c_arms_bracket_winner_capacity():
+    from experiments.accuracy_sweep_r2 import arm_r2, stage_c_arms
+    w = arm_r2("M_M1", "M1", (96, 144))
+    names = [a["channels"] for a in stage_c_arms(w)]
+    assert names == [[24, 36], [192, 288]]
+    assert all(a["mixture"] == "M1" for a in stage_c_arms(w))
+
+
+def test_tensor_cache_key_includes_arm_and_sample_seed(tmp_path):
+    from experiments.accuracy_sweep_r2 import _tensor_path, arm_r2
+    a = arm_r2("M_M1", "M1", (96, 144))
+    p1 = _tensor_path(tmp_path, a, sample_seed=0)
+    p2 = _tensor_path(tmp_path, a, sample_seed=1)
+    assert p1 != p2 and "M_M1" in p1.name
+
+
+def test_select_disqualifies_stable_killers_and_fails_if_all_do(monkeypatch, tmp_path):
+    import experiments.accuracy_sweep_r2 as r2
+    arms = [r2.arm_r2("M_M0", "M0", (96, 144)), r2.arm_r2("M_M1", "M1", (96, 144))]
+    stats = {"M_M0": (0.60, 0.30), "M_M1": (0.50, 0.55)}
+    monkeypatch.setattr(r2, "_val_stats", lambda run, a, seed: stats[a["name"]])
+    monkeypatch.setattr(r2, "champion_val_stats", lambda run=None: {"directional": 0.45, "stable": 0.50})
+    out = r2._select_from_arms(tmp_path, "M", arms)
+    assert out["winner"]["name"] == "M_M1"
+    assert out["table"]["M_M0"]["disqualified"] is True
+    both_bad = {"M_M0": (0.60, 0.30), "M_M1": (0.50, 0.30)}
+    monkeypatch.setattr(r2, "_val_stats", lambda run, a, seed: both_bad[a["name"]])
+    with pytest.raises(SystemExit):
+        r2._select_from_arms(tmp_path, "M", arms)
