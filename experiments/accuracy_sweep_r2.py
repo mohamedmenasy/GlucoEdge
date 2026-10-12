@@ -198,12 +198,18 @@ def _train_one(run, a, seed, train_v, val_v, batch, ckpt=None):
     device = resolve_device("mps")
     model = TrendCNN(num_classes=5, channels=tuple(a["channels"]))
     criterion = make_criterion("ce", class_weights(train_v, 5).to(device))
+    t0 = time.time()
     model = train_model(train_v, val_v, 5, EPOCHS, device,
                         model=model, criterion=criterion, batch_size=batch)
     if ckpt is None:
         ckpt = Path(run) / "checkpoints" / f"{a['name']}_seed{seed}.pt"
     ckpt.parent.mkdir(parents=True, exist_ok=True)
     torch.save({k: v.cpu() for k, v in model.state_dict().items()}, ckpt)
+    ckpt.with_suffix(".json").write_text(json.dumps({
+        "arm": a["name"], "seed": seed, "device": device.type, "batch": batch,
+        "train_windows": len(train_v), "val_windows": len(val_v),
+        "epochs": EPOCHS, "duration_s": round(time.time() - t0, 1),
+    }, indent=1))
     return ckpt
 
 

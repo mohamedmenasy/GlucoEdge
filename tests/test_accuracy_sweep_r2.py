@@ -95,6 +95,22 @@ def test_select_disqualifies_stable_killers_and_fails_if_all_do(monkeypatch, tmp
         r2._select_from_arms(tmp_path, "M", arms)
 
 
+def test_train_one_writes_provenance_sidecar(monkeypatch, tmp_path):
+    import json
+    import experiments.accuracy_sweep_r2 as r2
+    monkeypatch.setattr(r2, "EPOCHS", 1)
+    rng = np.random.default_rng(0)
+    x = rng.standard_normal((40, 12)).astype(np.float32)
+    y = rng.integers(0, 5, 40).astype(np.int64)
+    v = r2.TensorView(x, y)
+    a = r2.arm_r2("M_M0", "M0", (4, 6))
+    ckpt = r2._train_one(tmp_path, a, seed=0, train_v=v, val_v=v, batch=8)
+    meta = json.loads(ckpt.with_suffix(".json").read_text())
+    assert meta["device"] in ("cpu", "mps")
+    assert meta["train_windows"] == 40 and meta["batch"] == 8
+    assert meta["epochs"] == 1 and meta["duration_s"] >= 0
+
+
 def test_stage_evaluate_refuses_without_committed_r2_protocol(monkeypatch, tmp_path):
     import experiments.accuracy_sweep_r2 as r2
     monkeypatch.setattr(r2, "PROTOCOL_R2", tmp_path / "protocol_sweep_r2.json")

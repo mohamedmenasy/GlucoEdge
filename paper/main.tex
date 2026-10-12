@@ -1151,18 +1151,21 @@ Round one's lesson fixed round two's design: the endpoint is directional
 recall (the mean recall of the four non-stable classes), guarded by a
 stable-recall floor at both selection and confirmation, with the same
 one-read discipline (\texttt{protocol\_sweep\_r2.json}, committed before
-any held-out label). The new ingredient is training data: six
-sensor-compatible T1D cohorts from the DiaData collection (1{,}001
-subjects after the overlap and sensor audit;
-\texttt{diadata\_audit\_r1.json}), capped at 15M windows per arm by
-whole-subject sampling, with a seventh cohort (PEDAP) excluded from all
-training as a zero-shot probe. Stage~M compared five mixtures at the
-$(96,144)$ architecture: validation directional recall rose monotonically
-with the DiaData share, from 0.512 (Weinstock-only) through 0.527
-(natural proportions) and 0.532 (equal per cohort) to 0.535 for
-DiaData-only training --- the winning arm never sees a Weinstock training
-window --- while its stable recall (0.540) stayed above the disqualifier
-floor. Capacity brackets at $(24,36)$ and $(192,288)$ both lost
+any held-out label). The new ingredient is training data: the DiaData
+collection's overlap and sensor audit admitted six T1D cohorts (1{,}001
+subjects; \texttt{diadata\_audit\_r1.json}); five (898 subjects) fed
+training, capped near 15M windows per arm by whole-subject sampling,
+and the sixth, PEDAP (103), was excluded from all training as a
+zero-shot probe. Stage~M compared five mixtures at $(96,144)$:
+validation directional recall rose from 0.512 (Weinstock-only) through
+0.527 (natural proportions) and 0.532 (equal windows per cohort) to
+0.535 for DiaData-only training --- the winner never sees a Weinstock
+training window --- with stable recall (0.540) above the disqualifier
+floor. The gain tracks cohort balance as much as DiaData share: the
+equal-per-cohort mixture won on fewer DiaData windows (97.5\% versus
+97.8\% share). Fast-class oversampling tied natural proportions (0.526),
+a null expected here: re-balancing the class weights on the oversampled
+labels restores the same objective. Capacity brackets at $(24,36)$ and $(192,288)$ both lost
 (0.526, 0.524), and the best of five seeds reached 0.539 validation
 directional recall against the champion's 0.519.
 

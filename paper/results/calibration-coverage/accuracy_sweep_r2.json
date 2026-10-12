@@ -388,5 +388,21 @@
  "ship": {
   "candidate": "seed 1",
   "all_gates_pass": true
- }
+ },
+ "per_arm_train_windows": {
+  "M_M0": 328575,
+  "M_M1": 15116364,
+  "M_M2": 13019301,
+  "M_M3": 15135091,
+  "M_M4": 23479905,
+  "C_c24x36": 15135091,
+  "C_c192x288": 15135091,
+  "weinstock_train_windows": 328575,
+  "note": "counts of training samples per arm; M4 exceeds the 15M window cap because fast-class oversampling duplicates windows after whole-subject sampling"
+ },
+ "deviations": [
+  "bootstrap seed: the frozen protocol pre-registers seed 20261012; the code at the freeze commit reused the r1 analysis seed 20261010 and one analyze run used it; the seed was corrected to 20261012 and analyze rerun before publication. Gates and deltas are identical under both seeds (held-out CI [-0.0006,+0.0136] vs [-0.0006,+0.0133]).",
+  "per-checkpoint provenance sidecars (device/batch/windows/duration) were added to the training code after this run's checkpoints were written; this run's device (MPS) and frozen batch (512) are recorded in smoke.json and the selection trail.",
+  "M4 note: balanced class weights recomputed on the oversampled labels make M4's expected objective match M1's; M4 tests gradient variance and steps per epoch, not loss re-weighting, and tied M1 (0.5259 vs 0.5270 val directional)."
+ ]
 }
