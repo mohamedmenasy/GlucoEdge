@@ -324,17 +324,18 @@ def stage_convert(run_id):
 # --- stage: evaluate (locked gate: the one held-out read) ----------------------
 
 
-def protocol_is_committed():
-    """True iff PROTOCOL is git-tracked and identical to its committed
-    content."""
-    if not PROTOCOL.exists():
+def protocol_is_committed(path=None):
+    """True iff the protocol file (default: PROTOCOL) is git-tracked and
+    identical to its committed content."""
+    path = PROTOCOL if path is None else path
+    if not path.exists():
         return False
-    cwd = str(PROTOCOL.parent)
-    tracked = subprocess.run(["git", "ls-files", "--error-unmatch", PROTOCOL.name],
+    cwd = str(path.parent)
+    tracked = subprocess.run(["git", "ls-files", "--error-unmatch", path.name],
                              cwd=cwd, capture_output=True)
     if tracked.returncode != 0:
         return False
-    dirty = subprocess.run(["git", "diff", "--quiet", "HEAD", "--", PROTOCOL.name],
+    dirty = subprocess.run(["git", "diff", "--quiet", "HEAD", "--", path.name],
                            cwd=cwd, capture_output=True)
     return dirty.returncode == 0
 
