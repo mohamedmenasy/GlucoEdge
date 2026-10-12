@@ -52,3 +52,33 @@ def test_load_view_r3_asserts_channel_shape(tmp_path):
     assert isinstance(v, r3.TensorView3) and len(v) == 4
     x0, y0 = v[0]
     assert tuple(x0.shape) == (1, 12) and y0 == 0
+
+
+def test_ckpt_key_covers_mixture_features_arch(tmp_path):
+    a1 = r3.arm_r3("D_base", "D5", "none", "cnn")
+    a2 = r3.arm_r3("A_tcn", "D5", "none", "tcn")
+    assert r3._ckpt(tmp_path, a1, 0) != r3._ckpt(tmp_path, a2, 0)
+    # same cell under two stage names -> same path (reuse, not retrain)
+    a3 = r3.arm_r3("F_base", "D5", "none", "cnn")
+    assert r3._ckpt(tmp_path, a1, 0) == r3._ckpt(tmp_path, a3, 0)
+
+
+def test_select_disqualifier_and_all_dq_failure(tmp_path, monkeypatch):
+    arms = r3.stage_d_arms()
+    stats = {"D_base": (0.52, 0.40), "D_rtcgm": (0.54, 0.55)}
+    monkeypatch.setattr(r3, "_val_stats_r3", lambda run, a, seed: stats[a["name"]])
+    monkeypatch.setattr(r3, "_champion_val", lambda run: {"directional": 0.50, "stable": 0.56})
+    out = r3._select(tmp_path, "D", arms)
+    assert out["winner"]["name"] == "D_rtcgm"
+    assert out["table"]["D_base"]["disqualified"] is True
+    bad = {"D_base": (0.52, 0.40), "D_rtcgm": (0.54, 0.40)}
+    monkeypatch.setattr(r3, "_val_stats_r3", lambda run, a, seed: bad[a["name"]])
+    with pytest.raises(SystemExit):
+        r3._select(tmp_path, "D", arms)
+
+
+def test_boot_seed_single_source():
+    y = np.array([0, 1, 2, 3, 4] * 40)
+    pids = np.array([f"p{i % 4}" for i in range(200)])
+    g = r3.gate_results_r3(y, pids, cand_int8=y, cand_float=y, champ_int8=y, n_boot=50)
+    assert g["contrast_int8_vs_champion"]["seed"] == 20261013
