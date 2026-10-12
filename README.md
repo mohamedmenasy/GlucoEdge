@@ -9,6 +9,10 @@ be used to make treatment decisions.
 Built entirely on [GlucoBench](https://github.com/IrinaStatsLab/GlucoBench),
 a public academic CGM research benchmark — no proprietary data, schemas,
 or algorithms.
+Optional second source: [DiaData v3](https://zenodo.org/records/17285631)
+(integrated T1D CGM collection, CC BY-NC 4.0) — external sibling
+directory like GlucoBench, never committed; see the audit record in
+`paper/results/diadata_audit_r1.json`.
 
 ## What this is, right now
 

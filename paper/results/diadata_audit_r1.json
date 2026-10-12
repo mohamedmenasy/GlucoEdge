@@ -1,0 +1,238 @@
+{
+  "study": "diadata-audit",
+  "run_id": "diadata-audit-r1",
+  "diadata_version": "v3 (Zenodo 17285631)",
+  "zip_sha256": "2271dd6b2806f2952916b5a99ced09afae689346053e261173691d40c3b543c9",
+  "observed_cohorts": [
+    "CITY",
+    "D1NAMO",
+    "DDATSHR",
+    "DLCP3",
+    "HUPA-UCM",
+    "PEDAP",
+    "RBG",
+    "RT-CGM",
+    "SENCE",
+    "SHD",
+    "ShanghaiT1D",
+    "T1GDUJA",
+    "WISDM"
+  ],
+  "cohorts": [
+    {
+      "cohort": "CITY",
+      "sensor": "Dexcom G5",
+      "interval_min": 5,
+      "citation": "Laffel et al. 2020, JAMA 323(23); JAEB CITY study",
+      "subjects": 153,
+      "hours": 688555.2,
+      "segments": 70990,
+      "collinear_fraction": 0.2093,
+      "verdict": "included",
+      "label_windows": {
+        "falling_fast": 288610,
+        "falling": 776754,
+        "stable": 5482611,
+        "rising": 747939,
+        "rising_fast": 370654
+      }
+    },
+    {
+      "cohort": "D1NAMO",
+      "sensor": "Medtronic iPro2",
+      "interval_min": 5,
+      "citation": "Dubosson et al. 2018 - same acquisition as GlucoBench's dubosson2018 cohort",
+      "subjects": 9,
+      "hours": 663.7,
+      "segments": 102,
+      "collinear_fraction": 0.4144,
+      "verdict": "excluded_overlap"
+    },
+    {
+      "cohort": "DDATSHR",
+      "sensor": "unknown",
+      "interval_min": null,
+      "citation": "Diabetes adolescents time-series w/ HR - sensor undocumented",
+      "subjects": 18,
+      "hours": 16377.7,
+      "segments": 50961,
+      "collinear_fraction": 0.085,
+      "verdict": "excluded_interval"
+    },
+    {
+      "cohort": "DLCP3",
+      "sensor": "Dexcom G6",
+      "interval_min": 5,
+      "citation": "Brown et al. 2019, NEJM 381(18); iDCL protocol 3",
+      "subjects": 169,
+      "hours": 629567.0,
+      "segments": 32142,
+      "collinear_fraction": 0.2294,
+      "verdict": "included",
+      "label_windows": {
+        "falling_fast": 173375,
+        "falling": 661441,
+        "stable": 5533518,
+        "rising": 663283,
+        "rising_fast": 262785
+      }
+    },
+    {
+      "cohort": "HUPA-UCM",
+      "sensor": "FreeStyle Libre",
+      "interval_min": 15,
+      "citation": "Hidalgo et al. 2024, HUPA-UCM dataset",
+      "subjects": 24,
+      "hours": 16823.0,
+      "segments": 163864,
+      "collinear_fraction": 0.1504,
+      "verdict": "excluded_interval"
+    },
+    {
+      "cohort": "PEDAP",
+      "sensor": "Dexcom G6",
+      "interval_min": 5,
+      "citation": "Wadwa et al. 2023, NEJM 388(11); PEDAP trial",
+      "subjects": 103,
+      "hours": 604179.5,
+      "segments": 30675,
+      "collinear_fraction": 0.1252,
+      "verdict": "included",
+      "label_windows": {
+        "falling_fast": 383818,
+        "falling": 910031,
+        "stable": 4447186,
+        "rising": 771069,
+        "rising_fast": 491684
+      }
+    },
+    {
+      "cohort": "RBG",
+      "sensor": "Dexcom G4 505",
+      "interval_min": 5,
+      "citation": "Aleppo et al. 2017, Diabetes Care 40(4); JAEB REPLACE-BG",
+      "subjects": 226,
+      "hours": 1225065.9,
+      "segments": 193592,
+      "collinear_fraction": 0.1811,
+      "verdict": "included",
+      "label_windows": {
+        "falling_fast": 236549,
+        "falling": 1047248,
+        "stable": 10038977,
+        "rising": 1090383,
+        "rising_fast": 364809
+      }
+    },
+    {
+      "cohort": "RT-CGM",
+      "sensor": "mixed (DexCom SEVEN / Paradigm / FreeStyle Navigator)",
+      "interval_min": null,
+      "citation": "JDRF CGM RCT, NEJM 2008 359(14) - per-subject sensor not recoverable",
+      "subjects": 451,
+      "hours": 1513380.0,
+      "segments": 2876189,
+      "collinear_fraction": 0.3049,
+      "verdict": "excluded_interval"
+    },
+    {
+      "cohort": "SENCE",
+      "sensor": "Dexcom G5",
+      "interval_min": 5,
+      "citation": "Strategies to Enhance New CGM use in Early childhood, JAEB 2021",
+      "subjects": 144,
+      "hours": 692250.1,
+      "segments": 131540,
+      "collinear_fraction": 0.1481,
+      "verdict": "included",
+      "label_windows": {
+        "falling_fast": 397422,
+        "falling": 881429,
+        "stable": 4706576,
+        "rising": 736659,
+        "rising_fast": 507361
+      }
+    },
+    {
+      "cohort": "SHD",
+      "sensor": "blinded CGM",
+      "interval_min": 5,
+      "citation": "Weinstock et al. 2016 - same study as GlucoBench weinstock2016",
+      "subjects": 200,
+      "hours": 53667.8,
+      "segments": 26408,
+      "collinear_fraction": 0.1624,
+      "verdict": "excluded_overlap"
+    },
+    {
+      "cohort": "ShanghaiT1D",
+      "sensor": "FreeStyle Libre H",
+      "interval_min": 15,
+      "citation": "Zhao et al. 2023, Sci Data 10:35",
+      "subjects": 16,
+      "hours": 1307.9,
+      "segments": 15695,
+      "collinear_fraction": 0.0,
+      "verdict": "excluded_interval"
+    },
+    {
+      "cohort": "T1GDUJA",
+      "sensor": "unknown",
+      "interval_min": null,
+      "citation": "T1GDUJA - sensor undocumented",
+      "subjects": 1,
+      "hours": 3441.0,
+      "segments": 9903,
+      "collinear_fraction": 0.2438,
+      "verdict": "excluded_interval"
+    },
+    {
+      "cohort": "WISDM",
+      "sensor": "Dexcom G5",
+      "interval_min": 5,
+      "citation": "Pratley et al. 2020, JAMA 323(23); JAEB WISDM",
+      "subjects": 206,
+      "hours": 880771.0,
+      "segments": 112023,
+      "collinear_fraction": 0.1912,
+      "verdict": "included",
+      "label_windows": {
+        "falling_fast": 161063,
+        "falling": 754743,
+        "stable": 7635315,
+        "rising": 792336,
+        "rising_fast": 273246
+      }
+    }
+  ],
+  "overlap_checks": [
+    {
+      "diadata_source": "SevereHypoOlderT1D",
+      "glucobench_cohort": "weinstock2016",
+      "evidence": "Weinstock et al. 2016 is the primary publication of both; same T1D Exchange severe-hypoglycemia older-adults study",
+      "verdict": "excluded_overlap"
+    },
+    {
+      "diadata_source": "D1NAMO",
+      "glucobench_cohort": "dubosson2018",
+      "evidence": "Dubosson et al. 2018 is D1NAMO's own paper; GlucoBench's dubosson dataset is the same acquisition",
+      "verdict": "excluded_overlap"
+    }
+  ],
+  "summary": {
+    "included_cohorts": [
+      "CITY",
+      "DLCP3",
+      "PEDAP",
+      "RBG",
+      "SENCE",
+      "WISDM"
+    ],
+    "included_subjects": 1001,
+    "included_hours": 4720388.7,
+    "included_fast_class_windows": 3911376,
+    "weinstock_fast_class_windows": 40374,
+    "fast_class_multiplier": 96.88,
+    "decision_rule_2x_passed": true
+  }
+}
