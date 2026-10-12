@@ -20,6 +20,18 @@ cd GlucoBench && unzip raw_data.zip && cd ..
 python3.12 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
+# DiaData v3 (external T1D CGM collection, CC BY-NC 4.0 — sibling dir,
+# never vendored). ~2.3GB download; only the 5-minute archive is used.
+mkdir -p ../DiaData && cd ../DiaData
+curl -LO https://zenodo.org/records/17285631/files/5_min_sampling.zip
+curl -LO https://zenodo.org/records/17285631/files/README.md
+shasum -a 256 5_min_sampling.zip   # recorded in the audit output
+unzip 5_min_sampling.zip
+# The archive nests raw/preprocessed zips; only raw is used (the
+# preprocessed variant interpolates gaps, which fakes trend labels).
+cd 5_min_sampling && unzip raw.zip && cd raw
+unzip MDB_5min_sampling_raw.zip && cd ../../..
+
 # Tests (fast, no CGM data needed - GlucoBench doesn't need to be cloned
 # for this; every module lazily imports it only where actually used)
 pytest -v
