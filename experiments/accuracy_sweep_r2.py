@@ -367,3 +367,183 @@ def stage_select(run_id, stage):
     (Path(run) / "selection").mkdir(parents=True, exist_ok=True)
     _write_json(Path(run) / "selection" / "S.json", out)
     print(json.dumps({k: out[k] for k in out if k != "table"}, indent=1))
+
+
+def stage_calib(run_id):
+    from conversion.calibration import build_pool, select
+    from experiments.accuracy_sweep import _data
+    from experiments.calibration_coverage import _eligible
+    run = _run_dir(run_id)
+    ds, owner, ngf = _data("weinstock", 12)
+    pool = build_pool(ds["val"], _eligible(ds["val"], owner, ngf, "val"))
+    out = Path(run) / "selections"
+    out.mkdir(exist_ok=True)
+    for strategy, draw in (("sequential", 0), ("uniform_random", 101)):
+        path = out / f"{strategy}_200_d{draw}.json"
+        if path.exists():
+            continue
+        sel = select(pool, strategy, 200, seed=draw)
+        sel["draw"] = draw
+        _write_json(path, sel)
+        print(f"selected {path.name}")
+
+
+def stage_convert(run_id):
+    import torch
+    from conversion.common import load_checkpoint
+    from conversion.convert import convert_float, convert_int8
+    from experiments.accuracy_sweep import _data
+    from training.deltas import delta_windows
+    run = _run_dir(run_id)
+    winner = _read_sel(run, "S")["winner"]
+    ds, _, _ = _data("weinstock", 12)
+    art = Path(run) / "artifacts"
+    art.mkdir(exist_ok=True)
+    sample = torch.zeros(1, 1, 12, dtype=torch.float32)
+    for seed in FINAL_SEEDS:
+        model = load_checkpoint(Path(run) / "checkpoints" / f"{winner['name']}_seed{seed}.pt", 5)
+        fpath = art / f"winner_seed{seed}_float.tflite"
+        if not fpath.exists():
+            convert_float(model, sample, fpath)
+            print(f"converted {fpath.name}")
+        for sel_path in sorted((Path(run) / "selections").glob("*_200_d*.json")):
+            ipath = art / f"winner_seed{seed}_int8_{sel_path.stem}.tflite"
+            if ipath.exists():
+                continue
+            sel = json.loads(sel_path.read_text())
+            ws = np.stack([ds["val"].windows[i] for i in sel["indices"]])
+            calib = [torch.from_numpy(w[None, None, :]) for w in delta_windows(ws, True)]
+            timings = convert_int8(model, sample, calib, ipath)
+            _write_json(ipath.with_suffix(".json"), {"selection": sel_path.stem, **timings})
+            print(f"converted {ipath.name}")
+
+
+def _pedap_windows():
+    from training.mixtures import HOLDOUT_COHORT
+    w, y, pids = _diadata_windows(HOLDOUT_COHORT)
+    return w, {"labels": y.tolist(), "participants": pids.tolist()}
+
+
+def stage_evaluate(run_id):
+    from experiments.accuracy_sweep import (CHAMPION, _component_windows,
+                                            _tflite_logits, protocol_is_committed)
+    if not protocol_is_committed(PROTOCOL_R2):
+        raise SystemExit("REFUSED: commit paper/results/calibration-coverage/"
+                         "protocol_sweep_r2.json (clean) before evaluate")
+    run = _run_dir(run_id)
+    for comp, split in (("held_out", "held_out"), ("temporal", "test")):
+        base = Path(run) / "eval" / comp
+        base.mkdir(parents=True, exist_ok=True)
+        windows, meta = _component_windows(12, split)
+        if not (base / "meta.json").exists():
+            _write_json(base / "meta.json", meta)
+        for seed in FINAL_SEEDS:
+            for art in sorted((Path(run) / "artifacts").glob(f"winner_seed{seed}_*.tflite")):
+                p = base / f"{art.stem}_logits.npy"
+                if not p.exists():
+                    np.save(p, _tflite_logits(art, windows))
+                    print(f"{comp}/{art.stem} evaluated")
+        for kind in ("float", "int8"):
+            p = base / f"champion_{kind}_preds.npy"
+            if not p.exists():
+                np.save(p, _tflite_logits(CHAMPION[kind], windows).argmax(axis=1))
+                print(f"{comp}/champion_{kind} evaluated")
+    # PEDAP zero-shot (secondary, descriptive; same freeze discipline)
+    base = Path(run) / "eval" / "pedap"
+    base.mkdir(parents=True, exist_ok=True)
+    windows, meta = _pedap_windows()
+    if not (base / "meta.json").exists():
+        _write_json(base / "meta.json", meta)
+    sel_s = _read_sel(run, "S")
+    winner_art = (Path(run) / "artifacts" /
+                  f"winner_seed{sel_s['best_seed']}_int8_uniform_random_200_d101.tflite")
+    for name, path in (("winner_int8", winner_art), ("champion_int8", CHAMPION["int8"])):
+        p = base / f"{name}_preds.npy"
+        if not p.exists():
+            np.save(p, _tflite_logits(path, windows).argmax(axis=1))
+            print(f"pedap/{name} evaluated")
+
+
+def stage_analyze(run_id, n_boot=2000):
+    from experiments.analyze_calibration_coverage import confusion_counts, macro_f1
+    from training.labeling import FIVE_CLASSES
+    run = _run_dir(run_id)
+    sel_s = _read_sel(run, "S")
+    best_seed = sel_s["best_seed"]
+    ship_arm = "int8_uniform_random_200_d101"
+    out = {"run_id": run_id,
+           "selection_trail": {s: _read_sel(run, s) for s in ("M", "C", "S")},
+           "smoke": json.loads((Path(run) / "smoke.json").read_text()),
+           "components": {}}
+    for comp in ("held_out", "temporal"):
+        base = Path(run) / "eval" / comp
+        meta = json.loads((base / "meta.json").read_text())
+        y = np.array(meta["labels"])
+        pids = np.array(meta["participants"])
+        champ = np.load(base / "champion_int8_preds.npy")
+        cand_int8 = np.load(base / f"winner_seed{best_seed}_{ship_arm}_logits.npy").argmax(axis=1)
+        cand_float = np.load(base / f"winner_seed{best_seed}_float_logits.npy").argmax(axis=1)
+        per_seed = {str(s): {
+            k: directional_recall(confusion_counts(
+                y, np.load(base / f"winner_seed{s}_{k}_logits.npy").argmax(axis=1)))
+            for k in ("float", ship_arm, "int8_sequential_200_d0")}
+            for s in FINAL_SEEDS}
+        out["components"][comp] = {
+            "windows": len(y),
+            "per_seed_directional": per_seed,
+            "macro_f1_candidate_int8": macro_f1(confusion_counts(y, cand_int8)),
+            "macro_f1_champion_int8": macro_f1(confusion_counts(y, champ)),
+            "gates": gate_results_r2(y, pids, cand_int8, cand_float, champ,
+                                     n_boot=n_boot),
+        }
+    base = Path(run) / "eval" / "pedap"
+    meta = json.loads((base / "meta.json").read_text())
+    y = np.array(meta["labels"])
+    ped = {}
+    for name in ("winner_int8", "champion_int8"):
+        preds = np.load(base / f"{name}_preds.npy")
+        cm = confusion_counts(y, preds)
+        ped[name] = {"directional": directional_recall(cm),
+                     "stable": stable_recall(cm),
+                     "per_class": {c: float(cm[i, i] / cm[i].sum()) if cm[i].sum() else 0.0
+                                   for i, c in enumerate(FIVE_CLASSES)}}
+    out["pedap_zero_shot"] = {"windows": len(y), **ped,
+                              "note": "descriptive; no gates; cohort never trained on"}
+    g = out["components"]["held_out"]["gates"]
+    out["ship"] = {
+        "candidate": f"seed {best_seed}",
+        "all_gates_pass": bool(g["gate1_beats_champion"] and g["gate2_stable_floor"]
+                               and g["gate3_int8_within_half_pp_of_float"]),
+    }
+    (Path(run) / "analysis").mkdir(exist_ok=True)
+    _write_json(Path(run) / "analysis" / "sweep_r2_aggregate.json", out)
+    print("wrote", Path(run) / "analysis" / "sweep_r2_aggregate.json")
+    return out
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("stage", choices=["smoke", "train", "select", "calib",
+                                          "convert", "evaluate", "analyze"])
+    parser.add_argument("--run-id", default="sweep-r2")
+    parser.add_argument("--stage-name", choices=["M", "C", "S"])
+    args = parser.parse_args()
+    if args.stage == "smoke":
+        stage_smoke(args.run_id)
+    elif args.stage == "train":
+        stage_train(args.run_id, args.stage_name)
+    elif args.stage == "select":
+        stage_select(args.run_id, args.stage_name)
+    elif args.stage == "calib":
+        stage_calib(args.run_id)
+    elif args.stage == "convert":
+        stage_convert(args.run_id)
+    elif args.stage == "evaluate":
+        stage_evaluate(args.run_id)
+    else:
+        stage_analyze(args.run_id)
+
+
+if __name__ == "__main__":
+    main()

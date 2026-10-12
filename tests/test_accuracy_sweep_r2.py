@@ -86,3 +86,10 @@ def test_select_disqualifies_stable_killers_and_fails_if_all_do(monkeypatch, tmp
     monkeypatch.setattr(r2, "_val_stats", lambda run, a, seed: both_bad[a["name"]])
     with pytest.raises(SystemExit):
         r2._select_from_arms(tmp_path, "M", arms)
+
+
+def test_stage_evaluate_refuses_without_committed_r2_protocol(monkeypatch, tmp_path):
+    import experiments.accuracy_sweep_r2 as r2
+    monkeypatch.setattr(r2, "PROTOCOL_R2", tmp_path / "protocol_sweep_r2.json")
+    with pytest.raises(SystemExit, match="REFUSED"):
+        r2.stage_evaluate("sweep-r2-test")
