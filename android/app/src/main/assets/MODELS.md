@@ -1,45 +1,49 @@
 # Bundled model provenance
 
-Both models are the DELTA-ENCODED (anchor variant) artifacts of the
-2026-10-10 delta-inputs experiment (run `delta-r1`, protocol frozen before
-any metric was read; spec
-docs/superpowers/specs/2026-10-10-second-cohort-and-delta-inputs-design.md):
-training seed 0 on the study's eligible weinstock windows, inputs = 11
-consecutive differences + last reading / 16 (both clients apply this
-transform in `DeltaEncoding` before quantization; golden vectors pin
-Python/Kotlin/Swift to the same bytes). INT8 is calibrated on the study's
-`uniform_random_200_d101` selection. Reproduce with:
-- `venv/bin/python -m experiments.delta_inputs train --run-id delta-r1 --variant anchor`
-- `venv/bin/python -m experiments.delta_inputs convert --run-id delta-r1 --variant anchor`
+Both models are the SWEEP-R2 winner of the 2026-10-12 accuracy sweep
+round two (run `sweep-r2`, protocol frozen and committed before any
+held-out label was read; spec
+docs/superpowers/specs/2026-10-12-accuracy-sweep-r2-design.md): the
+DiaData-only training mixture (five audited cohorts, 898 subjects, zero
+Weinstock training windows), (96,144) channels (42,725 params), 1-hour
+window, training seed 1, delta-anchor inputs (11 consecutive differences
++ last reading / 16 — the same `DeltaEncoding` transform both clients
+already apply; golden vectors pin Python/Kotlin/Swift to the same
+bytes). INT8 is calibrated on the study's `uniform_random_200_d101`
+selection. Reproduce with:
+- `venv/bin/python -m experiments.accuracy_sweep_r2 train --run-id sweep-r2 --stage-name M` (then S for seeds 3–4)
+- `venv/bin/python -m experiments.accuracy_sweep_r2 convert --run-id sweep-r2`
 
-Held-out-participant directional recall of THESE seed-0 artifacts
-(paper/results/calibration-coverage/delta_inputs_r1.json,
-variants.anchor.held_out): float 0.5161, INT8 (uniform-200 d101) 0.5174;
-the five-seed means are 0.5088 / 0.5092 — above the absolute-input
-baseline (0.487) —
-and the INT8 input grid is 6.4x finer (scale 0.247 vs 1.572 mg/dL/code),
-which makes quantization nearly calibration-proof: even the
-toolchain-default sequential selection costs only ~0.5 pp here (the frozen
-ship gate passed at 0.4955 vs the 0.5 criterion — a thin margin, stated
-plainly; the shipped INT8 uses the uniform selection, where no gap is
-resolvable).
+Pre-registered confirmatory read
+(paper/results/calibration-coverage/accuracy_sweep_r2.json): held-out
+directional recall float 0.5244 / INT8 0.5234 vs the previous champion
+INT8 0.5174 (+0.60 pp, participant-cluster bootstrap CI
+[−0.06, +1.33 pp]); stable recall 0.4585 vs 0.4754 (−1.68 pp, inside the
+−2 pp gate); temporal split agrees in sign (+0.50 pp). All three frozen
+gates passed. Known cost, stated plainly: macro-F1 slips 0.364 vs 0.368
+held-out, and stable-class recall is ~1.7 pp lower than the previous
+pair. Zero-shot on the never-trained PEDAP cohort (7.0M windows,
+descriptive): directional 0.541 vs 0.522.
 
 | file | sha256 | bytes |
 |---|---|---|
-| `trend_float.tflite` | `c30560f7283e4927a4b63ff0ffdd34f4108e035905b80c4ed4fd01b479dbb07a` | 17352 |
-| `trend_int8.tflite` | `8590a3d25c409a46659cba3dab97f649c54b57061022e01cae0feec2f5366388` | 11976 |
+| `trend_float.tflite` | `96eef43c37779534dab86312a6c7c65954fade0f5b2af0cfc3084dffb03b9a01` | 177336 |
+| `trend_int8.tflite` | `a887ea4e786e2b40ff6c235fef0cd70af1c4149421ac49358640da3715757c42` | 55216 |
 
-Verification state: simulator suite 51/51 green against these bytes
-(golden parity incl. the Swift delta transform, INT8 bit-exact), and
-DEVICE-VERIFIED on the iPhone 18 Pro Max on 2026-10-11: golden parity +
-delta-transform suites 7/7 on device, INT8 bit-exact. A live in-app
-session the same day (CompiledModel, n=100 per model, one round,
-synthetic trace, timer = quantize+run+dequantize) recorded float
-0.080 ms mean / 0.140 ms p95 and INT8 0.086 ms / 0.160 ms, with the
-Explain feature producing descriptive, advice-free notes. The previous bundled pair (absolute-input study seed-0,
-shipped earlier on 2026-10-10) WAS device-verified on the iPhone that
-day: float `5a0f0744…`, INT8 `9f2f26f5…` — now historical; see git
-history and the paper.
+Verification state: NOT yet device-verified — verified at ship time on
+the Android JVM suite and the iOS simulator suite (golden parity, INT8
+bit-exact; results in the ship PR). On-device verification (iPhone
+18 Pro Max) is pending the next time the phone is attached.
+
+The previous bundled pair — the 2026-10-10 delta-inputs `delta-r1`
+anchor seed-0 artifacts, float `c30560f7…` (17,352 bytes), INT8
+`8590a3d2…` (11,976 bytes), held-out directional recall float 0.5161 /
+INT8 0.5174 — is now historical. It WAS device-verified on the iPhone
+18 Pro Max on 2026-10-11 (golden parity + delta-transform suites 7/7 on
+device, INT8 bit-exact; live in-app session: float 0.080 ms mean /
+0.140 ms p95, INT8 0.086 ms / 0.160 ms). The pair before it
+(absolute-input study seed-0, float `5a0f0744…`, INT8 `9f2f26f5…`) was
+device-verified 2026-10-10; see git history and the paper.
 
 Device-verification history (applies to PREVIOUS pairs, NOT the delta
 bytes above): the original pre-study assets were device-verified on the
@@ -90,7 +94,9 @@ INT8 dequantized outputs bit-exact across all 20 vectors.
 
 ## Accuracy sweep sweep-r1 (2026-10-11): not shipped
 
-A staged sweep (distance-weighted CE loss, 4x channels) beat the bundled INT8 pair by +5.7
-macro-F1 points on the pre-registered held-out read, but a post-hoc descriptive read showed
-it trades directional (minority-class) recall for that gain (0.438 vs 0.517 held-out), so the
-bundled pair stays. Full record: `paper/results/calibration-coverage/accuracy_sweep_r1.json`.
+A staged sweep (distance-weighted CE loss, 4x channels) beat the then-bundled INT8 pair by
++5.7 macro-F1 points on the pre-registered held-out read, but a post-hoc descriptive read
+showed it trades directional (minority-class) recall for that gain (0.438 vs 0.517 held-out),
+so that pair stayed. Full record: `paper/results/calibration-coverage/accuracy_sweep_r1.json`.
+Round two (sweep-r2, above) fixed the endpoint to directional recall and its winner shipped
+as the current bundled pair.
