@@ -86,6 +86,30 @@ def test_set_seed_makes_model_init_reproducible():
         assert torch.equal(p_a, p_b)
 
 
+def test_train_model_accepts_batch_size():
+    import torch
+    from training.model import TrendCNN
+    from training.train import train_model
+
+    class Tiny:
+        labels = [0, 1, 2, 3, 4] * 4
+        def __len__(self): return 20
+        def __getitem__(self, i):
+            return torch.zeros(1, 12), self.labels[i]
+
+    model = train_model(Tiny(), Tiny(), 5, 1, torch.device("cpu"),
+                        model=TrendCNN(num_classes=5), batch_size=5)
+    assert isinstance(model, TrendCNN)
+
+
+def test_resolve_device_falls_back_to_cpu(monkeypatch):
+    import torch
+    from training.train import resolve_device
+    monkeypatch.setattr(torch.backends.mps, "is_available", lambda: False)
+    assert resolve_device("mps").type == "cpu"
+    assert resolve_device("cpu").type == "cpu"
+
+
 def test_train_model_accepts_injected_model_and_criterion():
     import torch
 
