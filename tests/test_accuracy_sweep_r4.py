@@ -168,3 +168,69 @@ def test_val_stats_decode_plumbing(tmp_path, monkeypatch):
     monkeypatch.setattr(r4, "_val_r4", lambda: fake_val)
     d, s = r4._val_stats_r4(tmp_path, tmp_path / "w.pt", "reg")
     assert 0.0 <= d <= 1.0 and 0.0 <= s <= 1.0
+
+
+def test_stage_w_cells(tmp_path, monkeypatch):
+    import torch
+
+    import experiments.accuracy_sweep_r4 as r4
+    from training.model import TrendCNN
+
+    run = tmp_path
+    a = r4.arm_r4("R_noise", "ce", aug="noise")
+    (run / "selection").mkdir()
+    (run / "selection" / "R.json").write_text(json.dumps(
+        {"winner": a, "champion_val": {"directional": 0.5, "stable": 0.5}}))
+    for s in r4.ARM_SEEDS_R4:
+        m = TrendCNN(num_classes=5, channels=(4, 6))
+        p = r4._ckpt_r4(run, a, s)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        torch.save({"state_dict": m.state_dict(), "arch": "cnn",
+                    "in_channels": 1, "channels": [4, 6], "head": "ce"}, p)
+        ed = run / "checkpoints" / "epochs" / f"R_noise_seed{s}"
+        ed.mkdir(parents=True)
+        for e in range(20):
+            # distinct constant per epoch so the SWA slice is verifiable
+            torch.save({k: torch.full_like(v, float(e))
+                        for k, v in m.state_dict().items()},
+                       ed / f"epoch{e:02d}.pt")
+    fake_val = r4.R4View(np.zeros((4, 1, 12), dtype=np.float32),
+                         np.array([0, 1, 3, 4]))
+    monkeypatch.setattr(r4, "_val_r4", lambda: fake_val)
+    monkeypatch.setattr(r4, "champion_val_stats",
+                        lambda run: {"directional": 0.0, "stable": 0.0})
+    out = r4.stage_select_w(run)
+    assert set(out["table"]) == {"W_best", "W_soup", "W_swa"}
+    assert (run / "checkpoints" / "W_soup.pt").exists()
+    assert out["winner"]["cell"] in {"W_best", "W_soup", "W_swa"}
+    # SWA window off-by-one guard: epochs hold constants 0..19, so the
+    # last-5 average must be exactly mean(15..19) = 17.0
+    swa0 = torch.load(run / "checkpoints" / "W_swa_seed0.pt",
+                      map_location="cpu", weights_only=True)["state_dict"]
+    assert all(torch.allclose(v, torch.full_like(v, 17.0)) for v in swa0.values())
+
+
+def test_stage_w_swa_skipped_without_epochs(tmp_path, monkeypatch):
+    import torch
+
+    import experiments.accuracy_sweep_r4 as r4
+    from training.model import TrendCNN
+
+    run = tmp_path
+    a = r4.arm_r4("R_base", "ce")
+    (run / "selection").mkdir()
+    (run / "selection" / "R.json").write_text(json.dumps(
+        {"winner": a, "champion_val": {"directional": 0.5, "stable": 0.5}}))
+    for s in r4.ARM_SEEDS_R4:
+        m = TrendCNN(num_classes=5, channels=(4, 6))
+        p = r4._ckpt_r4(run, a, s)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        torch.save({"state_dict": m.state_dict(), "arch": "cnn",
+                    "in_channels": 1, "channels": [4, 6], "head": "ce"}, p)
+    fake_val = r4.R4View(np.zeros((4, 1, 12), dtype=np.float32),
+                         np.array([0, 1, 3, 4]))
+    monkeypatch.setattr(r4, "_val_r4", lambda: fake_val)
+    monkeypatch.setattr(r4, "champion_val_stats",
+                        lambda run: {"directional": 0.0, "stable": 0.0})
+    out = r4.stage_select_w(run)
+    assert out["table"]["W_swa"] == {"skipped": "no epoch history"}

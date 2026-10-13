@@ -434,3 +434,77 @@ def stage_select(run_id, stage):
     if stage == "W":
         return stage_select_w(run)
     raise SystemExit(f"unknown stage {stage}")
+
+
+def _save_averaged(run, name, dicts, meta_from):
+    import torch
+    from training.averaging import average_state_dicts
+    avg = average_state_dicts(dicts)
+    out = Path(run) / "checkpoints" / f"{name}.pt"
+    base = torch.load(meta_from, map_location="cpu", weights_only=True)
+    torch.save({"state_dict": avg, "arch": base["arch"],
+                "in_channels": base["in_channels"],
+                "channels": base["channels"], "head": base["head"]}, out)
+    return out
+
+
+def stage_select_w(run):
+    import torch
+    a = _read_sel(run, "R")["winner"]
+    head = a["head"]
+    champ = champion_val_stats(run)
+    floor = champ["stable"] - 0.05
+    table = {}
+
+    per_seed = {str(s): _val_stats_r4(run, _ckpt_r4(run, a, s), head)
+                for s in ARM_SEEDS_R4}
+    best = best_seed_r4(per_seed, floor)
+    table["W_best"] = {"per_seed": {s: {"directional": v[0], "stable": v[1]}
+                                    for s, v in per_seed.items()},
+                       "best_seed": best}
+
+    seed_dicts = [torch.load(_ckpt_r4(run, a, s), map_location="cpu",
+                             weights_only=True)["state_dict"]
+                  for s in ARM_SEEDS_R4]
+    soup_path = _save_averaged(run, "W_soup", seed_dicts, _ckpt_r4(run, a, 0))
+    d, s_ = _val_stats_r4(run, soup_path, head)
+    table["W_soup"] = {"directional": d, "stable": s_}
+
+    epoch_dirs = {s: Path(run) / "checkpoints" / "epochs" / f"{a['name']}_seed{s}"
+                  for s in ARM_SEEDS_R4}
+    if all(ed.is_dir() and len(sorted(ed.glob("epoch*.pt"))) >= SWA_LAST_K
+           for ed in epoch_dirs.values()):
+        swa_stats = {}
+        for s, ed in epoch_dirs.items():
+            last = sorted(ed.glob("epoch*.pt"))[-SWA_LAST_K:]
+            dicts = [torch.load(p, map_location="cpu", weights_only=True)
+                     for p in last]
+            p = _save_averaged(run, f"W_swa_seed{s}", dicts, _ckpt_r4(run, a, 0))
+            swa_stats[str(s)] = _val_stats_r4(run, p, head)
+        swa_best = best_seed_r4(swa_stats, floor)
+        table["W_swa"] = {"per_seed": {s: {"directional": v[0], "stable": v[1]}
+                                       for s, v in swa_stats.items()},
+                          "best_seed": swa_best}
+    else:
+        table["W_swa"] = {"skipped": "no epoch history"}
+        swa_stats, swa_best = None, None
+
+    cells = {"W_best": per_seed[str(best)],
+             "W_soup": (table["W_soup"]["directional"], table["W_soup"]["stable"])}
+    if swa_stats:
+        cells["W_swa"] = swa_stats[str(swa_best)]
+    eligible = {k: v for k, v in cells.items() if v[1] >= floor}
+    if not eligible:
+        raise SystemExit("REFUSED: every W cell failed the stable floor")
+    top = max(v[0] for v in eligible.values())
+    order = ["W_best", "W_soup", "W_swa"]  # cost: no new artifact < soup < swa
+    cell = next(k for k in order if k in eligible and top - eligible[k][0] <= 0.001)
+    winner = dict(a, cell=cell,
+                  best_seed=(best if cell == "W_best"
+                             else swa_best if cell == "W_swa" else "soup"))
+    out = {"stage": "W", "champion_val": champ, "stable_floor": floor,
+           "table": table, "winner": winner}
+    (Path(run) / "selection").mkdir(exist_ok=True)
+    _write_json(Path(run) / "selection" / "W.json", out)
+    print(json.dumps({k: out[k] for k in out if k != "table"}, indent=1))
+    return out
