@@ -1147,6 +1147,7 @@ seed 1). Delta is winner INT8 minus champion INT8,
 participant-cluster bootstrap CI.}
 \label{tab:sweep}
 \footnotesize
+\resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{}lcccc@{}}
 \toprule
 Split & Winner float & Winner INT8 & Champion INT8 & $\Delta$ [95\% CI] \\
@@ -1154,7 +1155,7 @@ Split & Winner float & Winner INT8 & Champion INT8 & $\Delta$ [95\% CI] \\
 Held-out & 0.425 & 0.425 & 0.368 & $+0.057$ $[+0.052, +0.063]$ \\
 Temporal & 0.417 & 0.418 & 0.362 & $+0.055$ $[+0.048, +0.061]$ \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 \subsection{Accuracy sweep, round two: a directional endpoint and external training data}
@@ -1573,17 +1574,6 @@ by GlucoBench \cite{sergazinov2024glucobench}. The work uses secondary research
 data and the prototype has not been studied with newly recruited participants.
 We do not claim an institutional ethics determination for this work.
 
-\subsection{AI assistance and author declarations}
-
-OpenAI Codex assisted with language editing during the September
-revision, checked sources, and compared claims with repository code and
-recorded results. Claude Code (Anthropic) wrote the provenance audit
-script and the Kotlin rounding fix, implemented the iOS client, and
-implemented and executed the study pipelines under their frozen
-protocols, drafting the corresponding revisions. The draft requires
-author review; funding, competing interests, and CRediT contributions
-remain to be confirmed by the author before submission.
-
 \section{Conclusion}
 
 On a corrected, provenance-masked protocol with five training seeds and
@@ -1611,8 +1601,6 @@ with prespecified paired predictions tracking the calibration-coverage
 deficit. \project remains a research prototype, not a medical device.
 
 \bibliographystyle{unsrtnat}
-\renewcommand{\bibfont}{\scriptsize}
-\setlength{\bibsep}{0pt}
 \bibliography{references}
 
 \end{document}
