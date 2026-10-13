@@ -71,12 +71,13 @@ def class_weights(train_ds, num_classes: int) -> torch.Tensor:
     return torch.tensor(weights, dtype=torch.float32)
 
 
-def train_model(train_ds, val_ds, num_classes, epochs, device, model=None, criterion=None, batch_size=64):
+def train_model(train_ds, val_ds, num_classes, epochs, device, model=None, criterion=None, batch_size=64, collate_fn=None, epoch_dir=None):
     model = (model if model is not None else TrendCNN(num_classes=num_classes)).to(device)
     if criterion is None:
         criterion = torch.nn.CrossEntropyLoss(weight=class_weights(train_ds, num_classes).to(device))
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True,
+                              collate_fn=collate_fn)
     val_loader = DataLoader(val_ds, batch_size=max(batch_size, 64))
 
     for epoch in range(epochs):
@@ -96,6 +97,11 @@ def train_model(train_ds, val_ds, num_classes, epochs, device, model=None, crite
                 val_loss += criterion(model(x), y).item()
         denom = max(len(val_loader), 1)
         print(f"epoch {epoch + 1}/{epochs}  val_loss={val_loss / denom:.4f}")
+
+        if epoch_dir is not None:
+            epoch_dir.mkdir(parents=True, exist_ok=True)
+            torch.save({k: v.cpu() for k, v in model.state_dict().items()},
+                       epoch_dir / f"epoch{epoch:02d}.pt")
 
     return model
 

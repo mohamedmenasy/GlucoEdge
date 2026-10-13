@@ -137,3 +137,27 @@ def test_train_model_accepts_injected_model_and_criterion():
                       model=injected, criterion=spy_criterion)
     assert out is injected
     assert calls  # criterion actually used
+
+
+def test_train_model_epoch_dir_and_collate(tmp_path):
+    import torch
+
+    from training.train import train_model
+
+    xs = torch.randn(8, 1, 12)
+    ys = torch.randint(0, 5, (8,))
+    ds = list(zip(xs, [int(y) for y in ys]))
+    calls = []
+
+    def collate(items):
+        calls.append(len(items))
+        return (torch.stack([i[0] for i in items]),
+                torch.tensor([i[1] for i in items]))
+
+    train_model(ds, ds, 5, 2, torch.device("cpu"), batch_size=4,
+                criterion=torch.nn.CrossEntropyLoss(),
+                collate_fn=collate, epoch_dir=tmp_path)
+    assert sorted(p.name for p in tmp_path.glob("epoch*.pt")) == ["epoch00.pt", "epoch01.pt"]
+    assert calls  # collate_fn actually used
+    sd = torch.load(tmp_path / "epoch01.pt", map_location="cpu", weights_only=True)
+    assert all(v.device.type == "cpu" for v in sd.values())
