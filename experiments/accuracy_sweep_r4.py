@@ -169,3 +169,84 @@ class NoisyLevelView:
         x = noisy_delta_windows(self.levels[k:k + 1], self.sigma, self.rng)[0][None]
         t = float(self.y[k]) if self.float_targets else int(self.y[k])
         return torch.from_numpy(x), t
+
+
+EXP0_ESTIMATOR = ("smoothed label = least-squares slope over the four horizon "
+                  "readings g[t..t+3] at 0/5/10/15 min, classified with the "
+                  "unchanged clinical thresholds; endpoint label = "
+                  "(g[t+3]-g[t])/15 classified identically")
+
+
+def exp0_agreement(endpoint_idx, smoothed_idx):
+    from experiments.analyze_calibration_coverage import confusion_counts
+    from training.labeling import FIVE_CLASSES
+    cm = confusion_counts(np.asarray(endpoint_idx), np.asarray(smoothed_idx))
+    return {"ceiling_directional": directional_recall(cm),
+            "ceiling_stable": stable_recall(cm),
+            "per_class_recall": {c: float(cm[i, i] / cm[i].sum()) if cm[i].sum() else 0.0
+                                 for i, c in enumerate(FIVE_CLASSES)}}
+
+
+def exp0_verdict(ceiling_directional, champion_val_directional):
+    # round to 1e-6 (0.0001pp) so the binary-float residue of a subtraction
+    # like 0.553 - 0.533 cannot flip the pre-registered strict < at exactly 2pp
+    headroom = round(float(ceiling_directional - champion_val_directional), 6)
+    return {"headroom": headroom, "abort": bool(headroom < HEADROOM_MIN)}
+
+
+def _val_label_views():
+    """Eligible weinstock val: (levels (N,12), horizons (N,3), endpoint idx)."""
+    from experiments.accuracy_sweep import _data
+    from experiments.calibration_coverage import _eligible
+    ds, owner, ngf = _data("weinstock", 12)
+    idx = _eligible(ds["val"], owner, ngf, "val")
+    t = ds["val"]
+    levels = np.stack([t.windows[i] for i in idx]).astype(np.float32)
+    horizons = np.stack([t.horizons[i] for i in idx]).astype(np.float32)
+    y = np.asarray([t.labels[i] for i in idx], dtype=np.int64)
+    return levels, horizons, y
+
+
+def _classify_rates(rates):
+    from training.labeling import FIVE_CLASSES, classify_rate
+    idx = {c: i for i, c in enumerate(FIVE_CLASSES)}
+    return np.array([idx[classify_rate(float(v))] for v in rates], dtype=np.int64)
+
+
+def stage_exp0(run_id):
+    from training.labeling import lsq_slope
+    run = _run_dir(run_id)
+    levels, horizons, y = _val_label_views()
+    pts = np.concatenate([levels[:, -1:], horizons], axis=1)
+    smoothed = _classify_rates(lsq_slope(pts))
+    agree = exp0_agreement(y, smoothed)
+    champ = champion_val_stats(run)
+    verdict = exp0_verdict(agree["ceiling_directional"], champ["directional"])
+    noise = {}
+    for sigma in (1.0, 2.0):
+        rng = np.random.default_rng(20261013)
+        noisy = pts + rng.normal(0.0, sigma, size=pts.shape)
+        rate = (noisy[:, -1] - noisy[:, 0]) / 15.0
+        noise[f"sigma_{sigma:g}"] = exp0_agreement(
+            y, _classify_rates(rate))["ceiling_directional"]
+    out = {"run_id": run_id, "estimator": EXP0_ESTIMATOR,
+           "val_windows": int(len(y)),
+           **agree,
+           "champion_val_directional": champ["directional"],
+           **verdict,
+           "noise_companions_directional": noise,
+           "note": "descriptive label-noise measurement; abort rule "
+                   f"pre-registered: headroom < {HEADROOM_MIN} aborts r4"}
+    _write_json(Path(run) / "exp0.json", out)
+    _write_json(EXP0_PATH, out)
+    print(json.dumps(verdict, indent=1))
+    return out
+
+
+def _exp0_gate():
+    if not EXP0_PATH.exists() or not protocol_is_committed(EXP0_PATH):
+        raise SystemExit("REFUSED: commit paper/results/calibration-coverage/"
+                         "exp0_sweep_r4.json (clean) before training")
+    if json.loads(EXP0_PATH.read_text()).get("abort", True):
+        raise SystemExit("REFUSED: Experiment 0 aborted r4 - headroom below "
+                         "the pre-registered 2pp; no arm trains")

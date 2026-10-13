@@ -86,3 +86,37 @@ def test_build_tensors_refuses_non_finite_rates(tmp_path, monkeypatch):
     monkeypatch.setattr(r4, "_cohort_cache_r4", fake_cohort)
     with pytest.raises(SystemExit, match="non-finite"):
         r4.build_arm_tensors_r4(tmp_path, r4.arm_r4("H_ce", "ce"), sample_seed=1)
+
+
+def test_exp0_agreement_hand_case():
+    from experiments.accuracy_sweep_r4 import exp0_agreement
+    endpoint = np.array([0, 1, 2, 3, 4, 2, 2, 1])
+    smoothed = np.array([0, 2, 2, 3, 4, 2, 3, 1])  # misses one falling, one stable
+    out = exp0_agreement(endpoint, smoothed)
+    # directional = mean recall over classes 0,1,3,4 = (1 + 0.5 + 1 + 1)/4
+    assert abs(out["ceiling_directional"] - 0.875) < 1e-9
+    assert abs(out["ceiling_stable"] - 2 / 3) < 1e-9
+
+
+def test_exp0_verdict_boundary_exact_2pp_proceeds():
+    from experiments.accuracy_sweep_r4 import exp0_verdict
+    assert exp0_verdict(0.5530, 0.5330)["abort"] is False      # exactly 2.0pp
+    assert exp0_verdict(0.55299, 0.5330)["abort"] is True      # just under
+    assert abs(exp0_verdict(0.60, 0.5330)["headroom"] - 0.067) < 1e-9
+
+
+def test_exp0_gate_refuses_without_file(tmp_path, monkeypatch):
+    import experiments.accuracy_sweep_r4 as r4
+    monkeypatch.setattr(r4, "EXP0_PATH", tmp_path / "exp0_sweep_r4.json")
+    with pytest.raises(SystemExit, match="REFUSED"):
+        r4._exp0_gate()
+
+
+def test_exp0_gate_refuses_on_abort(tmp_path, monkeypatch):
+    import experiments.accuracy_sweep_r4 as r4
+    p = tmp_path / "exp0_sweep_r4.json"
+    p.write_text(json.dumps({"abort": True}))
+    monkeypatch.setattr(r4, "EXP0_PATH", p)
+    monkeypatch.setattr(r4, "protocol_is_committed", lambda path: True)
+    with pytest.raises(SystemExit, match="REFUSED"):
+        r4._exp0_gate()
