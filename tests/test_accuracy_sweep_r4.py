@@ -120,3 +120,51 @@ def test_exp0_gate_refuses_on_abort(tmp_path, monkeypatch):
     monkeypatch.setattr(r4, "protocol_is_committed", lambda path: True)
     with pytest.raises(SystemExit, match="REFUSED"):
         r4._exp0_gate()
+
+
+def test_best_seed_tie_rule_lowest_in_band():
+    from experiments.accuracy_sweep_r4 import best_seed_r4
+    per_seed = {"0": (0.5300, 0.55), "1": (0.5308, 0.55), "2": (0.5309, 0.55),
+                "3": (0.5200, 0.55), "4": (0.5100, 0.40)}
+    # floor 0.50: seed 4 disqualified; top = 0.5309, band includes 1 and 2 and 0
+    # (0.5300 is 0.09pp below top -> inside 0.1pp band) -> lowest index: 0
+    assert best_seed_r4(per_seed, floor=0.50) == 0
+
+
+def test_best_seed_all_below_floor_refused():
+    from experiments.accuracy_sweep_r4 import best_seed_r4
+    with pytest.raises(SystemExit, match="stable floor"):
+        best_seed_r4({"0": (0.53, 0.30)}, floor=0.50)
+
+
+def test_train_view_routing(tmp_path):
+    from experiments.accuracy_sweep_r4 import _train_view, arm_r4
+    z = {"x": np.zeros((4, 1, 12), dtype=np.float32),
+         "levels": np.full((4, 12), 100.0, dtype=np.float32),
+         "y": np.array([2, 2, 3, 1]), "r": np.array([0.1, 0.2, 1.1, -1.2]),
+         "lsq": np.array([0.1, 0.2, 1.1, -1.2])}
+    v, collate = _train_view(tmp_path, arm_r4("H_ce", "ce"), z)
+    assert type(v).__name__ == "R4View" and collate is None
+    v, collate = _train_view(tmp_path, arm_r4("H_reg", "reg"), z)
+    assert type(v).__name__ == "RateView" and collate is None
+    v, collate = _train_view(tmp_path, arm_r4("R_noise", "corn", aug="noise"), z)
+    assert type(v).__name__ == "NoisyLevelView"
+    v, collate = _train_view(tmp_path, arm_r4("R_mixup", "reg", aug="mixup"), z)
+    assert type(v).__name__ == "RateView" and collate is not None
+
+
+def test_val_stats_decode_plumbing(tmp_path, monkeypatch):
+    # a fake 1-output checkpoint decoding through thresholds end to end
+    import torch
+
+    import experiments.accuracy_sweep_r4 as r4
+    from training.model import TrendCNN
+
+    m = TrendCNN(num_classes=1, channels=(4, 6))
+    torch.save({"state_dict": m.state_dict(), "arch": "cnn", "in_channels": 1,
+                "channels": [4, 6], "head": "reg"}, tmp_path / "w.pt")
+    fake_val = r4.R4View(np.zeros((6, 1, 12), dtype=np.float32),
+                         np.array([0, 1, 2, 3, 4, 2]))
+    monkeypatch.setattr(r4, "_val_r4", lambda: fake_val)
+    d, s = r4._val_stats_r4(tmp_path, tmp_path / "w.pt", "reg")
+    assert 0.0 <= d <= 1.0 and 0.0 <= s <= 1.0

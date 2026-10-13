@@ -250,3 +250,187 @@ def _exp0_gate():
     if json.loads(EXP0_PATH.read_text()).get("abort", True):
         raise SystemExit("REFUSED: Experiment 0 aborted r4 - headroom below "
                          "the pre-registered 2pp; no arm trains")
+
+
+def _ckpt_r4(run, a, seed):
+    return Path(run) / "checkpoints" / f"{a['name']}_seed{seed}.pt"
+
+
+def _val_view_r4():
+    from training.deltas import delta_windows
+    levels, horizons, y = _val_label_views()
+    x = delta_windows(levels, True).astype(np.float32)[:, None, :]
+    return R4View(x, y)
+
+
+_VAL_R4 = []
+
+
+def _val_r4():
+    if not _VAL_R4:
+        _VAL_R4.append(_val_view_r4())
+    return _VAL_R4[0]
+
+
+def _train_view(run, a, z):
+    """Arm -> (train view, collate_fn or None). Weights/criteria elsewhere."""
+    targets = _train_targets(a, z)
+    float_t = a["head"] == "reg"
+    if a["aug"] == "noise":
+        return NoisyLevelView(z["levels"], targets, NOISE_SIGMA,
+                              seed=SAMPLE_SEED, float_targets=float_t), None
+    if a["aug"] == "mixup":
+        from training.augment import mixup_collate
+        return RateView(z["x"], targets), mixup_collate(MIXUP_ALPHA, SAMPLE_SEED)
+    if float_t:
+        return RateView(z["x"], targets), None
+    return R4View(z["x"], targets), None
+
+
+def _train_one_r4(run, a, seed, z, batch):
+    import time as _t
+
+    import torch
+    from training.heads import head_outputs, make_r4_criterion, sqrt_class_weights
+    from training.model import TrendCNN
+    from training.train import class_weights, resolve_device, train_model
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    device = resolve_device("mps")
+
+    class _Y:  # weights always come from the hard endpoint labels
+        labels = z["y"]
+    weights = (sqrt_class_weights(_Y(), 5) if a["head"] == "wtemp"
+               else class_weights(_Y(), 5))
+    model = TrendCNN(num_classes=head_outputs(a["head"]),
+                     channels=tuple(a["channels"]))
+    criterion = make_r4_criterion(a["head"], weights.to(device))
+    view, collate = _train_view(run, a, z)
+    epoch_dir = Path(run) / "checkpoints" / "epochs" / f"{a['name']}_seed{seed}"
+    t0 = _t.time()
+    model = train_model(view, _val_r4(), head_outputs(a["head"]), 20, device,
+                        model=model, criterion=criterion, batch_size=batch,
+                        collate_fn=collate, epoch_dir=epoch_dir)
+    ckpt = _ckpt_r4(run, a, seed)
+    ckpt.parent.mkdir(parents=True, exist_ok=True)
+    torch.save({"state_dict": {k: v.cpu() for k, v in model.state_dict().items()},
+                "arch": "cnn", "in_channels": 1, "channels": a["channels"],
+                "head": a["head"]}, ckpt)
+    ckpt.with_suffix(".json").write_text(json.dumps({
+        "arm": a["name"], "head": a["head"], "labels": a["labels"],
+        "aug": a["aug"], "seed": seed, "device": device.type, "batch": batch,
+        "train_windows": len(view), "epochs": 20,
+        "duration_s": round(_t.time() - t0, 1)}, indent=1))
+    return ckpt
+
+
+def _val_stats_r4(run, ckpt_path, head):
+    import torch
+    from conversion.common import load_checkpoint
+    from experiments.analyze_calibration_coverage import confusion_counts
+    from training.heads import decode_outputs, head_outputs
+    val = _val_r4()
+    model = load_checkpoint(ckpt_path, head_outputs(head))
+    outs = []
+    with torch.no_grad():
+        for i in range(0, len(val), 8192):
+            outs.append(model(torch.from_numpy(val.x[i:i + 8192])).numpy())
+    preds = decode_outputs(head, np.concatenate(outs))
+    cm = confusion_counts(val.y, preds)
+    return directional_recall(cm), stable_recall(cm)
+
+
+def _read_sel(run, stage):
+    return json.loads((Path(run) / "selection" / f"{stage}.json").read_text())
+
+
+def _arms_for(run, stage):
+    if stage == "H":
+        return stage_h_arms()
+    if stage == "R":
+        return stage_r_arms(_read_sel(run, "H")["winner"])
+    raise SystemExit(f"unknown stage {stage}")
+
+
+def stage_train(run_id, stage):
+    import time as _t
+    from experiments.accuracy_sweep_r2 import _frozen_batch
+    _exp0_gate()
+    run = _run_dir(run_id)
+    batch = _frozen_batch(run)
+    for a in _arms_for(run, stage):
+        z = None
+        for seed in ARM_SEEDS_R4:
+            ckpt = _ckpt_r4(run, a, seed)
+            if ckpt.exists():
+                print(f"skip {ckpt.name}: exists")
+                continue
+            if a["name"] in ("H_ce", "R_base"):
+                raise SystemExit(f"REFUSED: {a['name']} is a reuse cell - copy "
+                                 "its checkpoints (spec section 3), do not train")
+            if z is None:
+                z = dict(np.load(build_arm_tensors_r4(run, a)))
+            t0 = _t.time()
+            _train_one_r4(run, a, seed, z, batch)
+            print(f"{a['name']} seed {seed} done in {_t.time()-t0:.0f}s")
+
+
+COST_ORDER = ("ce", "wtemp", "reg", "corn")  # cheaper decode first (tie rule)
+
+
+def pick_winner_r4(arms, means):
+    best = max(means.values())
+    names = [x["name"] for x in arms]
+    band = [a for a in arms if a["name"] in means
+            and best - means[a["name"]] <= 0.001]
+    band.sort(key=lambda a: (COST_ORDER.index(a["head"]),
+                             names.index(a["name"])))
+    return band[0]
+
+
+def best_seed_r4(per_seed, floor):
+    ok = {s: v for s, v in per_seed.items() if v[1] >= floor}
+    if not ok:
+        raise SystemExit("REFUSED: every seed failed the stable floor")
+    best = max(v[0] for v in ok.values())
+    band = sorted(int(s) for s, v in ok.items() if best - v[0] <= 0.001)
+    return band[0]
+
+
+def _select(run, stage, arms):
+    champ = champion_val_stats(run)
+    floor = champ["stable"] - 0.05
+    table, means = {}, {}
+    for a in arms:
+        per_seed = {str(s): _val_stats_r4(run, _ckpt_r4(run, a, s), a["head"])
+                    for s in ARM_SEEDS_R4}
+        dir_mean = float(np.mean([v[0] for v in per_seed.values()]))
+        stab_mean = float(np.mean([v[1] for v in per_seed.values()]))
+        dq = stab_mean < floor
+        table[a["name"]] = {
+            "per_seed": {s: {"directional": v[0], "stable": v[1]}
+                         for s, v in per_seed.items()},
+            "mean_directional": dir_mean, "mean_stable": stab_mean,
+            "disqualified": bool(dq)}
+        if not dq:
+            means[a["name"]] = dir_mean
+    if not means:
+        raise SystemExit("REFUSED: every arm failed the stable-recall "
+                         "disqualifier; no winner can be selected")
+    winner = pick_winner_r4(arms, means)
+    out = {"stage": stage, "champion_val": champ, "stable_floor": floor,
+           "table": table, "winner": winner}
+    sel = Path(run) / "selection"
+    sel.mkdir(parents=True, exist_ok=True)
+    _write_json(sel / f"{stage}.json", out)
+    print(json.dumps({k: out[k] for k in out if k != "table"}, indent=1))
+    return out
+
+
+def stage_select(run_id, stage):
+    run = _run_dir(run_id)
+    if stage in ("H", "R"):
+        return _select(run, stage, _arms_for(run, stage))
+    if stage == "W":
+        return stage_select_w(run)
+    raise SystemExit(f"unknown stage {stage}")
