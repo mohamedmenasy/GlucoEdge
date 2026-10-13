@@ -508,3 +508,265 @@ def stage_select_w(run):
     _write_json(Path(run) / "selection" / "W.json", out)
     print(json.dumps({k: out[k] for k in out if k != "table"}, indent=1))
     return out
+
+
+def gate_results_r4(y, pids, cand_int8_preds, cand_float_preds,
+                    champ_int8_preds, n_boot=2000):
+    import experiments.analyze_calibration_coverage as acc
+    contrast = acc.paired_cluster_bootstrap(
+        y, pids, [(cand_int8_preds, champ_int8_preds)],
+        metric=directional_recall, n_boot=n_boot, seed=BOOT_SEED_R4)
+    ci_low = contrast["ci95"][0] if contrast["ci95"] else None
+    d_float = directional_recall(acc.confusion_counts(y, cand_float_preds))
+    d_int8 = directional_recall(acc.confusion_counts(y, cand_int8_preds))
+    s_cand = stable_recall(acc.confusion_counts(y, cand_int8_preds))
+    s_champ = stable_recall(acc.confusion_counts(y, champ_int8_preds))
+    return {
+        "contrast_int8_vs_champion": contrast,
+        "candidate_float_directional": d_float,
+        "candidate_int8_directional": d_int8,
+        "champion_int8_directional": directional_recall(
+            acc.confusion_counts(y, champ_int8_preds)),
+        "candidate_int8_stable": s_cand,
+        "champion_int8_stable": s_champ,
+        "gate1_beats_champion": bool(contrast["delta"] is not None
+                                     and contrast["delta"] > 0
+                                     and ci_low is not None and ci_low > -0.005),
+        "gate2_stable_floor": bool(s_cand >= s_champ - 0.02),
+        "gate3_int8_within_half_pp_of_float": bool(d_float - d_int8 <= 0.005),
+    }
+
+
+def _winner_ckpts(run):
+    """W winner -> [(label, checkpoint path)] making up the artifact set."""
+    w = _read_sel(run, "W")["winner"]
+    run = Path(run)
+    if w["cell"] == "W_soup":
+        return [("soup", run / "checkpoints" / "W_soup.pt")]
+    if w["cell"] == "W_swa":
+        return [(f"seed{s}", run / "checkpoints" / f"W_swa_seed{s}.pt")
+                for s in ARM_SEEDS_R4]
+    return [(f"seed{s}", _ckpt_r4(run, w, s)) for s in ARM_SEEDS_R4]
+
+
+def _candidate_label(run):
+    w = _read_sel(run, "W")["winner"]
+    return "soup" if w["cell"] == "W_soup" else f"seed{w['best_seed']}"
+
+
+def _tflite_outputs_r4(path, x3, width):
+    """Raw float outputs for [n, 1, 12] inputs; dequantizes INT8 IO."""
+    from ai_edge_litert.interpreter import Interpreter
+    interp = Interpreter(model_path=str(path))
+    interp.allocate_tensors()
+    inp = interp.get_input_details()[0]
+    out = interp.get_output_details()[0]
+    outputs = np.empty((len(x3), width), dtype=np.float32)
+    is_int8 = inp["dtype"] == np.int8
+    scale, zp = inp["quantization"]
+    o_scale, o_zp = out["quantization"]
+    for k in range(len(x3)):
+        x = x3[k][None].astype(np.float32)
+        if is_int8:
+            info = np.iinfo(inp["dtype"])
+            x = np.clip(np.round(x / scale) + zp, info.min, info.max).astype(np.int8)
+        interp.set_tensor(inp["index"], x)
+        interp.invoke()
+        y = interp.get_tensor(out["index"])[0].astype(np.float32)
+        if out["dtype"] == np.int8:
+            y = (y - o_zp) * o_scale
+        outputs[k] = y
+    return outputs
+
+
+def stage_convert(run_id):
+    import torch
+    from conversion.common import load_checkpoint
+    from conversion.convert import convert_float, convert_int8
+    from experiments.accuracy_sweep import _data
+    from training.deltas import delta_windows
+    from training.heads import head_outputs
+    run = _run_dir(run_id)
+    head = _read_sel(run, "W")["winner"]["head"]
+    ds, _, _ = _data("weinstock", 12)
+    art = Path(run) / "artifacts"
+    art.mkdir(exist_ok=True)
+    sample = torch.zeros(1, 1, 12, dtype=torch.float32)
+    for label, ckpt in _winner_ckpts(run):
+        model = load_checkpoint(ckpt, head_outputs(head))
+        fpath = art / f"winner_{label}_float.tflite"
+        if not fpath.exists():
+            convert_float(model, sample, fpath)
+            print(f"converted {fpath.name}")
+        for sel_path in sorted((Path(run) / "selections").glob("*_200_d*.json")):
+            ipath = art / f"winner_{label}_int8_{sel_path.stem}.tflite"
+            if ipath.exists():
+                continue
+            sel = json.loads(sel_path.read_text())
+            ws = np.stack([ds["val"].windows[i] for i in sel["indices"]])
+            dws = delta_windows(ws, True).astype(np.float32)[:, None, :]
+            calib = [torch.from_numpy(w[None]) for w in dws]
+            timings = convert_int8(model, sample, calib, ipath)
+            _write_json(ipath.with_suffix(".json"),
+                        {"selection": sel_path.stem, **timings})
+            print(f"converted {ipath.name}")
+
+
+def _pedap_windows_r4():
+    from training.deltas import delta_windows
+    from training.mixtures import HOLDOUT_COHORT
+    levels, _, y, pids = _cohort_cache_r4(HOLDOUT_COHORT)
+    x = delta_windows(levels, True).astype(np.float32)[:, None, :]
+    return x, {"labels": y.tolist(), "participants": pids.tolist()}
+
+
+def stage_evaluate(run_id):
+    from experiments.accuracy_sweep import (CHAMPION, _component_windows,
+                                            _tflite_logits)
+    from training.heads import head_outputs
+    if not protocol_is_committed(PROTOCOL_R4):
+        raise SystemExit("REFUSED: commit paper/results/calibration-coverage/"
+                         "protocol_sweep_r4.json (clean) before evaluate")
+    run = _run_dir(run_id)
+    width = head_outputs(_read_sel(run, "W")["winner"]["head"])
+    for comp, split in (("held_out", "held_out"), ("temporal", "test")):
+        base = Path(run) / "eval" / comp
+        base.mkdir(parents=True, exist_ok=True)
+        windows, meta = _component_windows(12, split)
+        if not (base / "meta.json").exists():
+            _write_json(base / "meta.json", meta)
+        x3 = windows.astype(np.float32)[:, None, :] if windows.ndim == 2 else windows
+        for label, _ckpt in _winner_ckpts(run):
+            for art in sorted((Path(run) / "artifacts").glob(f"winner_{label}_*.tflite")):
+                p = base / f"{art.stem}_outputs.npy"
+                if not p.exists():
+                    np.save(p, _tflite_outputs_r4(art, x3, width))
+                    print(f"{comp}/{art.stem} evaluated")
+        for kind in ("float", "int8"):
+            p = base / f"champion_{kind}_preds.npy"
+            if not p.exists():
+                np.save(p, _tflite_logits(CHAMPION[kind], windows).argmax(axis=1))
+                print(f"{comp}/champion_{kind} evaluated")
+    base = Path(run) / "eval" / "pedap"
+    base.mkdir(parents=True, exist_ok=True)
+    x3, meta = _pedap_windows_r4()
+    if not (base / "meta.json").exists():
+        _write_json(base / "meta.json", meta)
+    cand = (Path(run) / "artifacts" /
+            f"winner_{_candidate_label(run)}_int8_uniform_random_200_d101.tflite")
+    p = base / "winner_int8_outputs.npy"
+    if not p.exists():
+        np.save(p, _tflite_outputs_r4(cand, x3, width))
+        print("pedap/winner_int8 evaluated")
+    p = base / "champion_int8_preds.npy"
+    if not p.exists():
+        from experiments.accuracy_sweep import CHAMPION, _tflite_logits
+        np.save(p, _tflite_logits(CHAMPION["int8"], x3[:, 0, :]).argmax(axis=1))
+        print("pedap/champion_int8 evaluated")
+
+
+def _pairing_block(n):
+    return {"pairing_rule": "identical eligible windows by construction",
+            "dropped_windows_winner": 0, "dropped_windows_champion": 0,
+            "windows": n}
+
+
+def stage_analyze(run_id, n_boot=2000):
+    from experiments.analyze_calibration_coverage import confusion_counts, macro_f1
+    from training.heads import decode_outputs
+    from training.labeling import FIVE_CLASSES
+    run = _run_dir(run_id)
+    head = _read_sel(run, "W")["winner"]["head"]
+    cand = _candidate_label(run)
+    ship_arm = "int8_uniform_random_200_d101"
+    labels = [label for label, _ in _winner_ckpts(run)]
+    out = {"protocol": "paper/results/calibration-coverage/protocol_sweep_r4.json",
+           "run_id": run_id,
+           "exp0": json.loads(EXP0_PATH.read_text()),
+           "selection_trail": {s: _read_sel(run, s) for s in ("H", "R", "W")},
+           "smoke": json.loads((Path(run) / "smoke.json").read_text()),
+           "per_arm_train_windows": {
+               p.stem: int(np.load(p)["y"].shape[0])
+               for p in sorted((Path(run) / "tensors").glob("*.npz"))},
+           "components": {}}
+    for comp in ("held_out", "temporal"):
+        base = Path(run) / "eval" / comp
+        meta = json.loads((base / "meta.json").read_text())
+        y = np.array(meta["labels"])
+        pids = np.array(meta["participants"])
+        champ = np.load(base / "champion_int8_preds.npy")
+        cand_int8 = decode_outputs(head, np.load(
+            base / f"winner_{cand}_{ship_arm}_outputs.npy"))
+        cand_float = decode_outputs(head, np.load(
+            base / f"winner_{cand}_float_outputs.npy"))
+        per_label = {lab: {
+            k: directional_recall(confusion_counts(y, decode_outputs(
+                head, np.load(base / f"winner_{lab}_{k}_outputs.npy"))))
+            for k in ("float", ship_arm, "int8_sequential_200_d0")}
+            for lab in labels}
+        out["components"][comp] = {
+            **_pairing_block(len(y)),
+            "per_artifact_directional": per_label,
+            "macro_f1_candidate_int8": macro_f1(confusion_counts(y, cand_int8)),
+            "macro_f1_champion_int8": macro_f1(confusion_counts(y, champ)),
+            "gates": gate_results_r4(y, pids, cand_int8, cand_float, champ,
+                                     n_boot=n_boot),
+        }
+    base = Path(run) / "eval" / "pedap"
+    meta = json.loads((base / "meta.json").read_text())
+    y = np.array(meta["labels"])
+    ped = {}
+    winner_preds = decode_outputs(head, np.load(base / "winner_int8_outputs.npy"))
+    for name, preds in (("winner_int8", winner_preds),
+                        ("champion_int8", np.load(base / "champion_int8_preds.npy"))):
+        cm = confusion_counts(y, preds)
+        ped[name] = {"directional": directional_recall(cm),
+                     "stable": stable_recall(cm),
+                     "per_class": {c: float(cm[i, i] / cm[i].sum()) if cm[i].sum() else 0.0
+                                   for i, c in enumerate(FIVE_CLASSES)}}
+    out["pedap_zero_shot"] = {"windows": int(len(y)), **ped,
+                              "note": "descriptive; no gates; cohort never trained on"}
+    g = out["components"]["held_out"]["gates"]
+    out["ship"] = {
+        "candidate": cand,
+        "all_gates_pass": bool(g["gate1_beats_champion"] and g["gate2_stable_floor"]
+                               and g["gate3_int8_within_half_pp_of_float"]),
+    }
+    out["deviations"] = list(DEVIATIONS_R4)
+    (Path(run) / "analysis").mkdir(exist_ok=True)
+    _write_json(Path(run) / "analysis" / "sweep_r4_aggregate.json", out)
+    print("wrote", Path(run) / "analysis" / "sweep_r4_aggregate.json")
+    return out
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("stage", choices=["exp0", "smoke", "train", "select",
+                                          "calib", "convert", "evaluate",
+                                          "analyze"])
+    parser.add_argument("--run-id", default="sweep-r4")
+    parser.add_argument("--stage-name", choices=["H", "R", "W"])
+    args = parser.parse_args()
+    if args.stage == "exp0":
+        stage_exp0(args.run_id)
+    elif args.stage == "smoke":
+        from experiments.accuracy_sweep_r2 import stage_smoke as smoke_r2
+        smoke_r2(args.run_id)
+    elif args.stage == "train":
+        stage_train(args.run_id, args.stage_name)
+    elif args.stage == "select":
+        stage_select(args.run_id, args.stage_name)
+    elif args.stage == "calib":
+        from experiments.accuracy_sweep_r2 import stage_calib as calib_r2
+        calib_r2(args.run_id)
+    elif args.stage == "convert":
+        stage_convert(args.run_id)
+    elif args.stage == "evaluate":
+        stage_evaluate(args.run_id)
+    else:
+        stage_analyze(args.run_id)
+
+
+if __name__ == "__main__":
+    main()

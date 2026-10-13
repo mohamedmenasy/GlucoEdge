@@ -234,3 +234,51 @@ def test_stage_w_swa_skipped_without_epochs(tmp_path, monkeypatch):
                         lambda run: {"directional": 0.0, "stable": 0.0})
     out = r4.stage_select_w(run)
     assert out["table"]["W_swa"] == {"skipped": "no epoch history"}
+
+
+def test_boot_seed_wired_into_gates(monkeypatch):
+    import experiments.accuracy_sweep_r4 as r4
+    captured = {}
+
+    def fake_boot(y, pids, pairs, metric, n_boot, seed):
+        captured["seed"] = seed
+        return {"delta": 0.01, "ci95": [0.001, 0.02]}
+    monkeypatch.setattr(
+        "experiments.analyze_calibration_coverage.paired_cluster_bootstrap",
+        fake_boot)
+    y = np.array([0, 1, 2, 3, 4] * 4)
+    pids = np.array(["a", "b"] * 10)
+    preds = y.copy()
+    out = r4.gate_results_r4(y, pids, preds, preds, preds, n_boot=10)
+    assert captured["seed"] == r4.BOOT_SEED_R4
+    assert out["gate1_beats_champion"] and out["gate3_int8_within_half_pp_of_float"]
+
+
+def test_evaluate_refuses_without_protocol(monkeypatch):
+    import experiments.accuracy_sweep_r4 as r4
+    monkeypatch.setattr(r4, "protocol_is_committed", lambda p: False)
+    with pytest.raises(SystemExit, match="REFUSED"):
+        r4.stage_evaluate("sweep-r4-test-nonexistent")
+
+
+def test_tflite_width_param_signature():
+    # pure signature check: callable takes (path, x3, width); no litert import
+    import inspect
+
+    import experiments.accuracy_sweep_r4 as r4
+    sig = inspect.signature(r4._tflite_outputs_r4)
+    assert list(sig.parameters) == ["path", "x3", "width"]
+
+
+def test_winner_ckpts_cells(tmp_path):
+    import experiments.accuracy_sweep_r4 as r4
+    a = r4.arm_r4("R_noise", "ce", aug="noise")
+    (tmp_path / "selection").mkdir()
+    for cell, best, expected in [
+            ("W_soup", "soup", [("soup", "W_soup.pt")]),
+            ("W_best", 3, [(f"seed{s}", f"R_noise_seed{s}.pt") for s in range(5)]),
+            ("W_swa", 1, [(f"seed{s}", f"W_swa_seed{s}.pt") for s in range(5)])]:
+        (tmp_path / "selection" / "W.json").write_text(json.dumps(
+            {"winner": dict(a, cell=cell, best_seed=best)}))
+        got = [(label, p.name) for label, p in r4._winner_ckpts(tmp_path)]
+        assert got == expected, cell
