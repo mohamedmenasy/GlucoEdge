@@ -11,8 +11,9 @@ a public academic CGM research benchmark — no proprietary data, schemas,
 or algorithms.
 Optional second source: [DiaData v3](https://zenodo.org/records/17285631)
 (integrated T1D CGM collection, CC BY-NC 4.0) — external sibling
-directory like GlucoBench, never committed; see the audit record in
-`paper/results/diadata_audit_r1.json`.
+directory like GlucoBench, never committed; see the audit records in
+`paper/results/diadata_audit_r1.json` and
+`paper/results/diadata_audit_r2.json`.
 
 ## What this is, right now
 
@@ -35,6 +36,11 @@ planned pieces are built; see [Roadmap](#roadmap). The app has since been
 ported to iOS: the same two model files and the same parity vectors, run
 through LiteRT's Swift API — see [iOS app](#ios-app-ios).
 
+On top of the apps sits a research record: a manuscript (`paper/`) and a
+series of pre-registered studies whose every confirmatory number was
+read exactly once, behind a committed protocol — see
+[The research record](#the-research-record).
+
 **The 5-class question is settled with real data, not assumed.** On
 GlucoBench's small 4-patient iglu config, the two "fast" trend classes had
 too few examples to learn from (15 and 64). Rather than assume that meant
@@ -50,10 +56,17 @@ and the decision procedure: `docs/superpowers/specs/2026-07-01-weinstock-class-c
 training/
 ├── labeling.py   # label_trend(): rate-of-change -> trend class, clinically-anchored thresholds
 ├── dataset.py    # GlucoseTrendDataset: segment-aware sliding windows over CGM data
-├── model.py      # TrendCNN: a small 1D-CNN (~2,900 params), chosen over a
-│                 #   GRU/LSTM specifically because it converts to a fixed-input-shape,
-│                 #   stateless inference format with no recurrent state to manage
+├── model.py      # TrendCNN: a small 1D-CNN, chosen over a GRU/LSTM specifically
+│                 #   because it converts to a fixed-input-shape, stateless inference
+│                 #   format; TrendTCN: a causal dilated variant (sweep r3 candidate)
+├── deltas.py     # delta/anchor input encoding (shipped) + time-of-day channels (studied)
+├── losses.py     # the sweep r1 loss arms
+├── splits.py     # sensitivity-tier split utilities
+├── diadata.py    # DiaData v3 loader (sibling dir, cohort cache, gap rule)
 └── train.py      # CLI: wires GlucoBench's DataFormatter into the above
+conversion/       # LiteRT float + INT8 export, benchmark, golden vectors
+experiments/      # the pre-registered study runners and provenance audits
+paper/            # the manuscript (tectonic) + published aggregate JSONs
 ```
 
 `GlucoseTrendDataset` windows respect GlucoBench's `id_segment` boundaries —
@@ -209,22 +222,66 @@ Asked for a dose or to skip insulin, the on-device model declined in its
 own text rather than raising an error, and the app shows that text as the
 note.
 
+## The research record
+
+The repository doubles as the full computational record of a manuscript
+(`paper/`, built with `tectonic`) about what actually moves a tiny CGM
+trend classifier on-device. Every confirmatory claim below was read from
+the held-out splits exactly once, after the selection trail, the winner,
+the gates, and the bootstrap seed were frozen in a committed protocol
+file — the evaluation stage refuses to run before that commit exists.
+Published aggregates (and only aggregates — no participant IDs,
+timestamps, or per-window predictions ever leave the local run
+directories) live in `paper/results/`.
+
+- **Calibration-coverage study:** the toolchain-default sequential
+  calibration selection (200 contiguous windows = 2 participants,
+  input ceiling 251 mg/dL) was the *sole* cause of a 13.4-point
+  held-out directional-recall loss under INT8 — any randomized
+  200-window selection restores float level, while budget, stratification
+  and observer choice move ≤0.08 points. Confirmed on two further
+  cohorts; mechanism isolated to input clipping; measured latency-free
+  on hardware (nine prespecified artifacts, 30 paired rounds).
+- **Delta encoding:** feeding 11 consecutive differences plus the last
+  reading/16 beats absolute inputs (0.509 vs 0.487 held-out directional)
+  and makes INT8 nearly calibration-proof (6.4× finer input grid).
+  Shipped to both clients as `DeltaEncoding`, pinned by golden vectors.
+- **Accuracy sweep r1 (no ship):** a distance-weighted loss passed every
+  pre-registered macro-F1 gate (+5.7 points) — and a post-hoc per-class
+  read showed the gain was majority-class-only, with directional recall
+  *down* 8 points. A pre-registered endpoint can pass all its gates and
+  still optimize the wrong thing; r2 regated on a directional endpoint.
+- **Accuracy sweep r2 (shipped):** training on the DiaData collection
+  (five audited cohorts, 898 subjects, never a Weinstock training
+  window) beat the bundled pair on held-out directional recall
+  (+0.60 points) within every gate, and is the bundled pair today —
+  device-verified the same day.
+- **Accuracy sweep r3 (no ship):** reopening the RT-CGM cohort and a
+  time-of-day channel both lost in selection; a causal dilated TCN won
+  it and beat the champion with the series' first fully positive
+  directional CI (+0.77 points, CI [+0.09, +1.49]) — but broke the
+  stable-recall floor (−4.4 vs a −2-point gate), so it was rejected and
+  the r2 pair stays. The full record, including a deviations block,
+  is in `paper/results/calibration-coverage/accuracy_sweep_r3.json`.
+
 ## The quantization tradeoff, measured
 
-**The bundled models were replaced twice on 2026-10-10.** First with the
-calibration-coverage study's seed-0 absolute-input artifacts (uniform
-random 200-window calibration instead of the toolchain-default
-first-200-sequential selection, whose under-coverage was the sole cause
-of a 13.4-point held-out directional-recall loss). Then with the
-delta-encoded (anchor) models from the follow-up experiment: both clients
-now feed the network 11 consecutive differences plus the last reading/16
-(`DeltaEncoding` in Kotlin and Swift, pinned to Python by the golden
-vectors). The delta float model scores 0.509 held-out directional recall
-(above the absolute baseline's 0.487) and its INT8 input grid is 6.4x
-finer, making quantization nearly calibration-proof. Hashes and metrics:
-`android/app/src/main/assets/MODELS.md`. The table below records the
-HISTORICAL artifacts' numbers — the measured collapse that motivated the
-study — on the historical test split and devices:
+**The bundled models have been replaced three times.** On 2026-10-10,
+first with the calibration-coverage study's seed-0 absolute-input
+artifacts (uniform random 200-window calibration instead of the
+toolchain-default first-200-sequential selection, whose under-coverage
+was the sole cause of a 13.4-point held-out directional-recall loss),
+then with the delta-encoded (anchor) models from the follow-up
+experiment: both clients feed the network 11 consecutive differences
+plus the last reading/16 (`DeltaEncoding` in Kotlin and Swift, pinned to
+Python by the golden vectors). On 2026-10-12, with the accuracy-sweep-r2
+winner — same delta encoding, same contract, but trained DiaData-only —
+which is the current bundled pair (held-out directional recall 0.523
+INT8 / 0.524 float; verified on the iPhone 18 Pro Max the day it
+shipped). Hashes and provenance: `android/app/src/main/assets/MODELS.md`.
+The table below records the HISTORICAL artifacts' numbers — the measured
+collapse that motivated the study — on the historical test split and
+devices:
 
 | | Size | Latency mean / p95 (Galaxy S22 Ultra) | Latency mean / p95 (iPhone 18 Pro Max) | Accuracy | Macro-avg recall |
 |---|---|---|---|---|---|
