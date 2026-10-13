@@ -256,3 +256,18 @@ def test_gap_free_windows_exclude_a_window_masked_only_at_its_endpoint():
     tiers = sensitivity_tier_indices(ds, owner, "test", no_gap_fill, no_gap_fill)
     assert tiers["gap_filled_endpoint"] == [2]
     assert tiers["gap_filled_inputs"] == []
+
+
+def test_horizons_and_rates_aligned():
+    from training.labeling import classify_rate
+
+    df = _make_df([17], start_value=100.0, step=2.0)
+    ds = GlucoseTrendDataset(df, classes=FIVE_CLASSES)
+    assert len(ds.horizons) == len(ds) == len(ds.rates) == 3
+    for k in range(len(ds)):
+        h = ds.horizons[k]
+        assert h.shape == (ds.horizon,)
+        expected_rate = (h[-1] - ds.windows[k][-1]) / ds.horizon_minutes
+        assert abs(ds.rates[k] - expected_rate) < 1e-6
+        # label still derives from the endpoint rate
+        assert ds.labels[k] == ds.class_to_idx[classify_rate(expected_rate)]
