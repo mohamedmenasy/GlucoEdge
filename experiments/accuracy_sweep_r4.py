@@ -147,7 +147,8 @@ class RateView:
 
     def __getitem__(self, k):
         import torch
-        return torch.from_numpy(self.x[k]), float(self.y[k])
+        # 0-dim float32 tensor: default collate must NOT widen to float64 (MPS)
+        return torch.from_numpy(self.x[k]), torch.tensor(self.y[k])
 
 
 class NoisyLevelView:
@@ -167,8 +168,9 @@ class NoisyLevelView:
         import torch
         from training.augment import noisy_delta_windows
         x = noisy_delta_windows(self.levels[k:k + 1], self.sigma, self.rng)[0][None]
-        t = float(self.y[k]) if self.float_targets else int(self.y[k])
-        return torch.from_numpy(x), t
+        if self.float_targets:
+            return torch.from_numpy(x), torch.tensor(np.float32(self.y[k]))
+        return torch.from_numpy(x), int(self.y[k])
 
 
 EXP0_ESTIMATOR = ("smoothed label = least-squares slope over the four horizon "

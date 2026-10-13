@@ -61,7 +61,7 @@ def test_rate_view_yields_float_targets():
     v = RateView(np.zeros((3, 1, 12), dtype=np.float32),
                  np.array([0.5, -1.5, 2.5], dtype=np.float32))
     x, r = v[1]
-    assert x.shape == (1, 12) and isinstance(r, float) and r == -1.5
+    assert x.shape == (1, 12) and float(r) == -1.5
 
 
 def test_noisy_view_reencodes_per_access():
@@ -282,3 +282,21 @@ def test_winner_ckpts_cells(tmp_path):
             {"winner": dict(a, cell=cell, best_seed=best)}))
         got = [(label, p.name) for label, p in r4._winner_ckpts(tmp_path)]
         assert got == expected, cell
+
+
+def test_rate_views_collate_float32_for_mps():
+    # MPS cannot take float64; default collate over python floats makes
+    # float64, so rate targets must come out of views as float32 tensors
+    import torch
+    from torch.utils.data import DataLoader
+
+    from experiments.accuracy_sweep_r4 import NoisyLevelView, RateView
+    v = RateView(np.zeros((4, 1, 12), dtype=np.float32),
+                 np.array([0.5, 1.0, 2.0, 3.0], dtype=np.float32))
+    _, y = next(iter(DataLoader(v, batch_size=4)))
+    assert y.dtype == torch.float32
+    nv = NoisyLevelView(np.full((2, 12), 100.0, dtype=np.float32),
+                        np.array([0.5, 1.0], dtype=np.float32),
+                        sigma=1.0, seed=0, float_targets=True)
+    _, y = next(iter(DataLoader(nv, batch_size=2)))
+    assert y.dtype == torch.float32
