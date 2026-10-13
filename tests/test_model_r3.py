@@ -1,4 +1,5 @@
 """r3 model additions - no CGM data needed."""
+import pytest
 import torch
 
 from training.model import TrendCNN, TrendTCN
@@ -51,6 +52,8 @@ def test_load_checkpoint_legacy_and_meta(tmp_path):
 
 
 def test_tcn_converts_to_litert(tmp_path):
+    # CI's pytest job installs only requirements.txt; conversion pins are local
+    pytest.importorskip("litert_torch")
     from conversion.convert import convert_float
     tcn = TrendTCN(num_classes=5)
     tcn.eval()

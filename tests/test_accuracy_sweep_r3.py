@@ -104,3 +104,12 @@ def test_hours_of_handles_datetime64_and_timestamps():
     assert out[0] == pytest.approx(13.5) and out[1] == pytest.approx(5 / 60)
     tpd = [pd.Timestamp("2020-01-01 06:15:00")]
     assert r3._hours_of(tpd)[0] == pytest.approx(6.25)
+
+
+def test_deviations_block_published():
+    txt = " ".join(r3.DEVIATIONS_R3)
+    assert "channels=72" in txt            # real TCN width vs placeholder field
+    assert "r2" in txt and "M_M3" in txt   # D_base checkpoint reuse
+    assert "per seed" in txt               # Stage S floor ruling
+    assert "argmax" in txt and "seed 1" in txt  # S tie-band disclosure
+    assert "RT-CGM" in txt                 # D5R window-share note

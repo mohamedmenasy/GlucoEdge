@@ -443,5 +443,12 @@
   "ship": {
     "candidate": "seed 2",
     "all_gates_pass": false
-  }
+  },
+  "deviations": [
+    "TrendTCN trained with channels=72, not 96: spec's 2x-CNN-parameter bound (85,450) ruled out 96 (111,653 params); 72 gives 63,005. The 'channels: [96,144]' field on arms, protocol, and selection JSONs is the CNN-shaped placeholder and does not describe the TCN.",
+    "D_base/F_base/A_cnn checkpoints are r2 M_M3 seeds 0-4 copied unchanged (justified by a bit-identical smoke reproduction, repro delta 0.0); the copies carry r2 provenance, no r3 sidecars.",
+    "Stage S applies the stable floor per seed (champion val stable - 5pp), a ruling the spec left implicit.",
+    "Stage S picked the best seed by strict argmax (ported from r2): seeds 1 and 2 sat 0.008pp apart on val directional, inside the 0.1pp tie band; the r1 tie rule (cost_key, then list order) would have picked seed 1 (val stable 0.536 vs seed 2's 0.526). Decided before the protocol freeze; the one confirmatory read went to seed 2 and stands.",
+    "D5R cohort shares: RT-CGM contributed 12,674,509 of 57,259,595 eligible windows (22.1%), sampled proportionally into the 15,159,669-window tensor by whole-subject draws."
+  ]
 }

@@ -1235,15 +1235,18 @@ blocks, dilations 1--8, $\sim$63k parameters) edged the CNN 0.533 to
 Table~\ref{tab:sweepthree} reports the one confirmatory read
 (\texttt{protocol\_sweep\_r3.json}, committed before any held-out
 label). The TCN's INT8 model beats the shipped champion by $+0.77$
-directional-recall points held-out with the series' first fully
-positive confidence interval ($[+0.09, +1.49]$), agrees temporally
+directional-recall points held-out with the first fully positive
+confidence interval on the directional endpoint ($[+0.09, +1.49]$), agrees temporally
 ($+0.97$), and sits within $0.05$ points of its float --- but breaks
 the stable floor: 0.414 against 0.459 held-out, $-4.4$ points against a
 $-2$-point gate ($-3.8$ temporally). The secondaries price the same
 trade (macro-F1 0.341 versus 0.364 held-out; on never-trained PEDAP,
 directional 0.545 versus 0.541 but stable 0.361 versus 0.394). One
 gate of three fails; the candidate was rejected and the round-two pair
-remains bundled. Full record: \texttt{accuracy\_sweep\_r3.json}.
+remains bundled. Seed selection used strict argmax; seed 1 sat within
+the 0.1-point tie band with higher stable recall, disclosed with the
+other deviations in the published record. Full record:
+\texttt{accuracy\_sweep\_r3.json}.
 
 \begin{table}[t]
 \centering

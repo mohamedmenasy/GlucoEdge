@@ -110,7 +110,7 @@ as the current bundled pair.
 
 ## Accuracy sweep sweep-r3 (2026-10-12): not shipped
 
-Sweep r3 (RT-CGM reopen, time-of-day channel, TCN arm) did not clear the directional gates:
+Sweep r3 (RT-CGM reopen, time-of-day channel, TCN arm) did not clear the ship gates:
 the TCN candidate beat the bundled pair on held-out directional recall (+0.77pp, CI fully
 positive) but broke the stable-recall floor (-4.4pp against a -2pp gate), so the bundled
 pair is retained. Full record: `paper/results/calibration-coverage/accuracy_sweep_r3.json`.

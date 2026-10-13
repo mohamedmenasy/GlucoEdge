@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+import experiments.audit_rtcgm as audit
 from experiments.audit_rtcgm import subject_verdicts
 
 
@@ -41,3 +42,16 @@ def test_intervals_never_cross_segments():
     rows += [("s", 1, t, 100.0) for t in _times("2020-01-02", 300, 20)]
     v = subject_verdicts(_frame(rows))
     assert v["s"]["admitted"] is True and v["s"]["within_tol"] == 1.0
+
+
+def test_main_aggregates_from_verdicts_and_frame():
+    import pandas as pd
+    t = pd.date_range("2020-01-01", periods=5, freq="300s")
+    frame = pd.DataFrame({"id": ["a"] * 5, "id_segment": [0] * 5,
+                          "time": t, "gl": [100.0] * 5})
+    agg = audit.aggregate_stats(audit.subject_verdicts(frame), frame)
+    assert agg["intervals_total"] == 4
+    assert agg["intervals_within_270_330"] == 4
+    assert agg["intervals_below_270"] == 0 and agg["intervals_above_330"] == 0
+    assert agg["within_tol_min"] == 1.0 and agg["within_tol_median"] == 1.0
+    assert agg["admitted_readings"] == 5

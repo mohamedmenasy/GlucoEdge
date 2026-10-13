@@ -5,5 +5,12 @@
   "subjects_admitted": 451,
   "modal_interval_histogram_s": {
     "300": 451
-  }
+  },
+  "intervals_total": 15284371,
+  "intervals_below_270": 0,
+  "intervals_within_270_330": 15284371,
+  "intervals_above_330": 0,
+  "within_tol_min": 1.0,
+  "within_tol_median": 1.0,
+  "admitted_readings": 18160560
 }

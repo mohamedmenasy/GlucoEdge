@@ -36,6 +36,28 @@ def subject_verdicts(frame):
     return out
 
 
+def aggregate_stats(verdicts, frame):
+    """Published aggregates over the whole cohort: interval distribution,
+    tolerance-fraction spread, and the admitted pool's reading count."""
+    ivals = []
+    for _, g in frame.groupby("id"):
+        for _, seg in g.groupby("id_segment"):
+            d = seg["time"].sort_values().diff().dt.total_seconds().dropna()
+            ivals.extend(float(x) for x in d)
+    ivals = np.asarray(ivals)
+    tols = [r["within_tol"] for r in verdicts.values()]
+    admitted_ids = {s for s, r in verdicts.items() if r["admitted"]}
+    return {
+        "intervals_total": int(ivals.size),
+        "intervals_below_270": int((ivals < TOL_LOW).sum()),
+        "intervals_within_270_330": int(((ivals >= TOL_LOW) & (ivals <= TOL_HIGH)).sum()),
+        "intervals_above_330": int((ivals > TOL_HIGH).sum()),
+        "within_tol_min": float(min(tols)) if tols else 0.0,
+        "within_tol_median": float(np.median(tols)) if tols else 0.0,
+        "admitted_readings": int(frame["id"].astype(str).isin(admitted_ids).sum()),
+    }
+
+
 def main():
     from training.diadata import load_diadata
     frame = load_diadata(GLUCOEDGE_ROOT.parent / "DiaData", ["RT-CGM"],
@@ -51,6 +73,7 @@ def main():
         "cohort": "RT-CGM", "rule": RULE,
         "subjects_total": len(v), "subjects_admitted": len(admitted),
         "modal_interval_histogram_s": {str(k): n for k, n in sorted(hist.items())},
+        **aggregate_stats(v, frame),
     })
     print(json.dumps({"total": len(v), "admitted": len(admitted)}))
 
