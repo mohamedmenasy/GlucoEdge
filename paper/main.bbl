@@ -1,4 +1,4 @@
-\begin{thebibliography}{33}
+\begin{thebibliography}{35}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -133,6 +133,23 @@ Xavier Bouthillier, Pierre Delaunay, Mirko Bronzi, et~al.
   pages 747--769, 2021.
 \newblock URL
   \url{https://proceedings.mlsys.org/paper_files/paper/2021/hash/0184b0cd3cfb185989f858a1d9f5c1eb-Abstract.html}.
+
+\bibitem[Kistkins et~al.(2023)Kistkins, Mihailovs, Lobanovs, P{\=\i}r{\=a}gs,
+  Sourij, Moser, and B{\c{l}}iz{\c{n}}uks]{kistkins2023classification}
+S.~Kistkins, T.~Mihailovs, S.~Lobanovs, V.~P{\=\i}r{\=a}gs, H.~Sourij,
+  O.~Moser, and D.~B{\c{l}}iz{\c{n}}uks.
+\newblock Comparative analysis of predictive interstitial glucose level
+  classification models.
+\newblock \emph{Sensors}, 23\penalty0 (19):\penalty0 8269, 2023.
+\newblock \doi{10.3390/s23198269}.
+
+\bibitem[De~Bois et~al.(2019)De~Bois, El~Yacoubi, and Ammi]{debois2019coherent}
+Maxime De~Bois, Moun{\^\i}m~A. El~Yacoubi, and Mehdi Ammi.
+\newblock Prediction-coherent {LSTM}-based recurrent neural network for safer
+  glucose predictions in diabetic people.
+\newblock In \emph{Neural Information Processing (ICONIP)}, pages 510--521,
+  2019.
+\newblock \doi{10.1007/978-3-030-36718-3_43}.
 
 \bibitem[Kiranyaz et~al.(2021)Kiranyaz, Avci, Abdeljaber, Ince, Gabbouj, and
   Inman]{kiranyaz2021survey}

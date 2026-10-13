@@ -1243,10 +1243,9 @@ $-2$-point gate ($-3.8$ temporally). The secondaries price the same
 trade (macro-F1 0.341 versus 0.364 held-out; on never-trained PEDAP,
 directional 0.545 versus 0.541 but stable 0.361 versus 0.394). One
 gate of three fails; the candidate was rejected and the round-two pair
-remains bundled. Seed selection used strict argmax; seed 1 sat within
-the 0.1-point tie band with higher stable recall, disclosed with the
-other deviations in the published record. Full record:
-\texttt{accuracy\_sweep\_r3.json}.
+remains bundled. Seed selection used strict argmax (seed 1 sat within
+the 0.1-point tie band with higher stable recall; disclosed in the
+published record). Full record: \texttt{accuracy\_sweep\_r3.json}.
 
 \begin{table}[t]
 \centering
@@ -1529,12 +1528,11 @@ PyTorch seed 0 and the formatter's split seed 0 control separate randomization
 steps; neither guarantees bitwise retraining across platforms. The artifact
 hashes identify the exact models used for replay.
 
-For the September manuscript revision, we reused the July results and
-calculated descriptive summaries from the rounded tables. We did not retrain
-models, rerun evaluation on the research data, or collect new phone timings.
-Machine-readable run reports and the training checkpoint can be regenerated
-locally, but are not versioned paper supplements. A fresh run may produce
-different numbers from those recorded here.
+The September revision reused the July results and calculated
+descriptive summaries from the rounded tables, with no retraining,
+re-evaluation, or new phone timings. Machine-readable run reports and
+the training checkpoint regenerate locally but are not versioned paper
+supplements; a fresh run may produce different numbers.
 
 A subsequent provenance audit reran only the GlucoBench formatter and
 window construction --- no training, model evaluation, or held-out
@@ -1545,23 +1543,17 @@ research data; its aggregate output, including the GlucoBench commit
 and a SHA-256 hash of the Weinstock data file, is versioned as
 \texttt{paper/results/split\_audit.json}.
 
-The calibration-coverage study itself is versioned under
-\texttt{paper/results/calibration-coverage/}: the frozen protocol
-(\texttt{protocol.json}), the sanitized study environment
-(\texttt{environment.txt}; a single virtual environment with the
-conversion pins, PyTorch 2.12.1, and NumPy 2.5.3, reconciling the
-previously recorded drift), the eligibility audit
-(\texttt{data\_availability.json}), the complete aggregate results
-with contrasts, intervals, coverage, and all 100 planned cells
-(\texttt{aggregate\_r1.json}), and the artifact summary --- operator
-inventories, sizes, and distinct-hash counts
-(\texttt{artifacts\_summary.json}); per-artifact SHA-256 hashes live in
-the local run manifest. Checkpoints, selected window keys,
-per-window predictions, and participant-level summaries remain local and
-are regenerable from the committed runner
-(\texttt{experiments/calibration\_coverage.py}) with GlucoBench cloned;
-every published number regenerates from the cached predictions via one
-analysis command. After the study's publication within the repository,
+The calibration-coverage study is versioned under
+\texttt{paper/results/calibration-coverage/}: the frozen protocol, the
+sanitized environment (\texttt{environment.txt}; conversion pins,
+PyTorch 2.12.1, NumPy 2.5.3, reconciling the previously recorded
+drift), the eligibility audit, the complete aggregate results with all
+100 planned cells (\texttt{aggregate\_r1.json}), and the artifact
+summary; per-artifact SHA-256 hashes live in the local run manifest.
+Checkpoints, window keys, per-window predictions, and
+participant-level summaries remain local and regenerate from the
+committed runner with GlucoBench cloned; every published number
+regenerates from the cached predictions via one analysis command. After the study's publication within the repository,
 the bundled application artifacts were replaced by its seed-0 float and
 uniform-200 INT8 models, and later by the delta-encoded pair, with
 hashes and provenance recorded in the application's model manifest.
@@ -1583,15 +1575,14 @@ We do not claim an institutional ethics determination for this work.
 
 \subsection{AI assistance and author declarations}
 
-OpenAI Codex assisted with language editing during the September manuscript
+OpenAI Codex assisted with language editing during the September
 revision, checked sources, and compared claims with repository code and
-recorded results. Claude Code (Anthropic) wrote the provenance audit script
-and the Kotlin rounding fix, implemented the iOS client, implemented and
-executed the calibration-coverage study pipeline under the frozen protocol,
-and drafted the corresponding manuscript revisions.
-The draft requires author review.
-Funding, competing interests, and CRediT author contributions remain to be
-confirmed by the author before submission.
+recorded results. Claude Code (Anthropic) wrote the provenance audit
+script and the Kotlin rounding fix, implemented the iOS client, and
+implemented and executed the study pipelines under their frozen
+protocols, drafting the corresponding revisions. The draft requires
+author review; funding, competing interests, and CRediT contributions
+remain to be confirmed by the author before submission.
 
 \section{Conclusion}
 
@@ -1613,14 +1604,14 @@ ones.
 
 The conclusions are scoped to one primary cohort, one architecture, and
 one quantizer, on a reanalysis of previously touched data; the frozen
-sensitivity tiers reproduce both headline findings, the device benchmark
-measured the calibration fix as latency-free, and the
+sensitivity tiers reproduce both headline findings, the device
+benchmark measured the fix latency-free, and the
 sequential-versus-uniform effect was confirmed on two further cohorts
 with prespecified paired predictions tracking the calibration-coverage
 deficit. \project remains a research prototype, not a medical device.
 
 \bibliographystyle{unsrtnat}
-\renewcommand{\bibfont}{\fontsize{6.5}{7.4}\selectfont}
+\renewcommand{\bibfont}{\scriptsize}
 \setlength{\bibsep}{0pt}
 \bibliography{references}
 
