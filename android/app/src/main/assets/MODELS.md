@@ -107,3 +107,10 @@ showed it trades directional (minority-class) recall for that gain (0.438 vs 0.5
 so that pair stayed. Full record: `paper/results/calibration-coverage/accuracy_sweep_r1.json`.
 Round two (sweep-r2, above) fixed the endpoint to directional recall and its winner shipped
 as the current bundled pair.
+
+## Accuracy sweep sweep-r3 (2026-10-12): not shipped
+
+Sweep r3 (RT-CGM reopen, time-of-day channel, TCN arm) did not clear the ship gates:
+the TCN candidate beat the bundled pair on held-out directional recall (+0.77pp, CI fully
+positive) but broke the stable-recall floor (-4.4pp against a -2pp gate), so the bundled
+pair is retained. Full record: `paper/results/calibration-coverage/accuracy_sweep_r3.json`.

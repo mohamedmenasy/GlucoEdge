@@ -14,3 +14,13 @@ def delta_windows(windows, anchor, anchor_scale=ANCHOR_SCALE):
     if not anchor:
         return d
     return np.concatenate([d, (w[:, -1:] / np.float32(anchor_scale))], axis=1)
+
+
+def tod_channels(anchor_hours, length=12, step_minutes=5.0):
+    """sin/cos time-of-day per window step, derived backwards from the
+    anchor at nominal spacing (sweep r3 spec section 4; device-local clock)."""
+    anchor_hours = np.asarray(anchor_hours, dtype=np.float64)
+    offsets = (np.arange(length) - (length - 1)) * step_minutes / 60.0
+    h = (anchor_hours[:, None] + offsets[None, :]) % 24.0
+    ang = 2.0 * np.pi * h / 24.0
+    return np.stack([np.sin(ang), np.cos(ang)], axis=1).astype(np.float32)
