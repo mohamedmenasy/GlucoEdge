@@ -1,0 +1,447 @@
+{
+  "protocol": "paper/results/calibration-coverage/protocol_sweep_r3.json",
+  "run_id": "sweep-r3",
+  "selection_trail": {
+    "D": {
+      "stage": "D",
+      "champion_val": {
+        "directional": 0.5329756623608157,
+        "stable": 0.5484556531595353
+      },
+      "stable_floor": 0.4984556531595353,
+      "table": {
+        "D_base": {
+          "per_seed": {
+            "0": {
+              "directional": 0.5339271455509136,
+              "stable": 0.5398602059129121
+            },
+            "1": {
+              "directional": 0.5391284323822993,
+              "stable": 0.5388684235383017
+            },
+            "2": {
+              "directional": 0.5322059886351717,
+              "stable": 0.5407575328232739
+            },
+            "3": {
+              "directional": 0.5250779440340179,
+              "stable": 0.5584207046377633
+            },
+            "4": {
+              "directional": 0.5308270884671717,
+              "stable": 0.5570983281382828
+            }
+          },
+          "mean_directional": 0.5322333198139149,
+          "mean_stable": 0.5470010390101068,
+          "disqualified": false
+        },
+        "D_rtcgm": {
+          "per_seed": {
+            "0": {
+              "directional": 0.5232753463799795,
+              "stable": 0.5665438745631435
+            },
+            "1": {
+              "directional": 0.5311436530861552,
+              "stable": 0.5394351563237934
+            },
+            "2": {
+              "directional": 0.5261262617738268,
+              "stable": 0.5476055539812978
+            },
+            "3": {
+              "directional": 0.5285448570919217,
+              "stable": 0.5540757532823274
+            },
+            "4": {
+              "directional": 0.5241980315814492,
+              "stable": 0.562435061868329
+            }
+          },
+          "mean_directional": 0.5266576299826664,
+          "mean_stable": 0.5540190800037782,
+          "disqualified": false
+        }
+      },
+      "winner": {
+        "name": "D_base",
+        "mixture": "D5",
+        "features": "none",
+        "arch": "cnn",
+        "in_channels": 1,
+        "channels": [
+          96,
+          144
+        ],
+        "length": 12,
+        "loss": "ce",
+        "pooled": false
+      }
+    },
+    "F": {
+      "stage": "F",
+      "champion_val": {
+        "directional": 0.5329756623608157,
+        "stable": 0.5484556531595353
+      },
+      "stable_floor": 0.4984556531595353,
+      "table": {
+        "F_base": {
+          "per_seed": {
+            "0": {
+              "directional": 0.5339271455509136,
+              "stable": 0.5398602059129121
+            },
+            "1": {
+              "directional": 0.5391284323822993,
+              "stable": 0.5388684235383017
+            },
+            "2": {
+              "directional": 0.5322059886351717,
+              "stable": 0.5407575328232739
+            },
+            "3": {
+              "directional": 0.5250779440340179,
+              "stable": 0.5584207046377633
+            },
+            "4": {
+              "directional": 0.5308270884671717,
+              "stable": 0.5570983281382828
+            }
+          },
+          "mean_directional": 0.5322333198139149,
+          "mean_stable": 0.5470010390101068,
+          "disqualified": false
+        },
+        "F_tod": {
+          "per_seed": {
+            "0": {
+              "directional": 0.528953469713949,
+              "stable": 0.5449608009823368
+            },
+            "1": {
+              "directional": 0.5311914531130522,
+              "stable": 0.5474166430528006
+            },
+            "2": {
+              "directional": 0.529426862256156,
+              "stable": 0.5456692169642013
+            },
+            "3": {
+              "directional": 0.5290979337487424,
+              "stable": 0.5502503069802588
+            },
+            "4": {
+              "directional": 0.5263830172481669,
+              "stable": 0.5559176348351752
+            }
+          },
+          "mean_directional": 0.5290105472160133,
+          "mean_stable": 0.5488429205629546,
+          "disqualified": false
+        }
+      },
+      "winner": {
+        "name": "F_base",
+        "mixture": "D5",
+        "features": "none",
+        "arch": "cnn",
+        "in_channels": 1,
+        "channels": [
+          96,
+          144
+        ],
+        "length": 12,
+        "loss": "ce",
+        "pooled": false
+      }
+    },
+    "A": {
+      "stage": "A",
+      "champion_val": {
+        "directional": 0.5329756623608157,
+        "stable": 0.5484556531595353
+      },
+      "stable_floor": 0.4984556531595353,
+      "table": {
+        "A_cnn": {
+          "per_seed": {
+            "0": {
+              "directional": 0.5339271455509136,
+              "stable": 0.5398602059129121
+            },
+            "1": {
+              "directional": 0.5391284323822993,
+              "stable": 0.5388684235383017
+            },
+            "2": {
+              "directional": 0.5322059886351717,
+              "stable": 0.5407575328232739
+            },
+            "3": {
+              "directional": 0.5250779440340179,
+              "stable": 0.5584207046377633
+            },
+            "4": {
+              "directional": 0.5308270884671717,
+              "stable": 0.5570983281382828
+            }
+          },
+          "mean_directional": 0.5322333198139149,
+          "mean_stable": 0.5470010390101068,
+          "disqualified": false
+        },
+        "A_tcn": {
+          "per_seed": {
+            "0": {
+              "directional": 0.524691732604529,
+              "stable": 0.5826485312175309
+            },
+            "1": {
+              "directional": 0.5366407832370433,
+              "stable": 0.5360819873429677
+            },
+            "2": {
+              "directional": 0.536717443566237,
+              "stable": 0.5255974308113724
+            },
+            "3": {
+              "directional": 0.5354597457799924,
+              "stable": 0.5419382261263814
+            },
+            "4": {
+              "directional": 0.5328134389757748,
+              "stable": 0.5309341645414187
+            }
+          },
+          "mean_directional": 0.5332646288327153,
+          "mean_stable": 0.5434400680079342,
+          "disqualified": false
+        }
+      },
+      "winner": {
+        "name": "A_tcn",
+        "mixture": "D5",
+        "features": "none",
+        "arch": "tcn",
+        "in_channels": 1,
+        "channels": [
+          96,
+          144
+        ],
+        "length": 12,
+        "loss": "ce",
+        "pooled": false
+      }
+    },
+    "S": {
+      "stage": "S",
+      "table": {
+        "per_seed": {
+          "0": {
+            "directional": 0.524691732604529,
+            "stable": 0.5826485312175309
+          },
+          "1": {
+            "directional": 0.5366407832370433,
+            "stable": 0.5360819873429677
+          },
+          "2": {
+            "directional": 0.536717443566237,
+            "stable": 0.5255974308113724
+          },
+          "3": {
+            "directional": 0.5354597457799924,
+            "stable": 0.5419382261263814
+          },
+          "4": {
+            "directional": 0.5328134389757748,
+            "stable": 0.5309341645414187
+          }
+        }
+      },
+      "best_seed": 2,
+      "winner": {
+        "name": "A_tcn",
+        "mixture": "D5",
+        "features": "none",
+        "arch": "tcn",
+        "in_channels": 1,
+        "channels": [
+          96,
+          144
+        ],
+        "length": 12,
+        "loss": "ce",
+        "pooled": false,
+        "ensemble": false
+      }
+    }
+  },
+  "smoke": {
+    "results": {
+      "64": {
+        "0": 0.5144132443292886,
+        "1": 0.49807907979111193
+      },
+      "512": {
+        "0": 0.5132031142456811,
+        "1": 0.5120121728524486
+      }
+    },
+    "mean64": 0.5062461620602002,
+    "frozen_batch": 512,
+    "mps_same_seed_abs_diff": 0.0,
+    "mps_seed_reproducible": true
+  },
+  "per_arm_train_windows": {
+    "D5R_none_s20261012": 15159669,
+    "D5_none_s20261012": 15135091,
+    "D5_tod_s20261012": 15135091,
+    "SMOKE_M0_s20261012": 328575
+  },
+  "components": {
+    "held_out": {
+      "windows": 46376,
+      "pairing_rule": "identical eligible windows by construction",
+      "dropped_windows_winner": 0,
+      "dropped_windows_champion": 0,
+      "per_seed_directional": {
+        "0": {
+          "float": 0.5195490549292376,
+          "int8_uniform_random_200_d101": 0.5175915372715862,
+          "int8_sequential_200_d0": 0.5145617917664254
+        },
+        "1": {
+          "float": 0.5248176096626773,
+          "int8_uniform_random_200_d101": 0.5234740323343496,
+          "int8_sequential_200_d0": 0.517668758656936
+        },
+        "2": {
+          "float": 0.530580007276715,
+          "int8_uniform_random_200_d101": 0.5311229067257914,
+          "int8_sequential_200_d0": 0.5222467498156339
+        },
+        "3": {
+          "float": 0.5226434969994483,
+          "int8_uniform_random_200_d101": 0.5205162588507761,
+          "int8_sequential_200_d0": 0.5170342246107534
+        },
+        "4": {
+          "float": 0.5297185658693245,
+          "int8_uniform_random_200_d101": 0.526779526239874,
+          "int8_sequential_200_d0": 0.5225178447394683
+        }
+      },
+      "macro_f1_candidate_int8": 0.34121335769536,
+      "macro_f1_champion_int8": 0.36353818667254256,
+      "gates": {
+        "contrast_int8_vs_champion": {
+          "delta": 0.007736371520609242,
+          "ci95": [
+            0.0009460658866313089,
+            0.014937445211281633
+          ],
+          "undefined_fraction": 0.0,
+          "n_boot": 2000,
+          "seed": 20261013
+        },
+        "candidate_float_directional": 0.530580007276715,
+        "candidate_int8_directional": 0.5311229067257914,
+        "champion_int8_directional": 0.5233865352051822,
+        "candidate_int8_stable": 0.41447426961293193,
+        "champion_int8_stable": 0.4585496069998517,
+        "gate1_beats_champion": true,
+        "gate2_stable_floor": false,
+        "gate3_int8_within_half_pp_of_float": true
+      }
+    },
+    "temporal": {
+      "windows": 37361,
+      "pairing_rule": "identical eligible windows by construction",
+      "dropped_windows_winner": 0,
+      "dropped_windows_champion": 0,
+      "per_seed_directional": {
+        "0": {
+          "float": 0.4993777219884738,
+          "int8_uniform_random_200_d101": 0.5017839690970805,
+          "int8_sequential_200_d0": 0.4974338003283236
+        },
+        "1": {
+          "float": 0.5118427574276753,
+          "int8_uniform_random_200_d101": 0.5073178746684635,
+          "int8_sequential_200_d0": 0.5089609309762244
+        },
+        "2": {
+          "float": 0.5106131817955266,
+          "int8_uniform_random_200_d101": 0.5114651147045246,
+          "int8_sequential_200_d0": 0.5078062732196927
+        },
+        "3": {
+          "float": 0.5065524936513693,
+          "int8_uniform_random_200_d101": 0.5113246923508756,
+          "int8_sequential_200_d0": 0.5044976688962126
+        },
+        "4": {
+          "float": 0.5070189483327773,
+          "int8_uniform_random_200_d101": 0.5067592920760037,
+          "int8_sequential_200_d0": 0.5035437715944456
+        }
+      },
+      "macro_f1_candidate_int8": 0.33556182275792806,
+      "macro_f1_champion_int8": 0.35572874693147183,
+      "gates": {
+        "contrast_int8_vs_champion": {
+          "delta": 0.009741647200029346,
+          "ci95": [
+            -0.00012708709603900245,
+            0.01939674934453772
+          ],
+          "undefined_fraction": 0.0,
+          "n_boot": 2000,
+          "seed": 20261013
+        },
+        "candidate_float_directional": 0.5106131817955266,
+        "candidate_int8_directional": 0.5114651147045246,
+        "champion_int8_directional": 0.5017234675044953,
+        "candidate_int8_stable": 0.4812858384013901,
+        "champion_int8_stable": 0.5195829713292789,
+        "gate1_beats_champion": true,
+        "gate2_stable_floor": false,
+        "gate3_int8_within_half_pp_of_float": true
+      }
+    }
+  },
+  "pedap_zero_shot": {
+    "windows": 7003788,
+    "winner_int8": {
+      "directional": 0.5451698963732566,
+      "stable": 0.3605126927454799,
+      "per_class": {
+        "falling_fast": 0.6668863888613874,
+        "falling": 0.4458881071084392,
+        "stable": 0.3605126927454799,
+        "rising": 0.39836123615396285,
+        "rising_fast": 0.6695438533692372
+      }
+    },
+    "champion_int8": {
+      "directional": 0.5407023859901744,
+      "stable": 0.3941903936556735,
+      "per_class": {
+        "falling_fast": 0.6384380096816721,
+        "falling": 0.46019531202783204,
+        "stable": 0.3941903936556735,
+        "rising": 0.45345876957833864,
+        "rising_fast": 0.6107174526728549
+      }
+    },
+    "note": "descriptive; no gates; cohort never trained on"
+  },
+  "ship": {
+    "candidate": "seed 2",
+    "all_gates_pass": false
+  }
+}

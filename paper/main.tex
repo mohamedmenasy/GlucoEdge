@@ -1173,13 +1173,12 @@ validation directional recall rose from 0.512 (Weinstock-only) through
 0.527 (natural proportions) and 0.532 (equal windows per cohort) to
 0.535 for DiaData-only training --- the winner never sees a Weinstock
 training window --- with stable recall (0.540) above the disqualifier
-floor. The gain tracks cohort balance as much as DiaData share: the
-equal-per-cohort mixture won on fewer DiaData windows (97.5\% versus
-97.8\% share). Fast-class oversampling tied natural proportions (0.526),
-a null expected here: re-balancing the class weights on the oversampled
-labels restores the same objective. Capacity brackets at $(24,36)$ and $(192,288)$ both lost
-(0.526, 0.524), and the best of five seeds reached 0.539 validation
-directional recall against the champion's 0.519.
+floor. The gain tracks cohort balance as much as DiaData share (the
+equal-per-cohort mixture won on a smaller share), and fast-class
+oversampling tied natural proportions, the expected null once class
+weights re-balance. Capacity brackets at $(24,36)$ and $(192,288)$ both
+lost, and the best of five seeds reached 0.539 validation directional
+recall against the champion's 0.519.
 
 Table~\ref{tab:sweeptwo} reports the one confirmatory read. The winner's
 INT8 model beats the bundled champion by $+0.60$ directional-recall
@@ -1205,15 +1204,61 @@ tests, INT8 bit-exact on device). Full record:
 \caption{Round-two pre-registered confirmatory read (directional recall,
 paired windows; winner = DiaData-only mixture, $(96,144)$ channels,
 1-hour window, seed 1). Delta is winner INT8 minus champion INT8,
-participant-cluster bootstrap CI.}
+participant-cluster bootstrap CI, in recall points ($\times 100$).}
 \label{tab:sweeptwo}
-\footnotesize
+\scriptsize\setlength{\tabcolsep}{2.5pt}
 \begin{tabular}{@{}lcccc@{}}
 \toprule
 Split & Winner float & Winner INT8 & Champion INT8 & $\Delta$ [95\% CI] \\
 \midrule
-Held-out & 0.524 & 0.523 & 0.517 & $+0.006$ $[-0.001, +0.013]$ \\
-Temporal & 0.506 & 0.502 & 0.497 & $+0.005$ $[-0.004, +0.014]$ \\
+Held-out & 0.524 & 0.523 & 0.517 & $+0.6$ $[-0.1, +1.3]$ \\
+Temporal & 0.506 & 0.502 & 0.497 & $+0.5$ $[-0.4, +1.4]$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Accuracy sweep, round three: a rejected candidate}
+
+Round three staged three changes against the round-two winner at five
+seeds per arm under the same stable floor: reopening DiaData's RT-CGM
+cohort, a time-of-day input channel, and a temporal convolutional
+architecture. A cadence audit admitted all 451 RT-CGM subjects under
+the pre-registered rule (modal within-segment interval 300\,s,
+$\geq$95\% of intervals in $[270, 330]$\,s;
+\texttt{diadata\_audit\_r2.json}) --- the archive is DiaData's own
+5-minute-sampled variant. Both data ideas lost on validation
+directional recall (five-seed means): RT-CGM $-0.6$ points, time-of-day
+$-0.3$. The architecture won: a causal dilated TCN (four residual
+blocks, dilations 1--8, $\sim$63k parameters) edged the CNN 0.533 to
+0.532, best seed 0.537.
+
+Table~\ref{tab:sweepthree} reports the one confirmatory read
+(\texttt{protocol\_sweep\_r3.json}, committed before any held-out
+label). The TCN's INT8 model beats the shipped champion by $+0.77$
+directional-recall points held-out with the series' first fully
+positive confidence interval ($[+0.09, +1.49]$), agrees temporally
+($+0.97$), and sits within $0.05$ points of its float --- but breaks
+the stable floor: 0.414 against 0.459 held-out, $-4.4$ points against a
+$-2$-point gate ($-3.8$ temporally). The secondaries price the same
+trade (macro-F1 0.341 versus 0.364 held-out; on never-trained PEDAP,
+directional 0.545 versus 0.541 but stable 0.361 versus 0.394). One
+gate of three fails; the candidate was rejected and the round-two pair
+remains bundled. Full record: \texttt{accuracy\_sweep\_r3.json}.
+
+\begin{table}[t]
+\centering
+\caption{Round-three confirmatory read (directional recall, paired
+windows; candidate = causal dilated TCN, round-two mixture, seed 2,
+uniform INT8). Delta is candidate minus champion INT8,
+participant-cluster bootstrap CI, in recall points ($\times 100$). Failed the stable gate; not shipped.}
+\label{tab:sweepthree}
+\scriptsize\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Split & Cand.\ float & Cand.\ INT8 & Champion INT8 & $\Delta$ [95\% CI] \\
+\midrule
+Held-out & 0.531 & 0.531 & 0.523 & $+0.8$ $[+0.1, +1.5]$ \\
+Temporal & 0.511 & 0.511 & 0.502 & $+1.0$ $[-0.0, +1.9]$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1467,12 +1512,11 @@ and test code. The bundled artifacts were generated from repository commit
 are stored beside the assets and asserted by instrumentation tests. Python unit
 tests cover label boundaries, segment-aware windows, model shape, conversion
 helpers, synthetic replay behavior, and the provenance audit's split
-bookkeeping. Android unit tests cover replay,
-buffering, quantization, latency aggregation, and view-model behavior. A merged-
-manifest check enforces the absence of Internet permission. The iOS test
-suite covers the same units and the golden-vector parity. Continuous
-integration runs it on a simulator, together with the source scan for
-networking APIs.
+bookkeeping. Android unit tests cover replay, buffering, quantization,
+latency aggregation, and view-model behavior; a merged-manifest check
+enforces the absence of Internet permission. The iOS suite covers the
+same units plus golden-vector parity, run in CI on a simulator with a
+source scan for networking APIs.
 
 The conversion requirements record LiteRT Torch 0.9.1, TorchAO 0.17.0, and
 Python LiteRT 2.1.5. They also document PyTorch 2.12.1 and NumPy 2.5.0 in the
@@ -1489,16 +1533,14 @@ Machine-readable run reports and the training checkpoint can be regenerated
 locally, but are not versioned paper supplements. A fresh run may produce
 different numbers from those recorded here.
 
-A subsequent provenance audit reran only the GlucoBench formatter and window
-construction; it involved no
-training, model evaluation, or held-out glucose values.
-
-The October revision adds the iOS client and its device measurements,
-recorded on 10 October 2026 with the unchanged artifacts (same SHA-256
-hashes). It involved no retraining, conversion, or evaluation on research
-data. Its aggregate output,
-including the GlucoBench commit and a SHA-256 hash of the Weinstock data file,
-is versioned as \texttt{paper/results/split\_audit.json}.
+A subsequent provenance audit reran only the GlucoBench formatter and
+window construction --- no training, model evaluation, or held-out
+glucose values. The October revision adds the iOS client and its device
+measurements (10 October 2026, unchanged artifacts, same SHA-256
+hashes), again with no retraining, conversion, or evaluation on
+research data; its aggregate output, including the GlucoBench commit
+and a SHA-256 hash of the Weinstock data file, is versioned as
+\texttt{paper/results/split\_audit.json}.
 
 The calibration-coverage study itself is versioned under
 \texttt{paper/results/calibration-coverage/}: the frozen protocol
@@ -1553,30 +1595,30 @@ confirmed by the author before submission.
 On a corrected, provenance-masked protocol with five training seeds and
 100 paired INT8 artifacts, calibration-data coverage fully determined
 whether static INT8 quantization damaged this compact CGM trend
-classifier. The toolchain-default sequential selection, whose 200 windows
-span two participants and cap the input range at 251~\mgdl, cost 13.4
-points of held-out directional recall while raising raw accuracy --- an
-illusion a class-balanced metric exposes. Any randomized selection of the
-same 200 windows restored float-level directional recall; range-aware
-stratification, a five-fold budget, and a min--max observer moved it by
-at most eight hundredths of a point; and clip-only controls attributed the loss to input-range
-clipping rather than grid resolution. Every INT8 artifact is
-byte-identical in size and selection takes milliseconds, so the corrected
-calibration is free at deployment time. In this setting, coverage means
-covering participants; sample count, stratification, and observer choice
-were the wrong knobs.
+classifier. The toolchain-default sequential selection, whose 200
+windows span two participants and cap the input range at 251~\mgdl,
+cost 13.4 points of held-out directional recall while raising raw
+accuracy --- an illusion a class-balanced metric exposes. Any
+randomized selection of the same 200 windows restored float-level
+directional recall; stratification, budget, and observer choice moved
+it by at most eight hundredths of a point; clip-only controls
+attributed the loss to input-range clipping, not grid resolution.
+Every INT8 artifact is byte-identical in size and selection takes
+milliseconds: the corrected calibration is free at deployment time.
+Coverage means covering participants; the other knobs were the wrong
+ones.
 
-The conclusions are scoped to one primary cohort, one architecture, and one
-quantizer, on a reanalysis of previously touched data; the frozen
-sensitivity tiers reproduce both headline findings, and the paired-round
-device benchmark measured the calibration fix as latency-free on the one
-remaining phone, and the sequential-versus-uniform effect was confirmed
-on two further cohorts with prespecified paired predictions whose
-magnitudes track the calibration-coverage deficit. \project remains a research prototype, not a medical device.
+The conclusions are scoped to one primary cohort, one architecture, and
+one quantizer, on a reanalysis of previously touched data; the frozen
+sensitivity tiers reproduce both headline findings, the device benchmark
+measured the calibration fix as latency-free, and the
+sequential-versus-uniform effect was confirmed on two further cohorts
+with prespecified paired predictions tracking the calibration-coverage
+deficit. \project remains a research prototype, not a medical device.
 
 \bibliographystyle{unsrtnat}
-\renewcommand{\bibfont}{\scriptsize}
-\setlength{\bibsep}{0.5pt}
+\renewcommand{\bibfont}{\fontsize{6.5}{7.4}\selectfont}
+\setlength{\bibsep}{0pt}
 \bibliography{references}
 
 \end{document}
