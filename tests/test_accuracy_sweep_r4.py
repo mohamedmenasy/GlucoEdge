@@ -300,3 +300,43 @@ def test_rate_views_collate_float32_for_mps():
                         sigma=1.0, seed=0, float_targets=True)
     _, y = next(iter(DataLoader(nv, batch_size=2)))
     assert y.dtype == torch.float32
+
+
+def test_analyze_no_read_flows(tmp_path, monkeypatch):
+    # identity/abort outcomes publish without eval dirs (review finding)
+    from pathlib import Path as _P
+
+    import experiments.accuracy_sweep_r4 as r4
+    monkeypatch.setattr(r4, "_run_dir", lambda rid: str(tmp_path))
+    exp0 = tmp_path / "exp0.json"
+    exp0.write_text(json.dumps({"abort": False, "headroom": 0.42}))
+    monkeypatch.setattr(r4, "EXP0_PATH", exp0)
+    # abort flow: nothing but exp0 exists
+    out = r4.stage_analyze("sweep-r4-test")
+    assert out["exp0"]["headroom"] == 0.42
+    assert out["selection_trail"] == {} and "components" not in out
+    assert out["ship"]["all_gates_pass"] is False
+    # identity flow: selections exist, still no eval dirs
+    (tmp_path / "selection").mkdir()
+    for s in ("H", "R", "W"):
+        (tmp_path / "selection" / f"{s}.json").write_text(json.dumps(
+            {"stage": s, "winner": r4.arm_r4("R_base", "ce")
+             if s != "W" else dict(r4.arm_r4("R_base", "ce"),
+                                   cell="W_best", best_seed=1)}))
+    (tmp_path / "smoke.json").write_text(json.dumps({"frozen_batch": 512}))
+    out = r4.stage_analyze("sweep-r4-test")
+    assert set(out["selection_trail"]) == {"H", "R", "W"}
+    assert out["smoke"]["frozen_batch"] == 512
+    assert "components" not in out and "pedap_zero_shot" not in out
+    assert (_P(tmp_path) / "analysis" / "sweep_r4_aggregate.json").exists()
+
+
+def test_published_r4_jsons_leak_free():
+    # the plan's leak walker, pinned as a test instead of prose
+    from pathlib import Path as _P
+    root = _P(__file__).resolve().parents[1] / "paper" / "results" / "calibration-coverage"
+    for name in ("exp0_sweep_r4.json", "accuracy_sweep_r4.json"):
+        blob = (root / name).read_text()
+        for pat in ('"participants"', '"keys"', '"pids"', '"row_ids"',
+                    '"anchor_times"', '"labels": ['):
+            assert pat not in blob, (name, pat)

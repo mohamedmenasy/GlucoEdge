@@ -1285,8 +1285,9 @@ the 15-minute horizon; a least-squares slope over the four horizon
 readings, classified with the unchanged clinical thresholds, agrees with
 the endpoint label on 95.4\% directional recall (stable 99.5\%) across
 the 27{,}109 eligible validation windows --- 42 points above the
-champion's 0.533. Even $\sigma{=}2$\,mg/dL Gaussian perturbation of the
-readings keeps directional agreement at 0.860. The pre-registered abort
+champion's 0.533. Even under $\sigma{=}2$\,mg/dL Gaussian perturbation of
+the readings, the re-derived endpoint label still agrees with the clean
+endpoint label at 0.860 directional. The pre-registered abort
 rule (stop if headroom $<$ 2 points; \texttt{exp0\_sweep\_r4.json},
 committed before training) did not fire: the task is model- and
 data-limited, not label-noise-limited.
@@ -1318,7 +1319,10 @@ bundled. Full record: \texttt{accuracy\_sweep\_r4.json}.
 five seeds, eligible Weinstock validation windows). Control = the
 shipped recipe (weighted CE, round-two mixture). The winner is the
 control's best seed, sha-identical to the bundled champion; no held-out
-read was spent.}
+read was spent. Rows are float-checkpoint evaluations; the champion
+reference 0.533 is its bundled INT8 on the same windows (the selection
+convention of rounds one to three), which is why the sha-identical
+winner's float row reads 0.6 points above it.}
 \label{tab:sweepfour}
 \scriptsize\setlength{\tabcolsep}{2.5pt}
 \begin{tabular}{@{}llcc@{}}

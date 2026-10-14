@@ -358,6 +358,7 @@
  "deviations": [
   "H_ce/R_base checkpoints are r3 D_base (= r2 M_M3) seeds 0-4, re-wrapped into the r3/r4 checkpoint dict format (the originals are raw r2-era state_dicts); weights byte-identical, provenance carried from r2.",
   "No confirmatory held-out/temporal/PEDAP read was performed: the W winner (R_base seed 1) converts to a float/INT8 pair sha256-identical to the bundled champion (96eef43c... / a887ea4e...), so the pre-registered paired contrast is a model-vs-itself comparison with delta identically 0 and gate 1 (delta > 0) unpassable. The protected splits were left untouched this round; the identity proof stands in for the read.",
-  "W_swa reported not-applicable: the R winner is the reuse lineage with no per-epoch history (spec section 3 skip rule)."
+  "W_swa reported not-applicable: the R winner is the reuse lineage with no per-epoch history (spec section 3 skip rule).",
+  "The first published accuracy_sweep_r4.json was hand-assembled (stage_analyze predated the no-read outcome and required eval artifacts); stage_analyze now handles identity/abort flows and regenerates the same aggregate schema."
  ]
 }

@@ -39,6 +39,10 @@ DEVIATIONS_R4 = (
     "untouched this round; the identity proof stands in for the read.",
     "W_swa reported not-applicable: the R winner is the reuse lineage with no "
     "per-epoch history (spec section 3 skip rule).",
+    "The first published accuracy_sweep_r4.json was hand-assembled (stage_"
+    "analyze predated the no-read outcome and required eval artifacts); "
+    "stage_analyze now handles identity/abort flows and regenerates the "
+    "same aggregate schema.",
 )
 
 
@@ -685,11 +689,55 @@ def _pairing_block(n):
             "windows": n}
 
 
+def _analyze_no_read(run_id, run):
+    """Identity/abort outcome: publish without any confirmatory-read
+    artifacts (review finding r4-I1). Protected splits stay unread."""
+    import hashlib
+    run = Path(run)
+    trail = {s: _read_sel(run, s) for s in ("H", "R", "W")
+             if (run / "selection" / f"{s}.json").exists()}
+    out = {"run_id": run_id,
+           "spec": "docs/superpowers/specs/2026-10-13-accuracy-sweep-r4-design.md",
+           "exp0": json.loads(EXP0_PATH.read_text()),
+           "selection_trail": trail,
+           "per_arm_train_windows": {
+               p.stem: int(np.load(p)["y"].shape[0])
+               for p in sorted((run / "tensors").glob("*.npz"))}}
+    if (run / "smoke.json").exists():
+        out["smoke"] = json.loads((run / "smoke.json").read_text())
+    if "W" in trail:
+        cand = _candidate_label(run)
+        fl = run / "artifacts" / f"winner_{cand}_float.tflite"
+        i8 = run / "artifacts" / f"winner_{cand}_int8_uniform_random_200_d101.tflite"
+        if fl.exists() and i8.exists():
+            from experiments.accuracy_sweep import CHAMPION
+
+            def sha16(path):
+                return hashlib.sha256(Path(path).read_bytes()).hexdigest()[:16]
+            out["identity_outcome"] = {
+                "candidate": f"W winner {cand}",
+                "candidate_float_sha256_prefix": sha16(fl),
+                "candidate_int8_sha256_prefix": sha16(i8),
+                "champion_float_sha256_prefix": sha16(CHAMPION["float"]),
+                "champion_int8_sha256_prefix": sha16(CHAMPION["int8"]),
+            }
+    out["ship"] = {"all_gates_pass": False,
+                   "outcome": "no confirmatory read performed; protected "
+                              "splits unread this round"}
+    out["deviations"] = list(DEVIATIONS_R4)
+    (run / "analysis").mkdir(exist_ok=True)
+    _write_json(run / "analysis" / "sweep_r4_aggregate.json", out)
+    print("wrote", run / "analysis" / "sweep_r4_aggregate.json", "(no-read flow)")
+    return out
+
+
 def stage_analyze(run_id, n_boot=2000):
     from experiments.analyze_calibration_coverage import confusion_counts, macro_f1
     from training.heads import decode_outputs
     from training.labeling import FIVE_CLASSES
     run = _run_dir(run_id)
+    if not (Path(run) / "eval" / "held_out" / "meta.json").exists():
+        return _analyze_no_read(run_id, run)
     head = _read_sel(run, "W")["winner"]["head"]
     cand = _candidate_label(run)
     ship_arm = "int8_uniform_random_200_d101"
