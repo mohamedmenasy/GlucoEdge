@@ -1,148 +1,190 @@
-# Accuracy sweep r4: training recipe, position-preserving head, fresh confirmation cohort
+# Accuracy Sweep r4 — Noise Ceiling, Objective Heads, Robustness, Weight Averaging
 
-Date: 2026-10-13. Status: approved design.
-Builds on: `2026-10-12-accuracy-sweep-r3-design.md` (rejected TCN candidate),
-the r3 final review (selection-floor/Gate-2 mismatch, strict-argmax tie
-deviation), and an external diagnostic (Codex, 2026-10-13,
-`analysis/accuracy-review-2026-10-13/`) showing that two synthetic
-histories with the same current glucose but a rise 30 versus 20 minutes
-earlier produce bit-identical outputs in the shipped checkpoint, float
-and INT8 models: global average pooling erases within-window timing.
+**Date:** 2026-10-13
+**Status:** approved design (brainstorm 2026-10-13, user chose: full ship
+intent incl. client decode changes; Experiment 0 as a binding abort gate;
+three stages H/R/W; 5 seeds per arm)
+**Builds on:** `2026-10-12-accuracy-sweep-r3-design.md` (null result, r2
+pair retained), r3 error analysis (2026-10-13, this session)
 
-## 1. Question
+## 1. Intent and evidence
 
-Does (a) a better training recipe and (b) a position-preserving
-classification head beat the shipped champion on directional recall
-without breaking the stable floor — confirmed on a cohort whose labels
-have never been evaluated?
+r3's held-out confusion structure, measured from the published run's saved
+predictions (champion INT8, 46,376 eligible held-out windows):
 
-## 2. What r3 taught (constraints carried in)
+- 72% of all errors are adjacent-class;
+- slow-class errors go to the same-direction fast class (47% falling,
+  46% rising), not to stable (25% each) — the model over-estimates rate
+  magnitude, consistent with balanced inverse-frequency class weights
+  inflating rare fast-class logits;
+- stable recall 0.459 — nearly half of stable windows get a spurious
+  direction;
+- per-seed held-out directional spread 1.1pp; the 5-seed mean-logit
+  ensemble (0.5304) ≈ best single seed (0.5306), confirming r1: ensembling
+  buys nothing, variance reduction might.
 
-- Seed noise on weinstock val directional is wider than most effects;
-  every arm runs 5 seeds (`ARM_SEEDS_R4 = (0,1,2,3,4)`).
-- The r3 selection floor (champion val stable − 5pp) admitted a seed
-  that then failed Gate 2 (− 2pp) — the failure was visible on val
-  before the read. r4 uses the SAME margin at selection and gate:
-  champion val stable − 2pp.
-- r3's Stage S used strict argmax while seeds 1 and 2 sat 0.008pp
-  apart; disclosed as a deviation. r4 applies the r1 tie rule at every
-  selection including Stage S: winners within 0.1pp (TIE_BAND) resolve
-  by cost_key (fewer parameters first), then list order.
-- Weinstock held-out and temporal have carried three confirmatory
-  reads (r1, r2, r3) plus exploratory threshold analyses; they can no
-  longer serve as fresh confirmation. PEDAP has been read repeatedly
-  as a descriptive probe.
+r4 therefore attacks the **objective** (Stage H), **target/input noise**
+(Stage R), and **seed variance** (Stage W), after first measuring whether
+label noise leaves any headroom to win (Experiment 0).
 
-## 3. Arms and staged selection
+**Scope reversal, stated:** r1 settled "losses other than weighted CE" —
+but under the old macro-F1 selection endpoint. The endpoint changed to
+directional recall in r2. r4 deliberately reopens objective design under
+the current endpoint; this is a recorded decision, not drift.
 
-Training data for every arm: the r2/r3 `D5` mixture tensors (five
-DiaData cohorts, PEDAP excluded, ~15.14M windows, SAMPLE_SEED
-20261012) — already cached; no tensor rebuild. Input contract
-unchanged: `[1, 12]` delta/anchor encoding.
+Error-structure provenance caveat: the confusion analysis above is a
+descriptive post-hoc read of already-saved r3 eval artifacts. It informs
+arm *choice*; all r4 *selection* remains val-only, and the single
+confirmatory held-out read happens once, at the end, under the frozen
+protocol. The analysis is reported in the paper as motivating evidence.
 
-### Stage R — training recipe
+## 2. Experiment 0 — label-noise ceiling (binding abort gate)
 
-- `R_base`: existing `D5_none_cnn` checkpoints seeds 0–4 (reused from
-  r3's checkpoint directory; zero training). Recipe: 20 epochs, final
-  epoch kept, constant LR.
-- `R_val`: same TrendCNN(96,144), same data, 5 seeds retrained with:
-  - cosine LR decay from the current LR to zero over the same 20 epochs;
-  - per-epoch validation; the kept checkpoint is the epoch maximizing
-    val directional recall subject to val stable recall ≥ champion val
-    stable − 2pp (epochs failing the floor are ineligible; if every
-    epoch fails, the seed keeps the final epoch and is flagged).
+Current labels are endpoint differences: `rate = (g[t+3] − g[t]) / 15`
+(`training/labeling.py::label_trend`). Exp0 measures how much of the task
+is sensor noise at the class boundaries:
 
-Selection: five-seed mean val directional recall, disqualifier floor
-champion val stable − 2pp, tie band 0.1pp → cost_key → list order.
+- **Smoothed label:** least-squares slope over the four horizon readings
+  `g[t..t+3]` (same clinical thresholds, same asymmetric boundary rules:
+  falling side `≤`, rising side `<`).
+- **Ceiling estimate:** on weinstock val eligible windows, treat the
+  smoothed label as a predictor of the endpoint label and compute
+  directional recall. This approximates the best any rate-faithful
+  predictor can score against endpoint-labeled eval.
+- **Descriptive companion:** the same agreement under Gaussian
+  perturbation of the levels at MARD scale (σ ∈ {1, 2} mg/dL), reported,
+  not gated.
 
-### Stage H — classification head
+**Abort rule (pre-registered in the protocol before any arm trains):**
+`ceiling − 0.5330` (champion val directional) `< 2.0pp` → r4 stops;
+Experiment 0 is published as the round's result (paper subsection +
+aggregates JSON), and no training arm runs. Otherwise the sweep proceeds
+and the ceiling is reported alongside the stage tables.
 
-- `H_gap`: Stage R winner (reused checkpoints).
-- `H_flat`: same conv stack (96,144), AdaptiveAvgPool1d removed,
-  flatten the [144, 12] feature map and classify with
-  `fc(1728 → 5)`. ~50,645 parameters (cap: 85,450 = 2× champion).
-  Trained with the Stage R winning recipe, 5 seeds.
+Exp0 reads **val only** (val is not a protected split; the protected
+held-out/temporal splits are untouched).
 
-Selection: same rule as Stage R.
+## 3. Sweep structure — staged greedy H → R → W, 5 seeds, 15M cap
 
-### Stage S — seed
+Carried unchanged from r3: selection on weinstock val eligible windows
+(same denominator as r1–r3); per-stage stable-recall disqualifier (mean
+val stable < champion val stable − 5pp); whole-subject sampling,
+`SAMPLE_SEED` fixed, 15,000,000-window cap per arm ("near 15M" overshoot
+rule); tensor caches keyed `{mixture}_{feat}_s{seed}.npz`; MPS training,
+frozen batch from a fresh smoke stage, 20 epochs, Adam lr 1e-3;
+per-checkpoint provenance sidecars; tie rule: within 0.1pp, `cost_key`
+then list order — **applied at every stage including seed selection**
+(fixes r3's Stage S deviation).
 
-Best seed of the Stage H winner by val directional recall, per-seed
-floor champion val stable − 2pp, tie band 0.1pp → cost_key → list
-order. SystemExit if all seeds fail the floor.
+Data recipe for every arm: the shipped r2 champion mixture (DiaData-5
+cohorts, channels (96,144), delta-anchor encoding, window 12). PEDAP
+never trains; it stays the zero-shot probe. RT-CGM is not used (r3: null).
 
-Checkpoint format: the r3 meta-dict (`state_dict`, `arch`,
-`in_channels`, `channels`) plus a new `head` field ("gap" | "flat");
-`load_checkpoint` grows a head-aware branch with full backward compat
-(absent `head` means "gap"). Checkpoints keyed
-`{mixture}_{features}_{arch}_{head}_{recipe}_seed{N}.pt`; `R_base`
-reuses r3 files via an explicit alias, ledgered.
+### Stage H — objective (4 arms)
 
-## 4. Confirmation: RT-CGM zero-shot primary
+- **H_ce** — control: shipped recipe exactly (weighted CE). Checkpoints
+  reuse r3 `D_base` (= r2 M3) seeds 0–4 under the bit-identical smoke
+  reproduction rule; provenance note carried as in r3.
+- **H_wtemp** — class weights `w_c = (1/freq_c)^0.5`, normalized the same
+  way as the current balanced weights (which are ∝ 1/freq_c); weighted CE
+  otherwise unchanged. Output contract unchanged (5 logits).
+- **H_reg** — regression head: `num_outputs=1`, target = true rate in
+  mg/dL/min, Huber loss (δ = 1.0). Decode: thresholds at −2/−1/1/2 with
+  the labeler's boundary rules. Selection metrics computed on decoded
+  classes. Output contract: 1 scalar.
+- **H_corn** — CORN ordinal head: 4 sigmoid outputs, target = ordinal
+  level (0–4), CORN conditional training loss; class weights folded in by
+  sample weighting `w[y]`. Decode: count of outputs > 0.5. Output
+  contract: 4 logits.
 
-- Primary cohort: DiaData RT-CGM — 451 cadence-admitted subjects,
-  ~12.7M eligible windows, labels NEVER evaluated in any round.
-  Disclosure carried in the protocol: r3's rejected `D_rtcgm` arm
-  trained on this cohort, but neither the shipped champion nor any r4
-  arm trains on it, and no model under comparison has seen its labels
-  at training or evaluation time.
-- Endpoint: winner uniform INT8 vs shipped champion INT8
-  (`trend_float.tflite` sha `96eef43c…`, `trend_int8.tflite` sha
-  `a887ea4e…` at freeze, recomputed from the live assets), paired on
-  identical eligible windows, participant-cluster bootstrap, 2,000
-  draws, pre-registered seed `BOOT_SEED_R4 = 20261014` (single-sourced,
-  test-asserted).
-- Gates (all on RT-CGM):
-  1. directional delta > 0 AND CI lower bound > −0.5pp;
-  2. winner INT8 stable recall ≥ champion INT8 stable − 2.0pp;
-  3. winner INT8 within 0.5pp of its own float (directional).
-- Secondary, disclosed as reused: weinstock held-out and temporal
-  (same paired recipe, descriptive CIs), macro-F1 on all splits,
-  PEDAP zero-shot descriptive. None gate.
-- Calibration: `sequential_200_d0` + `uniform_random_200_d101` as
-  before; uniform INT8 is the ship candidate. Calibration windows come
-  from weinstock train as in r2/r3 — never from RT-CGM or PEDAP.
-- `protocol_sweep_r4.json` committed clean before any RT-CGM label
-  read; `stage_evaluate` refuses otherwise. It carries the full
-  selection trail, smoke record, champion sha256s, prediction,
-  endpoints, gates, pairing rule, the RT-CGM training-exposure
-  disclosure, and the selection-rule changes relative to r3.
+### Stage R — robustness on the H winner (3–4 arms)
 
-## 5. Ship intent
+- **R_base** — H winner reused (no retraining).
+- **R_labels** — training labels from the LSQ slope over `g[t..t+3]`
+  (Exp0's estimator); **eval labels unchanged everywhere** (val,
+  held-out, temporal, PEDAP all stay endpoint-labeled, preserving champion
+  comparability).
+- **R_noise** — train-time Gaussian noise σ = 2 mg/dL added to levels
+  before delta encoding, fresh draw per epoch, seeded; eval inputs clean.
+- **R_mixup** — mixup α = 0.4 on (window, rate) pairs; **this arm exists
+  only if H_reg won Stage H** (mixing is linear in the regression target;
+  with discrete heads it is not run).
 
-Gates pass → full r2-style ship: winner float + uniform INT8 become
-the bundled pair; goldens regenerated and re-pinned (same `[1,12]`
-contract, no client code changes); Android JVM + iOS simulator suites;
-device verification on the iPhone 18 Pro Max. Gates fail → MODELS.md
-note, bundled pair retained, full record published.
+### Stage W — weight averaging on the R winner (3 cells, no new configs)
 
-Either way the paper gains: the GAP timing diagnostic (identical
-outputs for time-shifted synthetic histories), the r4 subsection with
-one table (`tab:sweepfour`), and the published
-`accuracy_sweep_r4.json` aggregate (leak-walked; deviations block if
-any accrue).
+- **W_best** — best single seed by val directional (control; tie rule as
+  above).
+- **W_soup** — uniform weight average of the 5 seed checkpoints (TrendCNN
+  has no BatchNorm — plain parameter mean, no stat recompute).
+- **W_swa** — per seed, average the last 5 epoch checkpoints; then best
+  seed. Per-epoch checkpoint retention is enabled for every arm r4
+  itself trains (H and R stages). If the R winner is a reused-checkpoint
+  cell with no epoch history (H_ce control carried through R_base), the
+  W_swa cell is skipped and reported as not-applicable — W_best and
+  W_soup still run.
 
-## 6. Non-goals
+Stage W selects on val like any stage; the winner cell's artifact is the
+confirmatory candidate.
 
-- No new architectures (the TCN question is closed; r3).
-- No time-of-day or other input-contract changes (closed; r3).
-- No RT-CGM training in any arm.
-- No threshold tuning of existing models (Codex's exploratory
-  adjustment stays exploratory).
-- No CORN/ordinal head this round — one new modeling idea per round.
+## 4. Endpoint, gates, protocol (carried discipline)
 
-## 7. Infrastructure
+- Primary: held-out directional recall, winner INT8 paired vs **champion
+  = shipped r2 pair** (float sha `96eef43c…`, INT8 sha `a887ea4e…`),
+  participant-cluster bootstrap, 2,000 draws, **pre-registered seed
+  20261014**, seed constant in one place with the protocol test asserting
+  its use.
+- Gate 1: delta > 0 AND CI lower bound > −0.5pp.
+- Gate 2: winner INT8 held-out stable recall ≥ champion INT8 − 2.0pp.
+- Gate 3: winner INT8 within 0.5pp of its own float (directional).
+- Secondary: temporal split same recipe; macro-F1 both splits; PEDAP
+  zero-shot descriptive.
+- Calibration: `sequential_200_d0` + `uniform_random_200_d101`; uniform
+  INT8 is the ship candidate. For H_reg/H_corn winners the calibration
+  pipeline feeds the same delta-transformed inputs; conversion handles
+  the new output shapes.
+- `protocol_sweep_r4.json` committed clean before any held-out / temporal
+  / PEDAP label read; `stage_evaluate` refuses otherwise. The protocol
+  carries the Exp0 result and abort verdict, full selection trail, smoke
+  record, champion sha256s, prediction, endpoints, gates, pairing rule,
+  dropped-window counts.
 
-`experiments/accuracy_sweep_r4.py`, structured like r3 (stages:
-smoke, train, select, calib, convert, evaluate, analyze), reusing r3
-helpers where signatures fit (champion eval via live assets, LiteRT
-conversion, leak walker). RT-CGM windows come from the existing hours
-cache (`results/diadata_cache/hours/RT_CGM.npz`) filtered to the
-cadence-admitted list; `stage_evaluate` materializes eval tensors
-without ever writing RT-CGM labels outside gitignored `results/`.
-Smoke: the r2/r3 bit-reproduction check (batch 512, repro delta 0.0)
-before any training. Tests cover: head-aware checkpoint load +
-backward compat, flatten-head shape and parameter bound, epoch-select
-floor logic, tie-band selection incl. Stage S, BOOT_SEED_R4 single
-source, evaluate refusal pre-freeze, RT-CGM never in any arm's
-training cohorts.
+## 5. Publication and ship
+
+- `paper/results/calibration-coverage/accuracy_sweep_r4.json`: Exp0
+  numbers, aggregates only, per-arm train-window counts, protocol
+  pointer, deviations block; participant-leak walker before commit.
+  Aborted round publishes Exp0 alone, same file.
+- Paper: r4 subsection after r3's (error-structure evidence, Exp0,
+  stage tables, confirmatory contrast or abort statement), one table,
+  page budget 15.
+- Ship decision stops for the user in all cases. H_ce/H_wtemp-lineage
+  winner → assets-only ship (r2 pattern). H_reg/H_corn-lineage winner →
+  extended ship: both clients' decode (Kotlin + Swift), golden-vector
+  schema v2 (output shape + decode rule), parity suites re-pinned, device
+  re-verification before merge. No gates passed → MODELS.md one-liner,
+  pair retained.
+
+## 6. Testing requirements
+
+- Exp0: LSQ slope hand-computed on small arrays; agreement math on a
+  hand-built confusion; abort threshold boundary cases (exactly 2.0pp).
+- Heads: CORN encode/decode round-trip incl. all-zeros/all-ones logits;
+  regression decode at exact boundary rates (−2, −1, 1, 2) matching
+  `label_trend`'s ≤/< rules; sqrt-weight computation vs hand values.
+- R stage: LSQ labeler vs endpoint labeler divergence cases; noise
+  augmentation determinism under seed and absence at eval; mixup target
+  linearity and gating-by-H-winner logic.
+- W stage: soup of identical checkpoints equals the checkpoint; SWA
+  window off-by-one; checkpoint-retention plumbing.
+- Conversion: LiteRT smoke for 1-output and 4-output heads (float +
+  INT8), golden-vector generation for whichever contract wins.
+- Protocol guard refusal pre-freeze; bootstrap-seed assertion; leak
+  walker on published JSON. Suite runs without GlucoBench/DiaData.
+
+## 7. Out of scope
+
+Kalman/causal-filter client front-end (own round — ship surface);
+self-supervised pretraining on the 57M-window pool (own round — compute);
+personalization; window lengths, capacity, mixtures, logit ensembles,
+RT-CGM (settled r1–r3); QAT; any change to the clinical thresholds or to
+eval labels; LR-schedule/EMA sweeps; any clinical claim.
