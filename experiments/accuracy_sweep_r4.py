@@ -27,7 +27,19 @@ PROTOCOL_R4 = (GLUCOEDGE_ROOT / "paper" / "results" / "calibration-coverage"
                / "protocol_sweep_r4.json")
 
 # Disclosed with the published aggregate; the frozen protocol is not edited.
-DEVIATIONS_R4 = ()
+DEVIATIONS_R4 = (
+    "H_ce/R_base checkpoints are r3 D_base (= r2 M_M3) seeds 0-4, re-wrapped "
+    "into the r3/r4 checkpoint dict format (the originals are raw r2-era "
+    "state_dicts); weights byte-identical, provenance carried from r2.",
+    "No confirmatory held-out/temporal/PEDAP read was performed: the W winner "
+    "(R_base seed 1) converts to a float/INT8 pair sha256-identical to the "
+    "bundled champion (96eef43c... / a887ea4e...), so the pre-registered "
+    "paired contrast is a model-vs-itself comparison with delta identically 0 "
+    "and gate 1 (delta > 0) unpassable. The protected splits were left "
+    "untouched this round; the identity proof stands in for the read.",
+    "W_swa reported not-applicable: the R winner is the reuse lineage with no "
+    "per-epoch history (spec section 3 skip rule).",
+)
 
 
 def arm_r4(name, head, labels="endpoint", aug="none"):
