@@ -1,0 +1,364 @@
+{
+ "run_id": "sweep-r4",
+ "spec": "docs/superpowers/specs/2026-10-13-accuracy-sweep-r4-design.md",
+ "exp0": {
+  "run_id": "sweep-r4",
+  "estimator": "smoothed label = least-squares slope over the four horizon readings g[t..t+3] at 0/5/10/15 min, classified with the unchanged clinical thresholds; endpoint label = (g[t+3]-g[t])/15 classified identically",
+  "val_windows": 27109,
+  "ceiling_directional": 0.9541149446932009,
+  "ceiling_stable": 0.9948049494663266,
+  "per_class_recall": {
+   "falling_fast": 0.9650092081031307,
+   "falling": 0.9460742018981881,
+   "stable": 0.9948049494663266,
+   "rising": 0.9475077194530216,
+   "rising_fast": 0.9578686493184635
+  },
+  "champion_val_directional": 0.5329756623608157,
+  "headroom": 0.421139,
+  "abort": false,
+  "noise_companions_directional": {
+   "sigma_1": 0.9145690952905967,
+   "sigma_2": 0.8598201303690098
+  },
+  "note": "descriptive label-noise measurement; abort rule pre-registered: headroom < 0.02 aborts r4"
+ },
+ "selection_trail": {
+  "H": {
+   "stage": "H",
+   "champion_val": {
+    "directional": 0.5329756623608157,
+    "stable": 0.5484556531595353
+   },
+   "stable_floor": 0.4984556531595353,
+   "table": {
+    "H_ce": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5339271455509136,
+       "stable": 0.5398602059129121
+      },
+      "1": {
+       "directional": 0.5391284323822993,
+       "stable": 0.5388684235383017
+      },
+      "2": {
+       "directional": 0.5322059886351717,
+       "stable": 0.5407575328232739
+      },
+      "3": {
+       "directional": 0.5250779440340179,
+       "stable": 0.5584207046377633
+      },
+      "4": {
+       "directional": 0.5308270884671717,
+       "stable": 0.5570983281382828
+      }
+     },
+     "mean_directional": 0.5322333198139149,
+     "mean_stable": 0.5470010390101068,
+     "disqualified": false
+    },
+    "H_wtemp": {
+     "per_seed": {
+      "0": {
+       "directional": 0.4082813922408485,
+       "stable": 0.8193539246245395
+      },
+      "1": {
+       "directional": 0.4073060702184983,
+       "stable": 0.8238877869084726
+      },
+      "2": {
+       "directional": 0.4083736987251062,
+       "stable": 0.8235571927836025
+      },
+      "3": {
+       "directional": 0.40099294857947326,
+       "stable": 0.8373476905638991
+      },
+      "4": {
+       "directional": 0.4012158729121426,
+       "stable": 0.8319637291017286
+      }
+     },
+     "mean_directional": 0.40523399653521375,
+     "mean_stable": 0.8272220647964484,
+     "disqualified": false
+    },
+    "H_reg": {
+     "per_seed": {
+      "0": {
+       "directional": 0.19799843317896232,
+       "stable": 0.9492774156984981
+      },
+      "1": {
+       "directional": 0.19044704488892486,
+       "stable": 0.9528667233399453
+      },
+      "2": {
+       "directional": 0.20615209115764463,
+       "stable": 0.9491357325021252
+      },
+      "3": {
+       "directional": 0.2010454721878308,
+       "stable": 0.9491829602342495
+      },
+      "4": {
+       "directional": 0.20412094000778347,
+       "stable": 0.9496080098233682
+      }
+     },
+     "mean_directional": 0.1999527962842292,
+     "mean_stable": 0.9500141683196371,
+     "disqualified": false
+    },
+    "H_corn": {
+     "per_seed": {
+      "0": {
+       "directional": 0.4652286503452687,
+       "stable": 0.5395296117880419
+      },
+      "1": {
+       "directional": 0.48176932822591056,
+       "stable": 0.5478889203740437
+      },
+      "2": {
+       "directional": 0.45339092533929504,
+       "stable": 0.5647019930102957
+      },
+      "3": {
+       "directional": 0.46294084620184267,
+       "stable": 0.527392084632096
+      },
+      "4": {
+       "directional": 0.4874343069347946,
+       "stable": 0.5368376310569567
+      }
+     },
+     "mean_directional": 0.47015281140942233,
+     "mean_stable": 0.5432700481722867,
+     "disqualified": false
+    }
+   },
+   "winner": {
+    "name": "H_ce",
+    "head": "ce",
+    "labels": "endpoint",
+    "aug": "none",
+    "mixture": "D5",
+    "arch": "cnn",
+    "in_channels": 1,
+    "channels": [
+     96,
+     144
+    ],
+    "length": 12
+   }
+  },
+  "R": {
+   "stage": "R",
+   "champion_val": {
+    "directional": 0.5329756623608157,
+    "stable": 0.5484556531595353
+   },
+   "stable_floor": 0.4984556531595353,
+   "table": {
+    "R_base": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5339271455509136,
+       "stable": 0.5398602059129121
+      },
+      "1": {
+       "directional": 0.5391284323822993,
+       "stable": 0.5388684235383017
+      },
+      "2": {
+       "directional": 0.5322059886351717,
+       "stable": 0.5407575328232739
+      },
+      "3": {
+       "directional": 0.5250779440340179,
+       "stable": 0.5584207046377633
+      },
+      "4": {
+       "directional": 0.5308270884671717,
+       "stable": 0.5570983281382828
+      }
+     },
+     "mean_directional": 0.5322333198139149,
+     "mean_stable": 0.5470010390101068,
+     "disqualified": false
+    },
+    "R_labels": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5358874402380677,
+       "stable": 0.5429300085009918
+      },
+      "1": {
+       "directional": 0.5326781241798825,
+       "stable": 0.5477472371776707
+      },
+      "2": {
+       "directional": 0.5325219815900846,
+       "stable": 0.5322565410408993
+      },
+      "3": {
+       "directional": 0.5278257824093622,
+       "stable": 0.5717389250968169
+      },
+      "4": {
+       "directional": 0.5239317167063664,
+       "stable": 0.57254179654293
+      }
+     },
+     "mean_directional": 0.5305690090247527,
+     "mean_stable": 0.5534429016718618,
+     "disqualified": false
+    },
+    "R_noise": {
+     "per_seed": {
+      "0": {
+       "directional": 0.49578813193776716,
+       "stable": 0.6192027958817418
+      },
+      "1": {
+       "directional": 0.4914571345143641,
+       "stable": 0.6311986398413149
+      },
+      "2": {
+       "directional": 0.4999842577091982,
+       "stable": 0.6081987342967791
+      },
+      "3": {
+       "directional": 0.48948141741410833,
+       "stable": 0.6345990365542646
+      },
+      "4": {
+       "directional": 0.498215103094262,
+       "stable": 0.6139132898838198
+      }
+     },
+     "mean_directional": 0.49498520893394,
+     "mean_stable": 0.621422499291584,
+     "disqualified": false
+    }
+   },
+   "winner": {
+    "name": "R_base",
+    "head": "ce",
+    "labels": "endpoint",
+    "aug": "none",
+    "mixture": "D5",
+    "arch": "cnn",
+    "in_channels": 1,
+    "channels": [
+     96,
+     144
+    ],
+    "length": 12
+   }
+  },
+  "W": {
+   "stage": "W",
+   "champion_val": {
+    "directional": 0.5329756623608157,
+    "stable": 0.5484556531595353
+   },
+   "stable_floor": 0.4984556531595353,
+   "table": {
+    "W_best": {
+     "per_seed": {
+      "0": {
+       "directional": 0.5339271455509136,
+       "stable": 0.5398602059129121
+      },
+      "1": {
+       "directional": 0.5391284323822993,
+       "stable": 0.5388684235383017
+      },
+      "2": {
+       "directional": 0.5322059886351717,
+       "stable": 0.5407575328232739
+      },
+      "3": {
+       "directional": 0.5250779440340179,
+       "stable": 0.5584207046377633
+      },
+      "4": {
+       "directional": 0.5308270884671717,
+       "stable": 0.5570983281382828
+      }
+     },
+     "best_seed": 1
+    },
+    "W_soup": {
+     "directional": 0.23792344180297947,
+     "stable": 0.0028808916595825067
+    },
+    "W_swa": {
+     "skipped": "no epoch history"
+    }
+   },
+   "winner": {
+    "name": "R_base",
+    "head": "ce",
+    "labels": "endpoint",
+    "aug": "none",
+    "mixture": "D5",
+    "arch": "cnn",
+    "in_channels": 1,
+    "channels": [
+     96,
+     144
+    ],
+    "length": 12,
+    "cell": "W_best",
+    "best_seed": 1
+   }
+  }
+ },
+ "smoke": {
+  "results": {
+   "64": {
+    "0": 0.5144132443292886,
+    "1": 0.49807907979111193
+   },
+   "512": {
+    "0": 0.5132031142456811,
+    "1": 0.5120121728524486
+   }
+  },
+  "mean64": 0.5062461620602002,
+  "frozen_batch": 512,
+  "mps_same_seed_abs_diff": 0.0,
+  "mps_seed_reproducible": true
+ },
+ "per_arm_train_windows": {
+  "D5_endpoint_noise_s20261012": 15135091,
+  "D5_endpoint_none_s20261012": 15135091,
+  "D5_lsq_none_s20261012": 15135091,
+  "SMOKE_M0_s20261012": 328575
+ },
+ "identity_outcome": {
+  "candidate": "W_best = R_base seed 1 (H_ce lineage = r2 M_M3 seed 1)",
+  "candidate_float_sha256_prefix": "96eef43c37779534",
+  "candidate_int8_sha256_prefix": "a887ea4e786e2b40",
+  "champion_float_sha256_prefix": "96eef43c37779534",
+  "champion_int8_sha256_prefix": "a887ea4e786e2b40",
+  "note": "candidate converts bit-identically to the bundled champion pair; confirmatory read vacuous and not performed"
+ },
+ "ship": {
+  "candidate": "seed 1 (sha-identical to bundled champion)",
+  "all_gates_pass": false,
+  "outcome": "pair retained; no held-out/temporal/PEDAP label read this round"
+ },
+ "deviations": [
+  "H_ce/R_base checkpoints are r3 D_base (= r2 M_M3) seeds 0-4, re-wrapped into the r3/r4 checkpoint dict format (the originals are raw r2-era state_dicts); weights byte-identical, provenance carried from r2.",
+  "No confirmatory held-out/temporal/PEDAP read was performed: the W winner (R_base seed 1) converts to a float/INT8 pair sha256-identical to the bundled champion (96eef43c... / a887ea4e...), so the pre-registered paired contrast is a model-vs-itself comparison with delta identically 0 and gate 1 (delta > 0) unpassable. The protected splits were left untouched this round; the identity proof stands in for the read.",
+  "W_swa reported not-applicable: the R winner is the reuse lineage with no per-epoch history (spec section 3 skip rule).",
+  "The first published accuracy_sweep_r4.json was hand-assembled (stage_analyze predated the no-read outcome and required eval artifacts); stage_analyze now handles identity/abort flows and regenerates the same aggregate schema."
+ ]
+}

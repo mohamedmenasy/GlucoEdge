@@ -37,6 +37,8 @@ class GlucoseTrendDataset(Dataset):
         self.segments = []
         self.anchor_times = []
         self.target_times = []
+        self.horizons = []   # readings after the window, shape (horizon,)
+        self.rates = []      # endpoint rate in mg/dL/min, label_trend's input
 
         span = input_length + horizon
         for (pid, seg), group in df.groupby([id_col, segment_col]):
@@ -54,6 +56,8 @@ class GlucoseTrendDataset(Dataset):
                 window = values[i:i + input_length]
                 last_value = window[-1]
                 future_value = values[i + input_length + horizon - 1]
+                self.horizons.append(values[i + input_length:i + span])
+                self.rates.append(float(future_value - last_value) / horizon_minutes)
                 raw_label = label_trend(float(last_value), float(future_value), horizon_minutes)
                 label = collapse_map[raw_label] if collapse_map else raw_label
                 self.windows.append(window)

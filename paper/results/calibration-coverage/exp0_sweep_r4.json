@@ -1,0 +1,22 @@
+{
+  "run_id": "sweep-r4",
+  "estimator": "smoothed label = least-squares slope over the four horizon readings g[t..t+3] at 0/5/10/15 min, classified with the unchanged clinical thresholds; endpoint label = (g[t+3]-g[t])/15 classified identically",
+  "val_windows": 27109,
+  "ceiling_directional": 0.9541149446932009,
+  "ceiling_stable": 0.9948049494663266,
+  "per_class_recall": {
+    "falling_fast": 0.9650092081031307,
+    "falling": 0.9460742018981881,
+    "stable": 0.9948049494663266,
+    "rising": 0.9475077194530216,
+    "rising_fast": 0.9578686493184635
+  },
+  "champion_val_directional": 0.5329756623608157,
+  "headroom": 0.421139,
+  "abort": false,
+  "noise_companions_directional": {
+    "sigma_1": 0.9145690952905967,
+    "sigma_2": 0.8598201303690098
+  },
+  "note": "descriptive label-noise measurement; abort rule pre-registered: headroom < 0.02 aborts r4"
+}

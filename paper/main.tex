@@ -1266,6 +1266,81 @@ Temporal & 0.511 & 0.511 & 0.502 & $+1.0$ $[-0.0, +1.9]$ \\
 \end{tabular}
 \end{table}
 
+\subsection{Accuracy sweep, round four: a measured ceiling and an
+identity outcome}
+
+Round four started from the shipped model's error structure, read
+descriptively from round three's saved held-out predictions: 72\% of
+champion errors are adjacent-class; slow-class errors go to the
+same-direction fast class (47\% of falling errors, 46\% of rising), not
+to stable (25\% each); and the five-seed held-out spread (1.1 points)
+rivals every effect size the sweeps have chased, while the five-seed
+mean-logit ensemble (0.530) matches the best single seed (0.531). These
+observations motivated arm choice only; selection stayed
+validation-only.
+
+Before any arm trained, a binding measurement asked whether label noise
+leaves headroom to win. Labels derive from the endpoint difference over
+the 15-minute horizon; a least-squares slope over the four horizon
+readings, classified with the unchanged clinical thresholds, agrees with
+the endpoint label on 95.4\% directional recall (stable 99.5\%) across
+the 27{,}109 eligible validation windows --- 42 points above the
+champion's 0.533. Even under $\sigma{=}2$\,mg/dL Gaussian perturbation of
+the readings, the re-derived endpoint label still agrees with the clean
+endpoint label at 0.860 directional. The pre-registered abort
+rule (stop if headroom $<$ 2 points; \texttt{exp0\_sweep\_r4.json},
+committed before training) did not fire: the task is model- and
+data-limited, not label-noise-limited.
+
+The sweep then staged objective heads, target and input robustness, and
+weight averaging against the shipped recipe at five seeds per arm
+(Table~\ref{tab:sweepfour}). Every lever lost to the control on
+validation directional recall. Square-rooted class weights collapsed it
+(0.405; stable rose to 0.827), confirming that the balanced weights ---
+and the slow-to-fast over-prediction they cause --- are what buys
+directional recall. A rate-regression head (Huber on mg/dL/min, decoded
+at the clinical thresholds) mean-sought the stable-dominated rate
+distribution (0.200). A CORN ordinal head reached 0.470. Training labels
+from the least-squares slope were a null ($-0.2$ points), $\sigma{=}2$
+input noise traded directional for stable ($-3.7$), and a uniform
+five-seed weight soup collapsed outright (0.238) --- independently
+seeded runs do not share a loss basin. The surviving candidate, the best
+seed of the control arm, converts to a float/INT8 pair sha256-identical
+to the bundled champion (\texttt{96eef43c\ldots}/\texttt{a887ea4e\ldots}).
+The pre-registered contrast would compare the model to itself, so no
+confirmatory read was performed and the protected splits were left
+untouched this round; the identity proof stands in for the read, the
+gates are unpassable by construction, and the round-two pair remains
+bundled. Full record: \texttt{accuracy\_sweep\_r4.json}.
+
+\begin{table}[t]
+\centering
+\caption{Round-four validation stage means (directional / stable recall,
+five seeds, eligible Weinstock validation windows). Control = the
+shipped recipe (weighted CE, round-two mixture). The winner is the
+control's best seed, sha-identical to the bundled champion; no held-out
+read was spent. Rows are float-checkpoint evaluations; the champion
+reference 0.533 is its bundled INT8 on the same windows (the selection
+convention of rounds one to three), which is why the sha-identical
+winner's float row reads 0.6 points above it.}
+\label{tab:sweepfour}
+\scriptsize\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}llcc@{}}
+\toprule
+Stage & Arm & Directional & Stable \\
+\midrule
+H & control (weighted CE) & \textbf{0.532} & 0.547 \\
+H & $\sqrt{\phantom{x}}$ class weights & 0.405 & 0.827 \\
+H & rate regression (Huber) & 0.200 & 0.950 \\
+H & CORN ordinal head & 0.470 & 0.543 \\
+R & least-squares train labels & 0.531 & 0.553 \\
+R & $\sigma{=}2$ input noise & 0.495 & 0.621 \\
+W & five-seed weight soup & 0.238 & 0.003 \\
+W & best single seed (winner) & \textbf{0.539} & 0.539 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Historical comparison}
 
 The earlier revision reported accuracy 0.5184 and macro recall 0.5060 for
