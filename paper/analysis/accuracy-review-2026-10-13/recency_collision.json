@@ -1,0 +1,225 @@
+{
+  "kind": "synthetic_architecture_diagnostic",
+  "scope": "No training or real-data accuracy evaluation; not a medical device.",
+  "checkpoint": {
+    "relative_path": "results/calibration-coverage/sweep-r2/checkpoints/M_M3_seed1.pt",
+    "sha256": "5e47d627cca4eefb1aa1549f0c91669ad98a1be52039a6ccf7710e0c320e9a70",
+    "provenance": "android/app/src/main/assets/MODELS.md identifies sweep-r2 M_M3, seed 1, channels (96,144)."
+  },
+  "source_sha256": {
+    "training/model.py": "6e8072cdbb7dc9d11857c5d545fe8d2c03e80232c730c6eddbbfbcaa36d333e4",
+    "training/deltas.py": "370d4239935b87c53a103b9cd107789f0f368c782c21a1a431c3bc2f616e66ae"
+  },
+  "readings_relative_minutes": [
+    -55,
+    -50,
+    -45,
+    -40,
+    -35,
+    -30,
+    -25,
+    -20,
+    -15,
+    -10,
+    -5,
+    0
+  ],
+  "synthetic_raw_windows_mg_dl": [
+    [
+      150.0,
+      150.0,
+      150.0,
+      150.0,
+      150.0,
+      160.0,
+      160.0,
+      160.0,
+      160.0,
+      160.0,
+      160.0,
+      160.0
+    ],
+    [
+      150.0,
+      150.0,
+      150.0,
+      150.0,
+      150.0,
+      150.0,
+      150.0,
+      160.0,
+      160.0,
+      160.0,
+      160.0,
+      160.0
+    ]
+  ],
+  "encoded_windows": [
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      10.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      10.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      10.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      10.0
+    ]
+  ],
+  "pulse_delta_indices_zero_based": [
+    4,
+    6
+  ],
+  "rise_intervals_relative_minutes": [
+    [
+      -35,
+      -30
+    ],
+    [
+      -25,
+      -20
+    ]
+  ],
+  "rise_first_observed_minutes_before_anchor": [
+    30,
+    20
+  ],
+  "pytorch": {
+    "logits": [
+      [
+        -1.7641186714172363,
+        -1.0591431856155396,
+        1.5120197534561157,
+        -2.168379545211792,
+        -2.9293296337127686
+      ],
+      [
+        -1.7641186714172363,
+        -1.0591431856155396,
+        1.5120197534561157,
+        -2.168379545211792,
+        -2.9293296337127686
+      ]
+    ],
+    "logits_exactly_equal": true,
+    "max_absolute_logit_difference": 0.0
+  },
+  "bundled_artifacts": {
+    "float": {
+      "relative_path": "android/app/src/main/assets/trend_float.tflite",
+      "sha256": "96eef43c37779534dab86312a6c7c65954fade0f5b2af0cfc3084dffb03b9a01",
+      "outputs": [
+        [
+          -1.7641187906265259,
+          -1.059143304824829,
+          1.5120199918746948,
+          -2.168379545211792,
+          -2.9293296337127686
+        ],
+        [
+          -1.7641187906265259,
+          -1.059143304824829,
+          1.5120199918746948,
+          -2.168379545211792,
+          -2.9293296337127686
+        ]
+      ],
+      "raw_outputs": [
+        [
+          -1.7641187906265259,
+          -1.059143304824829,
+          1.5120199918746948,
+          -2.168379545211792,
+          -2.9293296337127686
+        ],
+        [
+          -1.7641187906265259,
+          -1.059143304824829,
+          1.5120199918746948,
+          -2.168379545211792,
+          -2.9293296337127686
+        ]
+      ],
+      "raw_outputs_exactly_equal": true,
+      "max_absolute_output_difference": 0.0,
+      "expected_sha256_from_r3_protocol": "96eef43c37779534dab86312a6c7c65954fade0f5b2af0cfc3084dffb03b9a01",
+      "matches_frozen_champion_sha256": true,
+      "matches_r2_seed1_artifact_sha256": true
+    },
+    "int8": {
+      "relative_path": "android/app/src/main/assets/trend_int8.tflite",
+      "sha256": "a887ea4e786e2b40ff6c235fef0cd70af1c4149421ac49358640da3715757c42",
+      "outputs": [
+        [
+          -2.2001001834869385,
+          -1.062117338180542,
+          1.517310380935669,
+          -2.124234676361084,
+          -2.882889747619629
+        ],
+        [
+          -2.2001001834869385,
+          -1.062117338180542,
+          1.517310380935669,
+          -2.124234676361084,
+          -2.882889747619629
+        ]
+      ],
+      "raw_outputs": [
+        [
+          66,
+          81,
+          115,
+          67,
+          57
+        ],
+        [
+          66,
+          81,
+          115,
+          67,
+          57
+        ]
+      ],
+      "raw_outputs_exactly_equal": true,
+      "max_absolute_output_difference": 0.0,
+      "expected_sha256_from_r3_protocol": "a887ea4e786e2b40ff6c235fef0cd70af1c4149421ac49358640da3715757c42",
+      "matches_frozen_champion_sha256": true,
+      "matches_r2_seed1_artifact_sha256": true
+    }
+  },
+  "architecture": {
+    "current": "Two stride-one kernel-3 convolutions, ReLU, global average pool, five-logit linear head.",
+    "local_receptive_field_steps": 5,
+    "actual_parameter_count": 42725,
+    "proposed_flatten_head_parameter_count": 50645,
+    "proposed_additional_parameters": 7920,
+    "parameter_increase_percent": 18.53715623171446,
+    "parameter_formula": "conv = 96*1*3+96 + 144*96*3+144; GAP head = 144*5+5; flatten head = 144*12*5+5"
+  },
+  "interpretation": "The current CNN can assign identical outputs to different internal timing patterns. These pulses are sufficiently separated from boundaries and the appended anchor for pooling to erase their positions.",
+  "limitations": [
+    "This example does not establish how often the ambiguity matters on real data or whether the correct future label differs.",
+    "A recency-preserving head is an untested improvement hypothesis; no accuracy gain is claimed.",
+    "The CNN is not fully permutation invariant: local order, boundaries, and proximity to the appended anchor can affect outputs.",
+    "This diagnostic concerns the shipped CNN; the larger receptive field of the r3 TCN changes its behavior."
+  ]
+}
