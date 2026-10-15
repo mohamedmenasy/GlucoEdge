@@ -235,3 +235,24 @@ def test_stage_s_tie_band_and_floor(tmp_path, monkeypatch):
     out = r5.stage_select("sweep-r5-test", "S")
     assert out["best_seed"] == 1
     assert out["table"]["per_seed"]["4"]["epoch_floor_flagged"] is True
+
+
+def test_convert_artifact_naming_contract(tmp_path, monkeypatch):
+    import experiments.accuracy_sweep_r5 as r5
+    monkeypatch.setattr(r5, "_run_dir", lambda rid: str(tmp_path))
+    (tmp_path / "selection").mkdir()
+    (tmp_path / "selection" / "S.json").write_text(json.dumps(
+        {"winner": r5.arm_r5("H_flat", "flat", "val"), "best_seed": 2}))
+    (tmp_path / "selections").mkdir()
+    for stem in ("sequential_200_d0", "uniform_random_200_d101"):
+        (tmp_path / "selections" / f"{stem}.json").write_text(
+            json.dumps({"indices": [0, 1]}))
+    calls = []
+    monkeypatch.setattr(r5, "_convert_seed",
+                        lambda run, winner, seed: calls.append(seed))
+    r5.stage_convert("sweep-r5-test")
+    assert calls == [0, 1, 2, 3, 4]
+    # candidate artifact paths the evaluate/analyze stages will look for
+    fl, i8 = r5._candidate_arts(tmp_path)
+    assert fl.name == "winner_seed2_float.tflite"
+    assert i8.name == "winner_seed2_int8_uniform_random_200_d101.tflite"

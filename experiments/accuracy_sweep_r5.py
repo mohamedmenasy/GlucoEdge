@@ -292,3 +292,51 @@ def stage_select(run_id, stage):
     _write_json(Path(run) / "selection" / "S.json", out)
     print(json.dumps({k: out[k] for k in out if k != "table"}, indent=1))
     return out
+
+
+def stage_calib(run_id):
+    from experiments.accuracy_sweep_r2 import stage_calib as calib_r2
+    calib_r2(run_id)
+
+
+def _candidate_arts(run):
+    best = _read_sel(run, "S")["best_seed"]
+    art = Path(run) / "artifacts"
+    return (art / f"winner_seed{best}_float.tflite",
+            art / f"winner_seed{best}_int8_uniform_random_200_d101.tflite")
+
+
+def _convert_seed(run, winner, seed):
+    import torch
+    from conversion.common import load_checkpoint
+    from conversion.convert import convert_float, convert_int8
+    from experiments.accuracy_sweep import _data
+    from training.deltas import delta_windows
+    ds, _, _ = _data("weinstock", 12)  # lazy: tests stub _convert_seed whole
+    art = Path(run) / "artifacts"
+    art.mkdir(exist_ok=True)
+    model = load_checkpoint(_ckpt_r5(run, winner, seed), 5)
+    sample = torch.zeros(1, 1, 12, dtype=torch.float32)
+    fpath = art / f"winner_seed{seed}_float.tflite"
+    if not fpath.exists():
+        convert_float(model, sample, fpath)
+        print(f"converted {fpath.name}")
+    for sel_path in sorted((Path(run) / "selections").glob("*_200_d*.json")):
+        ipath = art / f"winner_seed{seed}_int8_{sel_path.stem}.tflite"
+        if ipath.exists():
+            continue
+        sel = json.loads(sel_path.read_text())
+        ws = np.stack([ds["val"].windows[i] for i in sel["indices"]])
+        dws = delta_windows(ws, True).astype(np.float32)[:, None, :]
+        calib = [torch.from_numpy(w[None]) for w in dws]
+        timings = convert_int8(model, sample, calib, ipath)
+        _write_json(ipath.with_suffix(".json"),
+                    {"selection": sel_path.stem, **timings})
+        print(f"converted {ipath.name}")
+
+
+def stage_convert(run_id):
+    run = _run_dir(run_id)
+    winner = _read_sel(run, "S")["winner"]
+    for seed in ARM_SEEDS_R5:
+        _convert_seed(run, winner, seed)
