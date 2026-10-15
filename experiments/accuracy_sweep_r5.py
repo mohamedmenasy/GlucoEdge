@@ -616,3 +616,34 @@ def stage_analyze(run_id, n_boot=2000):
     _write_json(Path(run) / "analysis" / "sweep_r5_aggregate.json", out)
     print("wrote", Path(run) / "analysis" / "sweep_r5_aggregate.json")
     return out
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("stage", choices=["smoke", "train", "select", "calib",
+                                          "convert", "protocol", "evaluate",
+                                          "analyze"])
+    parser.add_argument("--run-id", default="sweep-r5")
+    parser.add_argument("--stage-name", choices=["R", "H", "S"])
+    args = parser.parse_args()
+    if args.stage == "smoke":
+        stage_smoke(args.run_id)
+    elif args.stage == "train":
+        stage_train(args.run_id, args.stage_name)
+    elif args.stage == "select":
+        stage_select(args.run_id, args.stage_name)
+    elif args.stage == "calib":
+        stage_calib(args.run_id)
+    elif args.stage == "convert":
+        stage_convert(args.run_id)
+    elif args.stage == "protocol":
+        stage_protocol(args.run_id)
+    elif args.stage == "evaluate":
+        stage_evaluate(args.run_id)
+    else:
+        stage_analyze(args.run_id)
+
+
+if __name__ == "__main__":
+    main()

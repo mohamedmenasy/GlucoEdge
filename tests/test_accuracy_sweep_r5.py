@@ -399,3 +399,29 @@ def test_protocol_has_no_row_level_fields(tmp_path, monkeypatch):
         assert pat not in blob
     assert out["boot_seed"] == 20261015
     assert "disclosure" in out and "D_rtcgm" in out["disclosure"]
+
+
+def test_main_stage_choices():
+    import inspect
+
+    import experiments.accuracy_sweep_r5 as r5
+    src = inspect.getsource(r5.main)
+    for stage in ("smoke", "train", "select", "calib", "convert",
+                  "protocol", "evaluate", "analyze"):
+        assert f'"{stage}"' in src
+
+
+def test_published_r5_jsons_leak_free():
+    # row-level identifiers never leave gitignored results/
+    from pathlib import Path as _P
+    root = (_P(__file__).resolve().parents[1] / "paper" / "results"
+            / "calibration-coverage")
+    names = ("protocol_sweep_r5.json", "accuracy_sweep_r5.json")
+    published = [n for n in names if (root / n).exists()]
+    if not published:
+        pytest.skip("r5 not published yet")
+    for name in published:
+        blob = (root / name).read_text()
+        for pat in ('"participants": [', '"keys"', '"pids"', '"row_ids"',
+                    '"anchor_times"', '"labels": ['):
+            assert pat not in blob, (name, pat)
