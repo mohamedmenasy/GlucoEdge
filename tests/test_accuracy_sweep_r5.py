@@ -71,7 +71,7 @@ def test_pick_epoch_floor_tieband_and_flag():
     from experiments.accuracy_sweep_r5 import pick_epoch
     floor = 0.50
     per_epoch = {0: (0.54, 0.49),   # best directional but fails floor
-                 1: (0.530, 0.52),
+                 1: (0.528, 0.52),
                  2: (0.5305, 0.51),  # inside 0.1pp band of epoch 3
                  3: (0.5309, 0.51)}
     # band is {2, 3}; earliest wins
