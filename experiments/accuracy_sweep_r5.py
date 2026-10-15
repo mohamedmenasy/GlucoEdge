@@ -99,3 +99,132 @@ def pick_winner_r5(arms, means):
     band.sort(key=lambda a: (_param_count(a), a["recipe"] != "base",
                              order.index(a["name"])))
     return band[0]
+
+
+def _epoch_table(epoch_dir, a, val_v):
+    """Per-epoch (directional, stable) on val; rebuilds the arm's own head
+    because train_model saves raw state_dicts."""
+    import torch
+    from experiments.analyze_calibration_coverage import confusion_counts
+    from training.model import TrendCNN
+    table = {}
+    for p in sorted(Path(epoch_dir).glob("epoch*.pt")):
+        model = TrendCNN(num_classes=5, channels=tuple(a["channels"]),
+                         in_channels=a["in_channels"], head=a["head"])
+        model.load_state_dict(torch.load(p, map_location="cpu",
+                                         weights_only=True))
+        model.eval()
+        preds = []
+        with torch.no_grad():
+            for i in range(0, len(val_v.x), 8192):
+                preds.append(model(torch.from_numpy(val_v.x[i:i + 8192]))
+                             .numpy().argmax(axis=1))
+        cm = confusion_counts(val_v.y, np.concatenate(preds))
+        table[int(p.stem.replace("epoch", ""))] = (directional_recall(cm),
+                                                   stable_recall(cm))
+    return table
+
+
+def _val_stats_r5(run, a, seed):
+    """(directional, stable) on eligible weinstock val; head-aware load."""
+    import torch
+    from conversion.common import load_checkpoint
+    from experiments.accuracy_sweep_r3 import _val_for
+    from experiments.analyze_calibration_coverage import confusion_counts
+    val_v = _val_for("none")
+    model = load_checkpoint(_ckpt_r5(run, a, seed), 5)
+    preds = []
+    with torch.no_grad():
+        for i in range(0, len(val_v.x), 8192):
+            preds.append(model(torch.from_numpy(val_v.x[i:i + 8192]))
+                         .numpy().argmax(axis=1))
+    cm = confusion_counts(val_v.y, np.concatenate(preds))
+    return directional_recall(cm), stable_recall(cm)
+
+
+def _train_one_r5(run, a, seed, train_v, val_v, batch):
+    import time as _t
+
+    import torch
+    from training.losses import make_criterion
+    from training.model import TrendCNN
+    from training.train import class_weights, resolve_device, train_model
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    device = resolve_device("mps")
+    model = TrendCNN(num_classes=5, channels=tuple(a["channels"]),
+                     in_channels=a["in_channels"], head=a["head"])
+    criterion = make_criterion("ce", class_weights(train_v, 5).to(device))
+    cosine = a["recipe"] == "val"
+    epoch_dir = (Path(run) / "checkpoints" / "epochs" / f"{a['name']}_seed{seed}"
+                 if cosine else None)
+    t0 = _t.time()
+    model = train_model(train_v, val_v, 5, EPOCHS, device, model=model,
+                        criterion=criterion, batch_size=batch,
+                        cosine=cosine, epoch_dir=epoch_dir)
+    kept_epoch, flagged, per_epoch = EPOCHS - 1, False, None
+    state = {k: v.cpu() for k, v in model.state_dict().items()}
+    if cosine:
+        floor = champion_val_stats(run)["stable"] - FLOOR_MARGIN_R5
+        per_epoch = _epoch_table(epoch_dir, a, val_v)
+        kept_epoch, flagged = pick_epoch(per_epoch, floor)
+        state = torch.load(epoch_dir / f"epoch{kept_epoch:02d}.pt",
+                           map_location="cpu", weights_only=True)
+    ckpt = _ckpt_r5(run, a, seed)
+    ckpt.parent.mkdir(parents=True, exist_ok=True)
+    torch.save({"state_dict": state, "arch": "cnn",
+                "in_channels": a["in_channels"], "channels": a["channels"],
+                "head": a["head"]}, ckpt)
+    ckpt.with_suffix(".json").write_text(json.dumps({
+        "arm": a["name"], "head": a["head"], "recipe": a["recipe"],
+        "seed": seed, "device": device.type, "batch": batch,
+        "train_windows": len(train_v), "epochs": EPOCHS,
+        "kept_epoch": kept_epoch, "epoch_floor_flagged": flagged,
+        "per_epoch": ({str(e): list(v) for e, v in per_epoch.items()}
+                      if per_epoch else None),
+        "duration_s": round(_t.time() - t0, 1)}, indent=1))
+    return ckpt
+
+
+def _arms_for(run, stage):
+    if stage == "R":
+        return stage_r_arms()
+    if stage == "H":
+        return stage_h_arms(_read_sel(run, "R")["winner"])
+    raise SystemExit(f"unknown stage {stage}")
+
+
+def _frozen_batch(run):
+    from experiments.accuracy_sweep_r2 import _frozen_batch as _fb
+    return _fb(run)
+
+
+def stage_train(run_id, stage):
+    import time as _t
+    from experiments.accuracy_sweep_r3 import _load_view_r3, _val_for
+    run = _run_dir(run_id)
+    batch = _frozen_batch(run)
+    for a in _arms_for(run, stage):
+        if a["mixture"] != "D5":
+            raise SystemExit("REFUSED: r5 trains on D5 only - RT-CGM and all "
+                             f"other mixtures are out of scope, got {a['mixture']}")
+        train_v = None
+        for seed in ARM_SEEDS_R5:
+            ckpt = _ckpt_r5(run, a, seed)  # alias check happens in here
+            if ckpt.exists():
+                print(f"skip {ckpt.name}: exists")
+                continue
+            if a["head"] == "gap" and a["recipe"] == "base":
+                raise SystemExit(f"REFUSED: {a['name']} is a reuse cell - its "
+                                 "checkpoints live in the sweep-r3 run dir")
+            if train_v is None:
+                train_v = _load_view_r3(_tensor_path_r5(), a["in_channels"])
+            t0 = _t.time()
+            _train_one_r5(run, a, seed, train_v, _val_for("none"), batch)
+            print(f"{a['name']} seed {seed} done in {_t.time()-t0:.0f}s")
+
+
+def stage_smoke(run_id):
+    """Batch freeze + same-seed bit-reproduction record, r2 recipe."""
+    from experiments.accuracy_sweep_r2 import stage_smoke as smoke_r2
+    smoke_r2(run_id)
