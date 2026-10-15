@@ -1,0 +1,365 @@
+{
+  "protocol": "paper/results/calibration-coverage/protocol_sweep_r5.json",
+  "run_id": "sweep-r5",
+  "selection_trail": {
+    "R": {
+      "stage": "R",
+      "champion_val": {
+        "directional": 0.5329756623608157,
+        "stable": 0.5484556531595353
+      },
+      "stable_floor": 0.5284556531595352,
+      "table": {
+        "R_base": {
+          "per_seed": {
+            "0": {
+              "directional": 0.5339271455509136,
+              "stable": 0.5398602059129121,
+              "epoch_floor_flagged": false
+            },
+            "1": {
+              "directional": 0.5391284323822993,
+              "stable": 0.5388684235383017,
+              "epoch_floor_flagged": false
+            },
+            "2": {
+              "directional": 0.5322059886351717,
+              "stable": 0.5407575328232739,
+              "epoch_floor_flagged": false
+            },
+            "3": {
+              "directional": 0.5250779440340179,
+              "stable": 0.5584207046377633,
+              "epoch_floor_flagged": false
+            },
+            "4": {
+              "directional": 0.5308270884671717,
+              "stable": 0.5570983281382828,
+              "epoch_floor_flagged": false
+            }
+          },
+          "mean_directional": 0.5322333198139149,
+          "mean_stable": 0.5470010390101068,
+          "disqualified": false
+        },
+        "R_val": {
+          "per_seed": {
+            "0": {
+              "directional": 0.5362878529643313,
+              "stable": 0.5340039671294985,
+              "epoch_floor_flagged": false
+            },
+            "1": {
+              "directional": 0.5338055574070977,
+              "stable": 0.5446302068574667,
+              "epoch_floor_flagged": false
+            },
+            "2": {
+              "directional": 0.5347010018577967,
+              "stable": 0.5434022858222348,
+              "epoch_floor_flagged": false
+            },
+            "3": {
+              "directional": 0.534299776429972,
+              "stable": 0.5335789175403797,
+              "epoch_floor_flagged": false
+            },
+            "4": {
+              "directional": 0.5356116277479447,
+              "stable": 0.5386322848776802,
+              "epoch_floor_flagged": false
+            }
+          },
+          "mean_directional": 0.5349411632814285,
+          "mean_stable": 0.538849532445452,
+          "disqualified": false
+        }
+      },
+      "winner": {
+        "name": "R_val",
+        "mixture": "D5",
+        "features": "none",
+        "arch": "cnn",
+        "head": "gap",
+        "recipe": "val",
+        "in_channels": 1,
+        "channels": [
+          96,
+          144
+        ],
+        "length": 12
+      }
+    },
+    "H": {
+      "stage": "H",
+      "champion_val": {
+        "directional": 0.5329756623608157,
+        "stable": 0.5484556531595353
+      },
+      "stable_floor": 0.5284556531595352,
+      "table": {
+        "H_gap": {
+          "per_seed": {
+            "0": {
+              "directional": 0.5362878529643313,
+              "stable": 0.5340039671294985,
+              "epoch_floor_flagged": false
+            },
+            "1": {
+              "directional": 0.5338055574070977,
+              "stable": 0.5446302068574667,
+              "epoch_floor_flagged": false
+            },
+            "2": {
+              "directional": 0.5347010018577967,
+              "stable": 0.5434022858222348,
+              "epoch_floor_flagged": false
+            },
+            "3": {
+              "directional": 0.534299776429972,
+              "stable": 0.5335789175403797,
+              "epoch_floor_flagged": false
+            },
+            "4": {
+              "directional": 0.5356116277479447,
+              "stable": 0.5386322848776802,
+              "epoch_floor_flagged": false
+            }
+          },
+          "mean_directional": 0.5349411632814285,
+          "mean_stable": 0.538849532445452,
+          "disqualified": false
+        },
+        "H_flat": {
+          "per_seed": {
+            "0": {
+              "directional": 0.5373451657535163,
+              "stable": 0.5423160479833758,
+              "epoch_floor_flagged": false
+            },
+            "1": {
+              "directional": 0.5370277007896375,
+              "stable": 0.5398129781807878,
+              "epoch_floor_flagged": false
+            },
+            "2": {
+              "directional": 0.538512996063037,
+              "stable": 0.5311230754699159,
+              "epoch_floor_flagged": false
+            },
+            "3": {
+              "directional": 0.537260542468369,
+              "stable": 0.5301312930953056,
+              "epoch_floor_flagged": false
+            },
+            "4": {
+              "directional": 0.5408545876378978,
+              "stable": 0.5457164446963256,
+              "epoch_floor_flagged": false
+            }
+          },
+          "mean_directional": 0.5382001985424916,
+          "mean_stable": 0.5378199678851422,
+          "disqualified": false
+        }
+      },
+      "winner": {
+        "name": "H_flat",
+        "mixture": "D5",
+        "features": "none",
+        "arch": "cnn",
+        "head": "flat",
+        "recipe": "val",
+        "in_channels": 1,
+        "channels": [
+          96,
+          144
+        ],
+        "length": 12
+      }
+    },
+    "S": {
+      "stage": "S",
+      "champion_val": {
+        "directional": 0.5329756623608157,
+        "stable": 0.5484556531595353
+      },
+      "stable_floor": 0.5284556531595352,
+      "table": {
+        "per_seed": {
+          "0": {
+            "directional": 0.5373451657535163,
+            "stable": 0.5423160479833758,
+            "epoch_floor_flagged": false
+          },
+          "1": {
+            "directional": 0.5370277007896375,
+            "stable": 0.5398129781807878,
+            "epoch_floor_flagged": false
+          },
+          "2": {
+            "directional": 0.538512996063037,
+            "stable": 0.5311230754699159,
+            "epoch_floor_flagged": false
+          },
+          "3": {
+            "directional": 0.537260542468369,
+            "stable": 0.5301312930953056,
+            "epoch_floor_flagged": false
+          },
+          "4": {
+            "directional": 0.5408545876378978,
+            "stable": 0.5457164446963256,
+            "epoch_floor_flagged": false
+          }
+        }
+      },
+      "best_seed": 4,
+      "winner": {
+        "name": "H_flat",
+        "mixture": "D5",
+        "features": "none",
+        "arch": "cnn",
+        "head": "flat",
+        "recipe": "val",
+        "in_channels": 1,
+        "channels": [
+          96,
+          144
+        ],
+        "length": 12,
+        "ensemble": false
+      }
+    }
+  },
+  "smoke": {
+    "results": {
+      "64": {
+        "0": 0.5144132443292886,
+        "1": 0.49807907979111193
+      },
+      "512": {
+        "0": 0.5132031142456811,
+        "1": 0.5120121728524486
+      }
+    },
+    "mean64": 0.5062461620602002,
+    "frozen_batch": 512,
+    "mps_same_seed_abs_diff": 0.0,
+    "mps_seed_reproducible": true
+  },
+  "reused_tensor": "D5_none_s20261012.npz",
+  "components": {
+    "rtcgm_primary": {
+      "windows": 12674509,
+      "participants": 355,
+      "pairing_rule": "identical eligible windows by construction",
+      "macro_f1_candidate_int8": 0.41049808053433506,
+      "macro_f1_champion_int8": 0.42703691035428515,
+      "gates": {
+        "contrast_int8_vs_champion": {
+          "delta": 0.0020198908127736503,
+          "ci95": [
+            0.001125490043469024,
+            0.002933330986672956
+          ],
+          "undefined_fraction": 0.0,
+          "n_boot": 2000,
+          "seed": 20261015
+        },
+        "candidate_float_directional": 0.55727480324019,
+        "candidate_int8_directional": 0.5548003085545762,
+        "champion_int8_directional": 0.5527804177418025,
+        "candidate_int8_stable": 0.60508351253221,
+        "champion_int8_stable": 0.606681563120696,
+        "gate1_beats_champion": true,
+        "gate2_stable_floor": true,
+        "gate3_int8_within_half_pp_of_float": true
+      },
+      "disclosure": "RT-CGM labels have never been evaluated in any round. Training-exposure disclosure: r3's rejected D_rtcgm arm trained on this cohort, but neither the shipped champion nor any r5 arm trains on it, and no model under comparison has seen its labels at training or evaluation time."
+    },
+    "held_out": {
+      "descriptive_non_gating": true,
+      "windows": 46376,
+      "macro_f1_candidate_int8": 0.3417080673961184,
+      "macro_f1_champion_int8": 0.36353818667254256,
+      "contrast": {
+        "contrast_int8_vs_champion": {
+          "delta": -0.003207774932106444,
+          "ci95": [
+            -0.007506918282445085,
+            0.0014546509223026943
+          ],
+          "undefined_fraction": 0.0,
+          "n_boot": 2000,
+          "seed": 20261015
+        },
+        "candidate_float_directional": 0.5246853389654877,
+        "candidate_int8_directional": 0.5201787602730757,
+        "champion_int8_directional": 0.5233865352051822,
+        "candidate_int8_stable": 0.4362746551979831,
+        "champion_int8_stable": 0.4585496069998517,
+        "gate1_beats_champion": false,
+        "gate2_stable_floor": false,
+        "gate3_int8_within_half_pp_of_float": true
+      }
+    },
+    "temporal": {
+      "descriptive_non_gating": true,
+      "windows": 37361,
+      "macro_f1_candidate_int8": 0.3350599863113038,
+      "macro_f1_champion_int8": 0.35572874693147183,
+      "contrast": {
+        "contrast_int8_vs_champion": {
+          "delta": 0.0033255708035626608,
+          "ci95": [
+            -0.00577776408869139,
+            0.012398006022398964
+          ],
+          "undefined_fraction": 0.0,
+          "n_boot": 2000,
+          "seed": 20261015
+        },
+        "candidate_float_directional": 0.5089870529592214,
+        "candidate_int8_directional": 0.5050490383080579,
+        "champion_int8_directional": 0.5017234675044953,
+        "candidate_int8_stable": 0.4994613379669852,
+        "champion_int8_stable": 0.5195829713292789,
+        "gate1_beats_champion": false,
+        "gate2_stable_floor": false,
+        "gate3_int8_within_half_pp_of_float": true
+      }
+    }
+  },
+  "pedap_zero_shot": {
+    "windows": 7003788,
+    "winner_int8": {
+      "directional": 0.5392230736112312,
+      "stable": 0.39147676755593314,
+      "per_class": {
+        "falling_fast": 0.7053447206749032,
+        "falling": 0.3956513569317968,
+        "stable": 0.39147676755593314,
+        "rising": 0.42260939033990474,
+        "rising_fast": 0.63328682649832
+      }
+    },
+    "champion_int8": {
+      "directional": 0.5407023859901744,
+      "stable": 0.3941903936556735,
+      "per_class": {
+        "falling_fast": 0.6384380096816721,
+        "falling": 0.46019531202783204,
+        "stable": 0.3941903936556735,
+        "rising": 0.45345876957833864,
+        "rising_fast": 0.6107174526728549
+      }
+    },
+    "note": "descriptive; no gates; cohort never trained on"
+  },
+  "ship": {
+    "candidate": "seed 4",
+    "all_gates_pass": true
+  },
+  "deviations": []
+}

@@ -16,7 +16,8 @@ def load_checkpoint(checkpoint_path: Path, num_classes: int):
         else:
             model = TrendCNN(num_classes=num_classes,
                              channels=tuple(obj["channels"]),
-                             in_channels=obj["in_channels"])
+                             in_channels=obj["in_channels"],
+                             head=obj.get("head", "gap"))
         model.load_state_dict(obj["state_dict"])
     else:
         channels = (obj["conv1.weight"].shape[0], obj["conv2.weight"].shape[0])

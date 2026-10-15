@@ -1,48 +1,71 @@
 # Bundled model provenance
 
-Both models are the SWEEP-R2 winner of the 2026-10-12 accuracy sweep
-round two (run `sweep-r2`, protocol frozen and committed before any
-held-out label was read; spec
-docs/superpowers/specs/2026-10-12-accuracy-sweep-r2-design.md): the
-DiaData-only training mixture (five audited cohorts, 898 subjects, zero
-Weinstock training windows), (96,144) channels (42,725 params), 1-hour
-window, training seed 1, delta-anchor inputs (11 consecutive differences
-+ last reading / 16 — the same `DeltaEncoding` transform both clients
-already apply; golden vectors pin Python/Kotlin/Swift to the same
-bytes). INT8 is calibrated on the study's `uniform_random_200_d101`
-selection. Reproduce with:
-- `venv/bin/python -m experiments.accuracy_sweep_r2 train --run-id sweep-r2 --stage-name M` (then S for seeds 3–4)
-- `venv/bin/python -m experiments.accuracy_sweep_r2 convert --run-id sweep-r2`
+Both models are the SWEEP-R5 winner of the 2026-10-14 accuracy sweep
+round five (run `sweep-r5`, protocol frozen and committed before the
+confirmatory read; spec
+docs/superpowers/specs/2026-10-14-accuracy-sweep-r5-design.md): the
+round-two DiaData-only training mixture (five audited cohorts, 898
+subjects, zero Weinstock training windows), (96,144) channels with a
+position-preserving flatten head (50,645 params — the global average
+pool is gone, the final features of all 12 positions feed the
+classifier), 1-hour window, cosine learning-rate decay over 20 epochs
+with the kept epoch picked by validation directional recall under the
+stable floor (seed 4, kept epoch 11), delta-anchor inputs (11
+consecutive differences + last reading / 16 — the same `DeltaEncoding`
+transform both clients already apply; golden vectors pin
+Python/Kotlin/Swift to the same bytes). INT8 is calibrated on the
+study's `uniform_random_200_d101` selection. Reproduce with:
+- `venv/bin/python -m experiments.accuracy_sweep_r5 train --run-id sweep-r5 --stage-name R` (then H)
+- `venv/bin/python -m experiments.accuracy_sweep_r5 select --run-id sweep-r5 --stage-name R` (then H, S)
+- `venv/bin/python -m experiments.accuracy_sweep_r5 convert --run-id sweep-r5`
 
 Pre-registered confirmatory read
-(paper/results/calibration-coverage/accuracy_sweep_r2.json): held-out
-directional recall float 0.5244 / INT8 0.5234 vs the previous champion
-INT8 0.5174 (+0.60 pp, participant-cluster bootstrap CI
-[−0.06, +1.33 pp]); stable recall 0.4585 vs 0.4754 (−1.68 pp, inside the
-−2 pp gate); temporal split agrees in sign (+0.50 pp). All three frozen
-gates passed. Known cost, stated plainly: macro-F1 slips 0.364 vs 0.368
-held-out, and stable-class recall is ~1.7 pp lower than the previous
-pair. Zero-shot on the never-trained PEDAP cohort (7.0M windows,
-descriptive): directional 0.541 vs 0.522.
+(paper/results/calibration-coverage/accuracy_sweep_r5.json): the primary
+endpoint moved to a cohort with no prior reads — zero-shot directional
+recall on DiaData's RT-CGM cohort (12.67M eligible windows, 355
+participants; neither model under comparison ever trained on it). INT8
+directional 0.5548 vs the previous champion INT8 0.5528 (+0.20 pp,
+participant-cluster bootstrap CI [+0.11, +0.29 pp], fully positive);
+stable recall 0.605 vs 0.607 (−0.16 pp, inside the −2 pp gate); INT8
+within 0.25 pp of its own float. All three frozen gates passed. Known
+cost, stated plainly: macro-F1 trails (0.410 vs 0.427 on RT-CGM, 0.342
+vs 0.364 held-out), the reused held-out descriptive contrast is
+−0.3 pp [−0.8, +0.1], and never-trained PEDAP is a near-tie (0.539 vs
+0.541). On the non-gating secondaries the stable-class cost exceeds the
+level that gates the primary: held-out stable recall 0.436 vs 0.459
+(−2.2 pp) and temporal 0.499 vs 0.520 (−2.0 pp), and on PEDAP the
+`falling` class drops 6.4 pp (0.396 vs 0.460) and `rising` 3.1 pp —
+the certified gain is small and lives on the one cohort where no
+selection pressure was ever applied.
 
 | file | sha256 | bytes |
 |---|---|---|
-| `trend_float.tflite` | `96eef43c37779534dab86312a6c7c65954fade0f5b2af0cfc3084dffb03b9a01` | 177336 |
-| `trend_int8.tflite` | `a887ea4e786e2b40ff6c235fef0cd70af1c4149421ac49358640da3715757c42` | 55216 |
+| `trend_float.tflite` | `bfb37468c5896be9f8c30f515c7499586a71da1c0ca0f77319080f8fcaa76153` | 208560 |
+| `trend_int8.tflite` | `eacc0a741403b901330f0dfcc529195779b29f7bb0ed2de9ae90da8912dcf554` | 61936 |
 
-Verification state: DEVICE-VERIFIED on the iPhone 18 Pro Max on
-2026-10-12, the day these bytes shipped: the full test run — 51 tests in
-13 suites, golden parity (INT8 bit-exact against these sha256s) and the
-Swift delta transform included — passed on device. Also verified on the
-Android JVM suite and the iOS simulator suite at ship time (CI 3/3 on
-the ship PR). A live in-app session on the same device the same day
-(CompiledModel, n=100 per model, synthetic trace, timer =
-quantize+run+dequantize) recorded float 0.102 ms mean / 0.148 ms p95
-and INT8 0.149 ms / 0.212 ms — the 10x-parameter pair stays well under
-a quarter millisecond, with the Explain feature producing descriptive,
-advice-free notes.
+Verification state: verified at ship time (2026-10-15) on the Android
+JVM suite (39/39) and the iOS simulator suite (51 tests in 13 suites,
+golden parity included — both bundled files hash-match the goldens and
+the INT8 outputs are bit-exact against the Python record). Device-verified
+the same day on the iPhone 18 Pro Max (iOS 27.0.1): the full suite — 51
+tests in 13 suites — passed on device, including golden parity
+(`bundledModelsMatchGoldenHashes`, float logits match Python, INT8
+bit-exact), plus a live in-app session the same day (CompiledModel,
+n=100 per model, synthetic trace): float 0.124 ms mean / 0.182 ms p95,
+INT8 0.126 ms / 0.179 ms, skipped rows 0.
 
-The previous bundled pair — the 2026-10-10 delta-inputs `delta-r1`
+The SWEEP-R2 pair these bytes replace — float `96eef43c…` (177,336
+bytes), INT8 `a887ea4e…` (55,216 bytes); held-out directional recall
+float 0.5244 / INT8 0.5234 vs its own predecessor 0.5174, all r2 gates
+passed — is now historical. It WAS device-verified on the iPhone 18 Pro
+Max on 2026-10-12, the day its bytes shipped: 51 tests in 13 suites,
+golden parity (INT8 bit-exact) and the Swift delta transform included,
+plus a live in-app session (CompiledModel, n=100 per model, synthetic
+trace) at float 0.102 ms mean / 0.148 ms p95 and INT8 0.149 ms /
+0.212 ms. Full r2 record:
+paper/results/calibration-coverage/accuracy_sweep_r2.json.
+
+The pair before it — the 2026-10-10 delta-inputs `delta-r1`
 anchor seed-0 artifacts, float `c30560f7…` (17,352 bytes), INT8
 `8590a3d2…` (11,976 bytes), held-out directional recall float 0.5161 /
 INT8 0.5174 — is now historical. It WAS device-verified on the iPhone
@@ -111,6 +134,16 @@ as the current bundled pair.
 ## Accuracy sweep sweep-r3 (2026-10-12): not shipped
 
 Sweep r3 (RT-CGM reopen, time-of-day channel, TCN arm) did not clear the ship gates:
-the TCN candidate beat the bundled pair on held-out directional recall (+0.77pp, CI fully
-positive) but broke the stable-recall floor (-4.4pp against a -2pp gate), so the bundled
-pair is retained. Full record: `paper/results/calibration-coverage/accuracy_sweep_r3.json`.
+the TCN candidate beat the then-bundled r2 pair on held-out directional recall (+0.77pp, CI fully
+positive) but broke the stable-recall floor (-4.4pp against a -2pp gate), so that
+pair stayed. Full record: `paper/results/calibration-coverage/accuracy_sweep_r3.json`.
+
+## Accuracy sweep sweep-r4 (2026-10-13): identity outcome, no read spent
+
+Sweep r4 (objective heads, robustness levers, weight averaging) saw every arm lose to the
+shipped-recipe control on validation; the surviving candidate converted to a float/INT8 pair
+sha256-identical to the then-bundled r2 champion, so the pre-registered contrast would have
+compared the model to itself — no confirmatory read was performed and the protected labels
+were left unspent. Full record: `paper/results/calibration-coverage/accuracy_sweep_r4.json`.
+Round five (sweep-r5, above) changed the head and the recipe, won on a fresh zero-shot
+cohort, and its winner is the current bundled pair.
