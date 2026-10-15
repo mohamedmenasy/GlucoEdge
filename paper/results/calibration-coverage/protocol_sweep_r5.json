@@ -1,0 +1,279 @@
+{
+  "round": "r5",
+  "spec": "docs/superpowers/specs/2026-10-14-accuracy-sweep-r5-design.md",
+  "boot_seed": 20261015,
+  "n_boot": 2000,
+  "champion_sha256": {
+    "float": "96eef43c37779534dab86312a6c7c65954fade0f5b2af0cfc3084dffb03b9a01",
+    "int8": "a887ea4e786e2b40ff6c235fef0cd70af1c4149421ac49358640da3715757c42"
+  },
+  "r_base_alias_sha256": {
+    "0": "3252da32b7bd24456cb372f7eb1802d1a8d22742647a5721ead1dd7d6af6a7b6",
+    "1": "5e47d627cca4eefb1aa1549f0c91669ad98a1be52039a6ccf7710e0c320e9a70",
+    "2": "f6ad9d91c001b1d95f4615ce626d3efe489a9b6ef7f686b52e4da6dba6a78cef",
+    "3": "c518bc9564303e8ea758723928f8b7112bfde508ff98968061c63a255bf1f611",
+    "4": "11ba38370e8d4d058862c87f4a2ac7b3f015cac8b3df9c0e39b93b350d6c1094"
+  },
+  "selection_trail": {
+    "R": {
+      "stage": "R",
+      "champion_val": {
+        "directional": 0.5329756623608157,
+        "stable": 0.5484556531595353
+      },
+      "stable_floor": 0.5284556531595352,
+      "table": {
+        "R_base": {
+          "per_seed": {
+            "0": {
+              "directional": 0.5339271455509136,
+              "stable": 0.5398602059129121,
+              "epoch_floor_flagged": false
+            },
+            "1": {
+              "directional": 0.5391284323822993,
+              "stable": 0.5388684235383017,
+              "epoch_floor_flagged": false
+            },
+            "2": {
+              "directional": 0.5322059886351717,
+              "stable": 0.5407575328232739,
+              "epoch_floor_flagged": false
+            },
+            "3": {
+              "directional": 0.5250779440340179,
+              "stable": 0.5584207046377633,
+              "epoch_floor_flagged": false
+            },
+            "4": {
+              "directional": 0.5308270884671717,
+              "stable": 0.5570983281382828,
+              "epoch_floor_flagged": false
+            }
+          },
+          "mean_directional": 0.5322333198139149,
+          "mean_stable": 0.5470010390101068,
+          "disqualified": false
+        },
+        "R_val": {
+          "per_seed": {
+            "0": {
+              "directional": 0.5362878529643313,
+              "stable": 0.5340039671294985,
+              "epoch_floor_flagged": false
+            },
+            "1": {
+              "directional": 0.5338055574070977,
+              "stable": 0.5446302068574667,
+              "epoch_floor_flagged": false
+            },
+            "2": {
+              "directional": 0.5347010018577967,
+              "stable": 0.5434022858222348,
+              "epoch_floor_flagged": false
+            },
+            "3": {
+              "directional": 0.534299776429972,
+              "stable": 0.5335789175403797,
+              "epoch_floor_flagged": false
+            },
+            "4": {
+              "directional": 0.5356116277479447,
+              "stable": 0.5386322848776802,
+              "epoch_floor_flagged": false
+            }
+          },
+          "mean_directional": 0.5349411632814285,
+          "mean_stable": 0.538849532445452,
+          "disqualified": false
+        }
+      },
+      "winner": {
+        "name": "R_val",
+        "mixture": "D5",
+        "features": "none",
+        "arch": "cnn",
+        "head": "gap",
+        "recipe": "val",
+        "in_channels": 1,
+        "channels": [
+          96,
+          144
+        ],
+        "length": 12
+      }
+    },
+    "H": {
+      "stage": "H",
+      "champion_val": {
+        "directional": 0.5329756623608157,
+        "stable": 0.5484556531595353
+      },
+      "stable_floor": 0.5284556531595352,
+      "table": {
+        "H_gap": {
+          "per_seed": {
+            "0": {
+              "directional": 0.5362878529643313,
+              "stable": 0.5340039671294985,
+              "epoch_floor_flagged": false
+            },
+            "1": {
+              "directional": 0.5338055574070977,
+              "stable": 0.5446302068574667,
+              "epoch_floor_flagged": false
+            },
+            "2": {
+              "directional": 0.5347010018577967,
+              "stable": 0.5434022858222348,
+              "epoch_floor_flagged": false
+            },
+            "3": {
+              "directional": 0.534299776429972,
+              "stable": 0.5335789175403797,
+              "epoch_floor_flagged": false
+            },
+            "4": {
+              "directional": 0.5356116277479447,
+              "stable": 0.5386322848776802,
+              "epoch_floor_flagged": false
+            }
+          },
+          "mean_directional": 0.5349411632814285,
+          "mean_stable": 0.538849532445452,
+          "disqualified": false
+        },
+        "H_flat": {
+          "per_seed": {
+            "0": {
+              "directional": 0.5373451657535163,
+              "stable": 0.5423160479833758,
+              "epoch_floor_flagged": false
+            },
+            "1": {
+              "directional": 0.5370277007896375,
+              "stable": 0.5398129781807878,
+              "epoch_floor_flagged": false
+            },
+            "2": {
+              "directional": 0.538512996063037,
+              "stable": 0.5311230754699159,
+              "epoch_floor_flagged": false
+            },
+            "3": {
+              "directional": 0.537260542468369,
+              "stable": 0.5301312930953056,
+              "epoch_floor_flagged": false
+            },
+            "4": {
+              "directional": 0.5408545876378978,
+              "stable": 0.5457164446963256,
+              "epoch_floor_flagged": false
+            }
+          },
+          "mean_directional": 0.5382001985424916,
+          "mean_stable": 0.5378199678851422,
+          "disqualified": false
+        }
+      },
+      "winner": {
+        "name": "H_flat",
+        "mixture": "D5",
+        "features": "none",
+        "arch": "cnn",
+        "head": "flat",
+        "recipe": "val",
+        "in_channels": 1,
+        "channels": [
+          96,
+          144
+        ],
+        "length": 12
+      }
+    },
+    "S": {
+      "stage": "S",
+      "champion_val": {
+        "directional": 0.5329756623608157,
+        "stable": 0.5484556531595353
+      },
+      "stable_floor": 0.5284556531595352,
+      "table": {
+        "per_seed": {
+          "0": {
+            "directional": 0.5373451657535163,
+            "stable": 0.5423160479833758,
+            "epoch_floor_flagged": false
+          },
+          "1": {
+            "directional": 0.5370277007896375,
+            "stable": 0.5398129781807878,
+            "epoch_floor_flagged": false
+          },
+          "2": {
+            "directional": 0.538512996063037,
+            "stable": 0.5311230754699159,
+            "epoch_floor_flagged": false
+          },
+          "3": {
+            "directional": 0.537260542468369,
+            "stable": 0.5301312930953056,
+            "epoch_floor_flagged": false
+          },
+          "4": {
+            "directional": 0.5408545876378978,
+            "stable": 0.5457164446963256,
+            "epoch_floor_flagged": false
+          }
+        }
+      },
+      "best_seed": 4,
+      "winner": {
+        "name": "H_flat",
+        "mixture": "D5",
+        "features": "none",
+        "arch": "cnn",
+        "head": "flat",
+        "recipe": "val",
+        "in_channels": 1,
+        "channels": [
+          96,
+          144
+        ],
+        "length": 12,
+        "ensemble": false
+      }
+    }
+  },
+  "smoke": {
+    "results": {
+      "64": {
+        "0": 0.5144132443292886,
+        "1": 0.49807907979111193
+      },
+      "512": {
+        "0": 0.5132031142456811,
+        "1": 0.5120121728524486
+      }
+    },
+    "mean64": 0.5062461620602002,
+    "frozen_batch": 512,
+    "mps_same_seed_abs_diff": 0.0,
+    "mps_seed_reproducible": true
+  },
+  "primary_endpoint": "RT-CGM zero-shot directional recall: winner uniform INT8 vs shipped champion INT8, paired on identical eligible windows, participant-cluster bootstrap, 2000 draws",
+  "gates": [
+    "gate1: directional delta > 0 AND 95% CI lower bound > -0.5pp",
+    "gate2: winner INT8 stable recall >= champion INT8 stable - 2.0pp",
+    "gate3: winner INT8 within 0.5pp of its own float (directional)"
+  ],
+  "secondary_disclosed_reused": "weinstock held-out (3 prior confirmatory reads) and temporal: descriptive only; macro-F1 all splits; PEDAP zero-shot descriptive. None gate.",
+  "calibration": "sequential_200_d0 + uniform_random_200_d101 from weinstock train only; uniform INT8 is the ship candidate",
+  "disclosure": "RT-CGM labels have never been evaluated in any round. Training-exposure disclosure: r3's rejected D_rtcgm arm trained on this cohort, but neither the shipped champion nor any r5 arm trains on it, and no model under comparison has seen its labels at training or evaluation time.",
+  "selection_rule_changes_vs_r3": [
+    "selection floor aligned to Gate 2: champion val stable - 2pp (r3 used -5pp at selection)",
+    "tie band 0.1pp -> cost_key -> list order applied at every selection including Stage S and the kept-epoch pick (r3 Stage S used strict argmax)"
+  ],
+  "identity_guard": "candidate float AND uniform INT8 sha256-identical to the shipped pair -> confirmatory read skipped, identity outcome published (r4 lesson)",
+  "prediction": "flatten head wins val selection and transfers: positive directional delta on RT-CGM with CI lower bound above -0.5pp, stable within 2pp"
+}
