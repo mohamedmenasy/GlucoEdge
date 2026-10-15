@@ -50,9 +50,9 @@ the INT8 outputs are bit-exact against the Python record). Device-verified
 the same day on the iPhone 18 Pro Max (iOS 27.0.1): the full suite — 51
 tests in 13 suites — passed on device, including golden parity
 (`bundledModelsMatchGoldenHashes`, float logits match Python, INT8
-bit-exact). No live in-app latency session has been recorded for this
-pair yet (the r2 numbers below are the latest on-device latency
-observations).
+bit-exact), plus a live in-app session the same day (CompiledModel,
+n=100 per model, synthetic trace): float 0.124 ms mean / 0.182 ms p95,
+INT8 0.126 ms / 0.179 ms, skipped rows 0.
 
 The SWEEP-R2 pair these bytes replace — float `96eef43c…` (177,336
 bytes), INT8 `a887ea4e…` (55,216 bytes); held-out directional recall
