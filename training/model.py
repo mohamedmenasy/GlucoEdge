@@ -2,18 +2,27 @@ import torch.nn as nn
 
 
 class TrendCNN(nn.Module):
-    def __init__(self, num_classes: int = 5, channels=(24, 36), in_channels: int = 1):
+    def __init__(self, num_classes: int = 5, channels=(24, 36),
+                 in_channels: int = 1, head: str = "gap", length: int = 12):
         super().__init__()
         c1, c2 = channels
         self.conv1 = nn.Conv1d(in_channels, c1, kernel_size=3, padding=1)
         self.conv2 = nn.Conv1d(c1, c2, kernel_size=3, padding=1)
         self.relu = nn.ReLU()
-        self.pool = nn.AdaptiveAvgPool1d(1)
-        self.fc = nn.Linear(c2, num_classes)
+        self.head = head
+        if head == "flat":
+            # position-preserving: classify the full [c2, length] feature map
+            self.pool = None
+            self.fc = nn.Linear(c2 * length, num_classes)
+        else:
+            self.pool = nn.AdaptiveAvgPool1d(1)
+            self.fc = nn.Linear(c2, num_classes)
 
     def forward(self, x):
         x = self.relu(self.conv1(x))
         x = self.relu(self.conv2(x))
+        if self.pool is None:
+            return self.fc(x.flatten(1))
         x = self.pool(x).squeeze(-1)
         return self.fc(x)
 
