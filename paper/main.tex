@@ -1330,6 +1330,71 @@ W & best single seed (winner) & \textbf{0.539} & 0.539 \\
 \end{tabular}
 \end{table}
 
+\subsection{Accuracy sweep, round five: a flatten head and a fresh
+cohort}
+
+Round five tested the last untried axis of the model itself: the global
+average pool that erases within-window position. The sweep staged a
+training recipe against the shipped one (cosine learning-rate decay over
+20 epochs with the kept epoch chosen by validation directional recall
+subject to the stable floor), then a flatten head (the final
+convolutional features concatenated across all 12 positions, 50{,}645
+parameters against the pooled head's 42{,}725) under the winning recipe,
+then the best seed --- five seeds per arm throughout. Two selection
+rules changed from round three, both pre-registered: the stable floor at
+selection was aligned to the confirmatory gate ($-2$ points, previously
+$-5$), and the 0.1-point tie band applies at every pick including the
+best-seed stage and the kept-epoch choice. The recipe won its stage
+(five-seed mean 0.535 against 0.532), the flatten head won its own
+(0.538 against 0.535), and seed 4 led with validation 0.541 directional
+/ 0.546 stable --- the first candidate since round two to beat the
+champion's validation directional recall outright.
+
+The confirmatory read moved to a cohort with no prior reads: the
+pre-registered primary endpoint is zero-shot directional recall on
+DiaData's RT-CGM cohort (12.67M eligible windows from the 355 of 451
+admitted subjects with scored windows), whose labels no round had ever
+evaluated. Disclosure: round three trained a rejected arm on this
+cohort, but neither the shipped champion nor any round-five arm trains
+on it, so the comparison is zero-shot for both sides
+(\texttt{protocol\_sweep\_r5.json}, committed before the read). All
+three gates pass (Table~\ref{tab:sweepfive}): the candidate's uniform
+INT8 beats the champion INT8 by $+0.20$ directional-recall points with a
+fully positive participant-cluster CI ($[+0.11, +0.29]$, 2{,}000
+draws), holds stable recall within 0.2 points (0.605 against 0.607,
+gate $-2$), and sits 0.25 points under its own float (gate 0.5). The
+disclosed-reused secondaries are descriptive and price the gain
+honestly: the held-out contrast is $-0.3$ $[-0.8, +0.1]$ and the
+temporal $+0.3$ $[-0.6, +1.2]$ --- both inside seed noise --- macro-F1
+trails everywhere (0.410 against 0.427 on RT-CGM), and never-trained
+PEDAP is a near-tie (0.539 against 0.541 directional). The win the
+gates certify is small and endpoint-shaped, not uniform; it clears the
+pre-registered bar on the one cohort where no selection pressure was
+ever applied, and the candidate replaces the round-two pair under the
+rule fixed before the read. Full record:
+\texttt{accuracy\_sweep\_r5.json}.
+
+\begin{table}[t]
+\centering
+\caption{Round-five confirmatory read (directional recall, paired
+windows; candidate = flatten-head CNN, cosine recipe, seed 4, uniform
+INT8). Delta is candidate minus champion INT8, participant-cluster
+bootstrap CI, in recall points ($\times 100$). RT-CGM is the
+pre-registered zero-shot primary endpoint; held-out and temporal are
+disclosed-reused descriptive contrasts. All three gates pass.}
+\label{tab:sweepfive}
+\scriptsize\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Split & Cand.\ float & Cand.\ INT8 & Champion INT8 & $\Delta$ [95\% CI] \\
+\midrule
+RT-CGM (primary) & 0.557 & 0.555 & 0.553 & $+0.2$ $[+0.1, +0.3]$ \\
+Held-out & 0.525 & 0.520 & 0.523 & $-0.3$ $[-0.8, +0.1]$ \\
+Temporal & 0.509 & 0.505 & 0.502 & $+0.3$ $[-0.6, +1.2]$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Historical comparison}
 
 The earlier revision reported accuracy 0.5184 and macro recall 0.5060 for
