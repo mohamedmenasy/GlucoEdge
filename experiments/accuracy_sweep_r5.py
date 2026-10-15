@@ -340,3 +340,105 @@ def stage_convert(run_id):
     winner = _read_sel(run, "S")["winner"]
     for seed in ARM_SEEDS_R5:
         _convert_seed(run, winner, seed)
+
+
+def _sha256(path):
+    import hashlib
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def _champion_paths():
+    from experiments.accuracy_sweep import CHAMPION
+    return {"float": CHAMPION["float"], "int8": CHAMPION["int8"]}
+
+
+def identity_with_champion(run):
+    """r4 lesson: a sha-identical candidate spends no fresh labels."""
+    fl, i8 = _candidate_arts(run)
+    champ = _champion_paths()
+    out = {"candidate_float_sha256": _sha256(fl),
+           "candidate_int8_sha256": _sha256(i8),
+           "champion_float_sha256": _sha256(champ["float"]),
+           "champion_int8_sha256": _sha256(champ["int8"])}
+    out["identical"] = bool(
+        out["candidate_float_sha256"] == out["champion_float_sha256"]
+        and out["candidate_int8_sha256"] == out["champion_int8_sha256"])
+    return out
+
+
+def _admitted_rtcgm_r5():
+    from experiments.accuracy_sweep_r3 import _admitted_rtcgm
+    return _admitted_rtcgm()
+
+
+def _rtcgm_windows():
+    """Eligible RT-CGM eval windows: delta-encoded hours cache filtered to
+    the cadence-admitted subjects. Loud on any drift."""
+    if not RTCGM_CACHE.exists():
+        raise SystemExit(f"REFUSED: RT-CGM hours cache missing: {RTCGM_CACHE}")
+    z = np.load(RTCGM_CACHE)
+    admitted = _admitted_rtcgm_r5()
+    keep = np.isin(z["pids"], np.asarray(sorted(admitted)))
+    n_total, n_keep = len(z["pids"]), int(keep.sum())
+    if n_keep == 0 or n_keep < n_total // 2:
+        raise SystemExit(f"REFUSED: admit-list drift - {n_keep}/{n_total} "
+                         "cached RT-CGM windows admitted; audit before eval")
+    return (z["w"][keep].astype(np.float32),
+            z["y"][keep].astype(np.int64), z["pids"][keep])
+
+
+def stage_evaluate(run_id):
+    from experiments.accuracy_sweep import (CHAMPION, _component_windows,
+                                            _tflite_logits)
+    if not protocol_is_committed(PROTOCOL_R5):
+        raise SystemExit("REFUSED: commit paper/results/calibration-coverage/"
+                         "protocol_sweep_r5.json (clean) before evaluate")
+    run = _run_dir(run_id)
+    ident = identity_with_champion(run)
+    (Path(run) / "eval").mkdir(parents=True, exist_ok=True)
+    if ident["identical"]:
+        _write_json(Path(run) / "eval" / "identity.json", ident)
+        print("identity outcome: candidate == shipped champion; "
+              "confirmatory read skipped, no labels spent")
+        return
+    fl, i8 = _candidate_arts(run)
+    # --- primary: RT-CGM zero-shot (first and only label read) -------------
+    base = Path(run) / "eval" / "rtcgm"
+    base.mkdir(parents=True, exist_ok=True)
+    if not (base / "meta.npz").exists():
+        x, y, pids = _rtcgm_windows()
+        np.savez_compressed(base / "meta.npz", y=y, pids=pids)
+        np.save(base / "_x.npy", x)  # transient input cache, gitignored
+    x = np.load(base / "_x.npy")
+    for name, path in (("winner_float", fl), ("winner_int8", i8),
+                       ("champion_int8", CHAMPION["int8"])):
+        p = base / f"{name}_preds.npy"
+        if not p.exists():
+            np.save(p, _tflite_logits(path, x).argmax(axis=1))
+            print(f"rtcgm/{name} evaluated")
+    # --- secondary: weinstock held-out/temporal (disclosed reused) ----------
+    for comp, split in (("held_out", "held_out"), ("temporal", "test")):
+        cbase = Path(run) / "eval" / comp
+        cbase.mkdir(parents=True, exist_ok=True)
+        windows, meta = _component_windows(12, split)
+        if not (cbase / "meta.json").exists():
+            _write_json(cbase / "meta.json", meta)
+        for name, path in (("winner_float", fl), ("winner_int8", i8),
+                           ("champion_int8", CHAMPION["int8"])):
+            p = cbase / f"{name}_preds.npy"
+            if not p.exists():
+                np.save(p, _tflite_logits(path, windows).argmax(axis=1))
+                print(f"{comp}/{name} evaluated")
+    # --- secondary: PEDAP zero-shot (descriptive) ---------------------------
+    pbase = Path(run) / "eval" / "pedap"
+    pbase.mkdir(parents=True, exist_ok=True)
+    from experiments.accuracy_sweep_r3 import _diadata_windows_r3
+    from training.mixtures import HOLDOUT_COHORT
+    w, y, pids, _hours = _diadata_windows_r3(HOLDOUT_COHORT)
+    if not (pbase / "meta.npz").exists():
+        np.savez_compressed(pbase / "meta.npz", y=y, pids=pids)
+    for name, path in (("winner_int8", i8), ("champion_int8", CHAMPION["int8"])):
+        p = pbase / f"{name}_preds.npy"
+        if not p.exists():
+            np.save(p, _tflite_logits(path, w).argmax(axis=1))
+            print(f"pedap/{name} evaluated")

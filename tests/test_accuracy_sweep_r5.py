@@ -256,3 +256,68 @@ def test_convert_artifact_naming_contract(tmp_path, monkeypatch):
     fl, i8 = r5._candidate_arts(tmp_path)
     assert fl.name == "winner_seed2_float.tflite"
     assert i8.name == "winner_seed2_int8_uniform_random_200_d101.tflite"
+
+
+def test_identity_guard_requires_both_artifacts_equal(tmp_path, monkeypatch):
+    import experiments.accuracy_sweep_r5 as r5
+    (tmp_path / "selection").mkdir()
+    (tmp_path / "selection" / "S.json").write_text(json.dumps(
+        {"winner": r5.arm_r5("H_gap", "gap", "val"), "best_seed": 0}))
+    art = tmp_path / "artifacts"
+    art.mkdir()
+    (art / "winner_seed0_float.tflite").write_bytes(b"FLOAT")
+    (art / "winner_seed0_int8_uniform_random_200_d101.tflite").write_bytes(b"INT8")
+    champ_f, champ_i = tmp_path / "cf.tflite", tmp_path / "ci.tflite"
+    champ_f.write_bytes(b"FLOAT")
+    champ_i.write_bytes(b"INT8")
+    monkeypatch.setattr(r5, "_champion_paths",
+                        lambda: {"float": champ_f, "int8": champ_i})
+    assert r5.identity_with_champion(tmp_path)["identical"] is True
+    champ_i.write_bytes(b"DIFFERENT")  # one-of-two equal is NOT identity
+    assert r5.identity_with_champion(tmp_path)["identical"] is False
+
+
+def test_rtcgm_windows_filters_admitted_and_guards_drift(tmp_path, monkeypatch):
+    import experiments.accuracy_sweep_r5 as r5
+    cache = tmp_path / "RT_CGM.npz"
+    np.savez_compressed(cache,
+                        w=np.zeros((6, 12), dtype=np.float32),
+                        y=np.arange(6, dtype=np.int64) % 5,
+                        pids=np.array(["a", "a", "b", "b", "c", "c"]),
+                        hours=np.zeros(6))
+    monkeypatch.setattr(r5, "RTCGM_CACHE", cache)
+    monkeypatch.setattr(r5, "_admitted_rtcgm_r5", lambda: {"a", "b", "c"})
+    x, y, pids = r5._rtcgm_windows()
+    assert len(x) == 6 and x.shape[1] == 12
+    # admit-list drift: keep count collapses below half the cache -> refuse
+    monkeypatch.setattr(r5, "_admitted_rtcgm_r5", lambda: {"a"})
+    with pytest.raises(SystemExit, match="REFUSED"):
+        r5._rtcgm_windows()
+    monkeypatch.setattr(r5, "_admitted_rtcgm_r5", lambda: {"zz"})
+    with pytest.raises(SystemExit, match="REFUSED"):
+        r5._rtcgm_windows()
+
+
+def test_evaluate_refuses_without_committed_protocol(monkeypatch):
+    import experiments.accuracy_sweep_r5 as r5
+    monkeypatch.setattr(r5, "protocol_is_committed", lambda p: False)
+    with pytest.raises(SystemExit, match="REFUSED"):
+        r5.stage_evaluate("sweep-r5-test")
+
+
+def test_evaluate_identity_skips_the_read(tmp_path, monkeypatch):
+    import experiments.accuracy_sweep_r5 as r5
+    monkeypatch.setattr(r5, "protocol_is_committed", lambda p: True)
+    monkeypatch.setattr(r5, "_run_dir", lambda rid: str(tmp_path))
+    monkeypatch.setattr(r5, "identity_with_champion", lambda run: {
+        "identical": True, "candidate_float_sha256": "x",
+        "candidate_int8_sha256": "y", "champion_float_sha256": "x",
+        "champion_int8_sha256": "y"})
+
+    def boom():
+        raise AssertionError("labels were read despite identity")
+    monkeypatch.setattr(r5, "_rtcgm_windows", boom)
+    r5.stage_evaluate("sweep-r5-test")
+    assert json.loads((tmp_path / "eval" / "identity.json").read_text())[
+        "identical"] is True
+    assert not (tmp_path / "eval" / "rtcgm").exists()
