@@ -71,3 +71,31 @@ def _tensor_path_r5():
 
 def _read_sel(run, stage):
     return json.loads((Path(run) / "selection" / f"{stage}.json").read_text())
+
+
+def pick_epoch(per_epoch, floor):
+    """Kept epoch under the recipe rule: max val directional subject to val
+    stable >= floor; tie band then earliest epoch. All fail -> final epoch,
+    flagged (spec section 3)."""
+    ok = {e: v for e, v in per_epoch.items() if v[1] >= floor}
+    if not ok:
+        return max(per_epoch), True
+    best = max(v[0] for v in ok.values())
+    return min(e for e, v in ok.items() if best - v[0] <= TIE_BAND), False
+
+
+def _param_count(a):
+    from training.model import TrendCNN
+    m = TrendCNN(num_classes=5, channels=tuple(a["channels"]),
+                 in_channels=a["in_channels"], head=a["head"])
+    return sum(p.numel() for p in m.parameters())
+
+
+def pick_winner_r5(arms, means):
+    best = max(means.values())
+    order = [a["name"] for a in arms]
+    band = [a for a in arms if a["name"] in means
+            and best - means[a["name"]] <= TIE_BAND]
+    band.sort(key=lambda a: (_param_count(a), a["recipe"] != "base",
+                             order.index(a["name"])))
+    return band[0]

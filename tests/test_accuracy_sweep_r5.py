@@ -65,3 +65,40 @@ def test_tensor_path_is_r3_d5_and_refuses_if_missing(monkeypatch, tmp_path):
     t.mkdir()
     (t / "D5_none_s20261012.npz").write_bytes(b"x")
     assert _tensor_path_r5().name == "D5_none_s20261012.npz"
+
+
+def test_pick_epoch_floor_tieband_and_flag():
+    from experiments.accuracy_sweep_r5 import pick_epoch
+    floor = 0.50
+    per_epoch = {0: (0.54, 0.49),   # best directional but fails floor
+                 1: (0.530, 0.52),
+                 2: (0.5305, 0.51),  # inside 0.1pp band of epoch 3
+                 3: (0.5309, 0.51)}
+    # band is {2, 3}; earliest wins
+    assert pick_epoch(per_epoch, floor) == (2, False)
+    # every epoch fails the floor -> final epoch kept, flagged
+    assert pick_epoch({0: (0.6, 0.1), 1: (0.5, 0.2)}, floor) == (1, True)
+
+
+def test_param_count_matches_model_r5():
+    from experiments.accuracy_sweep_r5 import _param_count, arm_r5
+    assert _param_count(arm_r5("H_gap", "gap", "val")) == 42_725
+    assert _param_count(arm_r5("H_flat", "flat", "val")) == 50_645
+    assert _param_count(arm_r5("H_flat", "flat", "val")) <= 85_450
+
+
+def test_pick_winner_r5_tie_band_cost_then_order():
+    from experiments.accuracy_sweep_r5 import arm_r5, pick_winner_r5
+    gap = arm_r5("H_gap", "gap", "val")
+    flat = arm_r5("H_flat", "flat", "val")
+    # inside the band: cheaper head (gap) wins even listed second
+    w = pick_winner_r5([flat, gap], {"H_flat": 0.5305, "H_gap": 0.5300})
+    assert w["name"] == "H_gap"
+    # outside the band: argmax wins
+    w = pick_winner_r5([flat, gap], {"H_flat": 0.5320, "H_gap": 0.5300})
+    assert w["name"] == "H_flat"
+    # recipe base before val at equal params
+    base = arm_r5("R_base", "gap", "base")
+    val = arm_r5("R_val", "gap", "val")
+    w = pick_winner_r5([base, val], {"R_base": 0.5300, "R_val": 0.5305})
+    assert w["name"] == "R_base"
