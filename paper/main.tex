@@ -1366,8 +1366,12 @@ gate $-2$), and sits 0.25 points under its own float (gate 0.5). The
 disclosed-reused secondaries are descriptive and price the gain
 honestly: the held-out contrast is $-0.3$ $[-0.8, +0.1]$ and the
 temporal $+0.3$ $[-0.6, +1.2]$ --- both inside seed noise --- macro-F1
-trails everywhere (0.410 against 0.427 on RT-CGM), and never-trained
-PEDAP is a near-tie (0.539 against 0.541 directional). The win the
+trails everywhere (0.410 against 0.427 on RT-CGM), never-trained
+PEDAP is a near-tie (0.539 against 0.541 directional), and the
+stable-class cost on those secondaries exceeds the level the primary
+gates: held-out stable recall 0.436 against 0.459 ($-2.2$) and temporal
+0.499 against 0.520 ($-2.0$), with PEDAP's falling class down 6.4
+points (0.396 against 0.460) and rising down 3.1. The win the
 gates certify is small and endpoint-shaped, not uniform; it clears the
 pre-registered bar on the one cohort where no selection pressure was
 ever applied, and the candidate replaces the round-two pair under the
@@ -1622,10 +1626,12 @@ The results should be read with the following limitations in mind.
     and energy and memory were not measured. The remaining 101 matrix,
     confirmation-cohort, and delta-encoded artifacts were not
     device-timed but share one operator inventory and byte size with
-    the timed ones; the bundled delta pair passed on-device parity,
-    with a single live in-app session (100 inferences per model)
-    observing 0.080~ms float and 0.086~ms INT8 means --- an
-    observation, not a paired-protocol measurement.
+    the timed ones; earlier bundled pairs (delta-r1 and round-two)
+    passed on-device parity, with single live in-app sessions (100
+    inferences per model) observing means between 0.080 and 0.149~ms
+    --- observations, not paired-protocol measurements. The round-five
+    pair bundled at submission passed the simulator and JVM parity
+    suites bit-exactly; its own on-device run is pending.
     \item The application replays synthetic or locally extracted
     historical traces. It does not ingest a live sensor stream and has
     not undergone prospective, external, usability, or clinical
@@ -1680,8 +1686,10 @@ participant-level summaries remain local and regenerate from the
 committed runner with GlucoBench cloned; every published number
 regenerates from the cached predictions via one analysis command. After the study's publication within the repository,
 the bundled application artifacts were replaced by its seed-0 float and
-uniform-200 INT8 models, and later by the delta-encoded pair, with
-hashes and provenance recorded in the application's model manifest.
+uniform-200 INT8 models, later by the delta-encoded pair, then by the
+round-two sweep winner, and finally by the round-five flatten-head
+winner, with hashes and provenance recorded in the application's model
+manifest at each step.
 
 \subsection{Data availability and research-use scope}
 

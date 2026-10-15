@@ -393,6 +393,15 @@ def stage_evaluate(run_id):
     if not protocol_is_committed(PROTOCOL_R5):
         raise SystemExit("REFUSED: commit paper/results/calibration-coverage/"
                          "protocol_sweep_r5.json (clean) before evaluate")
+    frozen = json.loads(PROTOCOL_R5.read_text())["champion_sha256"]
+    champ = _champion_paths()
+    live = {k: _sha256(champ[k]) for k in ("float", "int8")}
+    if live != frozen:
+        raise SystemExit(
+            "REFUSED: live champion assets differ from the protocol's frozen "
+            "champion_sha256 - the baseline changed since freeze (post-ship "
+            "re-run?); the r5 read is spent and must not be re-evaluated "
+            "against the new pair")
     run = _run_dir(run_id)
     ident = identity_with_champion(run)
     (Path(run) / "eval").mkdir(parents=True, exist_ok=True)

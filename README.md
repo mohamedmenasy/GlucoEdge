@@ -254,19 +254,30 @@ directories) live in `paper/results/`.
 - **Accuracy sweep r2 (shipped):** training on the DiaData collection
   (five audited cohorts, 898 subjects, never a Weinstock training
   window) beat the bundled pair on held-out directional recall
-  (+0.60 points) within every gate, and is the bundled pair today —
-  device-verified the same day.
+  (+0.60 points) within every gate, and shipped — device-verified the
+  same day.
 - **Accuracy sweep r3 (no ship):** reopening the RT-CGM cohort and a
   time-of-day channel both lost in selection; a causal dilated TCN won
   it and beat the champion with the series' first fully positive
   directional CI (+0.77 points, CI [+0.09, +1.49]) — but broke the
   stable-recall floor (−4.4 vs a −2-point gate), so it was rejected and
-  the r2 pair stays. The full record, including a deviations block,
+  the r2 pair stayed. The full record, including a deviations block,
   is in `paper/results/calibration-coverage/accuracy_sweep_r3.json`.
+- **Accuracy sweep r4 (identity outcome):** every lever (objective
+  heads, robustness tricks, weight averaging) lost to the shipped-recipe
+  control on validation; the surviving candidate converted to a pair
+  sha256-identical to the bundled champion, so the confirmatory read
+  was skipped and no protected labels were spent.
+- **Accuracy sweep r5 (shipped):** a position-preserving flatten head
+  plus a cosine/best-epoch recipe beat the champion on validation, and
+  the confirmatory read moved to a zero-shot cohort with no prior reads
+  (RT-CGM, 12.67M windows, 355 participants): +0.20 directional-recall
+  points, CI fully positive [+0.11, +0.29], all three gates passed —
+  the current bundled pair. Known costs are stated in `MODELS.md`.
 
 ## The quantization tradeoff, measured
 
-**The bundled models have been replaced three times.** On 2026-10-10,
+**The bundled models have been replaced four times.** On 2026-10-10,
 first with the calibration-coverage study's seed-0 absolute-input
 artifacts (uniform random 200-window calibration instead of the
 toolchain-default first-200-sequential selection, whose under-coverage
@@ -275,10 +286,13 @@ then with the delta-encoded (anchor) models from the follow-up
 experiment: both clients feed the network 11 consecutive differences
 plus the last reading/16 (`DeltaEncoding` in Kotlin and Swift, pinned to
 Python by the golden vectors). On 2026-10-12, with the accuracy-sweep-r2
-winner — same delta encoding, same contract, but trained DiaData-only —
-which is the current bundled pair (held-out directional recall 0.523
-INT8 / 0.524 float; verified on the iPhone 18 Pro Max the day it
-shipped). Hashes and provenance: `android/app/src/main/assets/MODELS.md`.
+winner — same delta encoding, same contract, but trained DiaData-only
+(verified on the iPhone 18 Pro Max the day it shipped). On 2026-10-15,
+with the accuracy-sweep-r5 winner — same encoding and contract, a
+position-preserving flatten head — the current bundled pair (RT-CGM
+zero-shot directional recall 0.555 INT8 / 0.557 float; suite-verified at
+ship time, on-device verification pending). Hashes and provenance:
+`android/app/src/main/assets/MODELS.md`.
 The table below records the HISTORICAL artifacts' numbers — the measured
 collapse that motivated the study — on the historical test split and
 devices:

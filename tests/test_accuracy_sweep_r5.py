@@ -305,10 +305,40 @@ def test_evaluate_refuses_without_committed_protocol(monkeypatch):
         r5.stage_evaluate("sweep-r5-test")
 
 
+def _freeze_champion(r5, tmp_path, monkeypatch, drifted=False):
+    """Protocol pins champion shas; optionally drift the live assets."""
+    champ_f = tmp_path / "champ_float.tflite"
+    champ_i = tmp_path / "champ_int8.tflite"
+    champ_f.write_bytes(b"F")
+    champ_i.write_bytes(b"I")
+    proto = tmp_path / "protocol_sweep_r5.json"
+    proto.write_text(json.dumps({"champion_sha256": {
+        "float": "f67ab10ad4e4c53121b6a5fe4da9c10ddee905b978d3788d2723d7bfacbe28a9",
+        "int8": "a83dd0ccbffe39d071cc317ddf6e97f5c6b1c87af91919271f9fa140b0508c6c"}}))
+    if drifted:
+        champ_f.write_bytes(b"POST-SHIP BYTES")
+    monkeypatch.setattr(r5, "PROTOCOL_R5", proto)
+    monkeypatch.setattr(r5, "_champion_paths",
+                        lambda: {"float": champ_f, "int8": champ_i})
+
+
+def test_evaluate_refuses_when_champion_drifted_from_protocol(tmp_path, monkeypatch):
+    """Post-ship rerun: live champion is the r5 winner itself; evaluating
+    against it would publish a false identity record. Must refuse."""
+    import experiments.accuracy_sweep_r5 as r5
+    monkeypatch.setattr(r5, "protocol_is_committed", lambda p: True)
+    monkeypatch.setattr(r5, "_run_dir", lambda rid: str(tmp_path))
+    _freeze_champion(r5, tmp_path, monkeypatch, drifted=True)
+    with pytest.raises(SystemExit, match="champion"):
+        r5.stage_evaluate("sweep-r5-test")
+    assert not (tmp_path / "eval").exists()
+
+
 def test_evaluate_identity_skips_the_read(tmp_path, monkeypatch):
     import experiments.accuracy_sweep_r5 as r5
     monkeypatch.setattr(r5, "protocol_is_committed", lambda p: True)
     monkeypatch.setattr(r5, "_run_dir", lambda rid: str(tmp_path))
+    _freeze_champion(r5, tmp_path, monkeypatch)
     monkeypatch.setattr(r5, "identity_with_champion", lambda run: {
         "identical": True, "candidate_float_sha256": "x",
         "candidate_int8_sha256": "y", "champion_float_sha256": "x",

@@ -31,8 +31,12 @@ within 0.25 pp of its own float. All three frozen gates passed. Known
 cost, stated plainly: macro-F1 trails (0.410 vs 0.427 on RT-CGM, 0.342
 vs 0.364 held-out), the reused held-out descriptive contrast is
 −0.3 pp [−0.8, +0.1], and never-trained PEDAP is a near-tie (0.539 vs
-0.541) — the certified gain is small and lives on the one cohort where
-no selection pressure was ever applied.
+0.541). On the non-gating secondaries the stable-class cost exceeds the
+level that gates the primary: held-out stable recall 0.436 vs 0.459
+(−2.2 pp) and temporal 0.499 vs 0.520 (−2.0 pp), and on PEDAP the
+`falling` class drops 6.4 pp (0.396 vs 0.460) and `rising` 3.1 pp —
+the certified gain is small and lives on the one cohort where no
+selection pressure was ever applied.
 
 | file | sha256 | bytes |
 |---|---|---|
