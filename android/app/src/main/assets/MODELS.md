@@ -46,9 +46,13 @@ selection pressure was ever applied.
 Verification state: verified at ship time (2026-10-15) on the Android
 JVM suite (39/39) and the iOS simulator suite (51 tests in 13 suites,
 golden parity included — both bundled files hash-match the goldens and
-the INT8 outputs are bit-exact against the Python record). On-device
-verification on the iPhone 18 Pro Max: PENDING (device offline at ship
-time; this line is updated when the device run lands).
+the INT8 outputs are bit-exact against the Python record). Device-verified
+the same day on the iPhone 18 Pro Max (iOS 27.0.1): the full suite — 51
+tests in 13 suites — passed on device, including golden parity
+(`bundledModelsMatchGoldenHashes`, float logits match Python, INT8
+bit-exact). No live in-app latency session has been recorded for this
+pair yet (the r2 numbers below are the latest on-device latency
+observations).
 
 The SWEEP-R2 pair these bytes replace — float `96eef43c…` (177,336
 bytes), INT8 `a887ea4e…` (55,216 bytes); held-out directional recall

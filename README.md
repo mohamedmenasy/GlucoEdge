@@ -290,8 +290,8 @@ winner — same delta encoding, same contract, but trained DiaData-only
 (verified on the iPhone 18 Pro Max the day it shipped). On 2026-10-15,
 with the accuracy-sweep-r5 winner — same encoding and contract, a
 position-preserving flatten head — the current bundled pair (RT-CGM
-zero-shot directional recall 0.555 INT8 / 0.557 float; suite-verified at
-ship time, on-device verification pending). Hashes and provenance:
+zero-shot directional recall 0.555 INT8 / 0.557 float; device-verified
+on the iPhone 18 Pro Max the day it shipped). Hashes and provenance:
 `android/app/src/main/assets/MODELS.md`.
 The table below records the HISTORICAL artifacts' numbers — the measured
 collapse that motivated the study — on the historical test split and

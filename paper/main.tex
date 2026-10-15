@@ -1631,7 +1631,9 @@ The results should be read with the following limitations in mind.
     inferences per model) observing means between 0.080 and 0.149~ms
     --- observations, not paired-protocol measurements. The round-five
     pair bundled at submission passed the simulator and JVM parity
-    suites bit-exactly; its own on-device run is pending.
+    suites bit-exactly, and the same suite passed on the iPhone 18 Pro
+    Max on ship day (51 tests, golden parity included); no live in-app
+    latency session has been recorded for it.
     \item The application replays synthetic or locally extracted
     historical traces. It does not ingest a live sensor stream and has
     not undergone prospective, external, usability, or clinical
