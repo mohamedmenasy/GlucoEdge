@@ -442,3 +442,177 @@ def stage_evaluate(run_id):
         if not p.exists():
             np.save(p, _tflite_logits(path, w).argmax(axis=1))
             print(f"pedap/{name} evaluated")
+
+
+def gate_results_r5(y, pids, cand_int8, cand_float, champ_int8, n_boot=2000):
+    import experiments.analyze_calibration_coverage as acc
+    contrast = acc.paired_cluster_bootstrap(
+        y, pids, [(cand_int8, champ_int8)], metric=directional_recall,
+        n_boot=n_boot, seed=BOOT_SEED_R5)
+    ci_low = contrast["ci95"][0] if contrast["ci95"] else None
+    d_float = directional_recall(acc.confusion_counts(y, cand_float))
+    d_int8 = directional_recall(acc.confusion_counts(y, cand_int8))
+    s_cand = stable_recall(acc.confusion_counts(y, cand_int8))
+    s_champ = stable_recall(acc.confusion_counts(y, champ_int8))
+    return {
+        "contrast_int8_vs_champion": contrast,
+        "candidate_float_directional": d_float,
+        "candidate_int8_directional": d_int8,
+        "champion_int8_directional": directional_recall(
+            acc.confusion_counts(y, champ_int8)),
+        "candidate_int8_stable": s_cand,
+        "champion_int8_stable": s_champ,
+        "gate1_beats_champion": bool(contrast["delta"] is not None
+                                     and contrast["delta"] > 0
+                                     and ci_low is not None
+                                     and ci_low > -0.005),
+        "gate2_stable_floor": bool(s_cand >= s_champ - FLOOR_MARGIN_R5),
+        "gate3_int8_within_half_pp_of_float": bool(d_float - d_int8 <= 0.005),
+    }
+
+
+def stage_protocol(run_id):
+    """Draft the pre-registration; the user commits it (clean) before any
+    RT-CGM label read - stage_evaluate enforces the commit."""
+    run = _run_dir(run_id)
+    champ = _champion_paths()
+    base_arm = arm_r5("R_base", "gap", "base")
+    out = {
+        "round": "r5",
+        "spec": "docs/superpowers/specs/2026-10-14-accuracy-sweep-r5-design.md",
+        "boot_seed": BOOT_SEED_R5, "n_boot": 2000,
+        "champion_sha256": {k: _sha256(v) for k, v in champ.items()},
+        "r_base_alias_sha256": {str(s): _sha256(_ckpt_r5(run, base_arm, s))
+                                for s in ARM_SEEDS_R5},
+        "selection_trail": {s: _read_sel(run, s) for s in ("R", "H", "S")},
+        "smoke": json.loads((Path(run) / "smoke.json").read_text()),
+        "primary_endpoint": (
+            "RT-CGM zero-shot directional recall: winner uniform INT8 vs "
+            "shipped champion INT8, paired on identical eligible windows, "
+            "participant-cluster bootstrap, 2000 draws"),
+        "gates": [
+            "gate1: directional delta > 0 AND 95% CI lower bound > -0.5pp",
+            "gate2: winner INT8 stable recall >= champion INT8 stable - 2.0pp",
+            "gate3: winner INT8 within 0.5pp of its own float (directional)"],
+        "secondary_disclosed_reused": (
+            "weinstock held-out (3 prior confirmatory reads) and temporal: "
+            "descriptive only; macro-F1 all splits; PEDAP zero-shot "
+            "descriptive. None gate."),
+        "calibration": ("sequential_200_d0 + uniform_random_200_d101 from "
+                        "weinstock train only; uniform INT8 is the ship "
+                        "candidate"),
+        "disclosure": DISCLOSURE_RTCGM,
+        "selection_rule_changes_vs_r3": [
+            "selection floor aligned to Gate 2: champion val stable - 2pp "
+            "(r3 used -5pp at selection)",
+            "tie band 0.1pp -> cost_key -> list order applied at every "
+            "selection including Stage S and the kept-epoch pick "
+            "(r3 Stage S used strict argmax)"],
+        "identity_guard": ("candidate float AND uniform INT8 sha256-identical "
+                           "to the shipped pair -> confirmatory read skipped, "
+                           "identity outcome published (r4 lesson)"),
+        "prediction": ("flatten head wins val selection and transfers: "
+                       "positive directional delta on RT-CGM with CI lower "
+                       "bound above -0.5pp, stable within 2pp"),
+    }
+    _write_json(PROTOCOL_R5, out)
+    print("wrote", PROTOCOL_R5, "- commit it (clean) before stage evaluate")
+    return out
+
+
+def _analyze_identity(run_id, run):
+    run = Path(run)
+    out = {"protocol": "paper/results/calibration-coverage/protocol_sweep_r5.json",
+           "run_id": run_id,
+           "selection_trail": {s: _read_sel(run, s) for s in ("R", "H", "S")
+                               if (run / "selection" / f"{s}.json").exists()},
+           "identity_outcome": json.loads(
+               (run / "eval" / "identity.json").read_text())}
+    if (run / "smoke.json").exists():
+        out["smoke"] = json.loads((run / "smoke.json").read_text())
+    out["ship"] = {"all_gates_pass": False,
+                   "outcome": "identity outcome: candidate converts "
+                              "sha256-identical to the shipped champion; "
+                              "no confirmatory read performed, RT-CGM "
+                              "labels unspent"}
+    out["deviations"] = list(DEVIATIONS_R5)
+    (run / "analysis").mkdir(exist_ok=True)
+    _write_json(run / "analysis" / "sweep_r5_aggregate.json", out)
+    print("wrote", run / "analysis" / "sweep_r5_aggregate.json", "(identity flow)")
+    return out
+
+
+def stage_analyze(run_id, n_boot=2000):
+    from experiments.analyze_calibration_coverage import confusion_counts, macro_f1
+    from training.labeling import FIVE_CLASSES
+    run = _run_dir(run_id)
+    if (Path(run) / "eval" / "identity.json").exists():
+        return _analyze_identity(run_id, run)
+    best_seed = _read_sel(run, "S")["best_seed"]
+    out = {"protocol": "paper/results/calibration-coverage/protocol_sweep_r5.json",
+           "run_id": run_id,
+           "selection_trail": {s: _read_sel(run, s) for s in ("R", "H", "S")},
+           "smoke": json.loads((Path(run) / "smoke.json").read_text()),
+           "reused_tensor": _tensor_path_r5().name,
+           "components": {}}
+    # primary: RT-CGM (gates live here and only here)
+    base = Path(run) / "eval" / "rtcgm"
+    meta = np.load(base / "meta.npz")
+    y, pids = meta["y"], meta["pids"]
+    cand_int8 = np.load(base / "winner_int8_preds.npy")
+    cand_float = np.load(base / "winner_float_preds.npy")
+    champ = np.load(base / "champion_int8_preds.npy")
+    out["components"]["rtcgm_primary"] = {
+        "windows": int(len(y)),
+        "participants": int(len(np.unique(pids))),
+        "pairing_rule": "identical eligible windows by construction",
+        "macro_f1_candidate_int8": macro_f1(confusion_counts(y, cand_int8)),
+        "macro_f1_champion_int8": macro_f1(confusion_counts(y, champ)),
+        "gates": gate_results_r5(y, pids, cand_int8, cand_float, champ,
+                                 n_boot=n_boot),
+        "disclosure": DISCLOSURE_RTCGM,
+    }
+    # secondary: weinstock held-out/temporal, descriptive (non-gating)
+    for comp in ("held_out", "temporal"):
+        cbase = Path(run) / "eval" / comp
+        cmeta = json.loads((cbase / "meta.json").read_text())
+        cy = np.array(cmeta["labels"])
+        cpids = np.array(cmeta["participants"])
+        ci8 = np.load(cbase / "winner_int8_preds.npy")
+        cfl = np.load(cbase / "winner_float_preds.npy")
+        cch = np.load(cbase / "champion_int8_preds.npy")
+        out["components"][comp] = {
+            "descriptive_non_gating": True,
+            "windows": int(len(cy)),
+            "macro_f1_candidate_int8": macro_f1(confusion_counts(cy, ci8)),
+            "macro_f1_champion_int8": macro_f1(confusion_counts(cy, cch)),
+            "contrast": gate_results_r5(cy, cpids, ci8, cfl, cch,
+                                        n_boot=n_boot),
+        }
+    # secondary: PEDAP descriptive
+    pbase = Path(run) / "eval" / "pedap"
+    pmeta = np.load(pbase / "meta.npz")
+    py = pmeta["y"]
+    ped = {}
+    for name in ("winner_int8", "champion_int8"):
+        cm = confusion_counts(py, np.load(pbase / f"{name}_preds.npy"))
+        ped[name] = {"directional": directional_recall(cm),
+                     "stable": stable_recall(cm),
+                     "per_class": {c: float(cm[i, i] / cm[i].sum())
+                                   if cm[i].sum() else 0.0
+                                   for i, c in enumerate(FIVE_CLASSES)}}
+    out["pedap_zero_shot"] = {"windows": int(len(py)), **ped,
+                              "note": "descriptive; no gates; cohort never "
+                                      "trained on"}
+    g = out["components"]["rtcgm_primary"]["gates"]
+    out["ship"] = {
+        "candidate": f"seed {best_seed}",
+        "all_gates_pass": bool(g["gate1_beats_champion"]
+                               and g["gate2_stable_floor"]
+                               and g["gate3_int8_within_half_pp_of_float"]),
+    }
+    out["deviations"] = list(DEVIATIONS_R5)
+    (Path(run) / "analysis").mkdir(exist_ok=True)
+    _write_json(Path(run) / "analysis" / "sweep_r5_aggregate.json", out)
+    print("wrote", Path(run) / "analysis" / "sweep_r5_aggregate.json")
+    return out

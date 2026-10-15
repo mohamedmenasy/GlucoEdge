@@ -321,3 +321,81 @@ def test_evaluate_identity_skips_the_read(tmp_path, monkeypatch):
     assert json.loads((tmp_path / "eval" / "identity.json").read_text())[
         "identical"] is True
     assert not (tmp_path / "eval" / "rtcgm").exists()
+
+
+def test_gates_r5_boot_seed_and_none_ci(monkeypatch):
+    import experiments.accuracy_sweep_r5 as r5
+    captured = {}
+
+    def fake_boot(y, pids, pairs, metric, n_boot, seed):
+        captured["seed"] = seed
+        return {"delta": 0.01, "ci95": None, "undefined_fraction": 0.2,
+                "n_boot": n_boot, "seed": seed}
+    import experiments.analyze_calibration_coverage as acc
+    monkeypatch.setattr(acc, "paired_cluster_bootstrap", fake_boot)
+    y = np.array([0, 1, 2, 3, 4] * 4)
+    pids = np.array(["a", "b"] * 10)
+    g = r5.gate_results_r5(y, pids, y.copy(), y.copy(), y.copy(), n_boot=7)
+    assert captured["seed"] == r5.BOOT_SEED_R5 == 20261015
+    assert g["gate1_beats_champion"] is False  # undefined CI never passes
+
+
+def test_gates_r5_pass_case(monkeypatch):
+    import experiments.accuracy_sweep_r5 as r5
+    import experiments.analyze_calibration_coverage as acc
+    monkeypatch.setattr(acc, "paired_cluster_bootstrap",
+                        lambda *a, **k: {"delta": 0.008,
+                                         "ci95": [0.001, 0.015],
+                                         "undefined_fraction": 0.0,
+                                         "n_boot": k.get("n_boot"),
+                                         "seed": k.get("seed")})
+    y = np.array([0, 1, 2, 3, 4] * 4)
+    pids = np.array(["a", "b"] * 10)
+    g = r5.gate_results_r5(y, pids, y.copy(), y.copy(), y.copy())
+    assert g["gate1_beats_champion"] is True
+    assert g["gate2_stable_floor"] is True
+    assert g["gate3_int8_within_half_pp_of_float"] is True
+
+
+def test_analyze_identity_flow(tmp_path, monkeypatch):
+    import experiments.accuracy_sweep_r5 as r5
+    monkeypatch.setattr(r5, "_run_dir", lambda rid: str(tmp_path))
+    (tmp_path / "selection").mkdir()
+    for s in ("R", "H"):
+        (tmp_path / "selection" / f"{s}.json").write_text(json.dumps(
+            {"stage": s, "winner": r5.arm_r5("R_base", "gap", "base")}))
+    (tmp_path / "selection" / "S.json").write_text(json.dumps(
+        {"stage": "S", "winner": r5.arm_r5("R_base", "gap", "base"),
+         "best_seed": 1}))
+    (tmp_path / "smoke.json").write_text(json.dumps({"frozen_batch": 512}))
+    (tmp_path / "eval").mkdir()
+    (tmp_path / "eval" / "identity.json").write_text(json.dumps(
+        {"identical": True, "candidate_int8_sha256": "y"}))
+    out = r5.stage_analyze("sweep-r5-test")
+    assert out["ship"]["all_gates_pass"] is False
+    assert "identity" in out["ship"]["outcome"]
+    assert "components" not in out
+    assert (tmp_path / "analysis" / "sweep_r5_aggregate.json").exists()
+
+
+def test_protocol_has_no_row_level_fields(tmp_path, monkeypatch):
+    import experiments.accuracy_sweep_r5 as r5
+    monkeypatch.setattr(r5, "_run_dir", lambda rid: str(tmp_path))
+    monkeypatch.setattr(r5, "PROTOCOL_R5", tmp_path / "protocol_sweep_r5.json")
+    monkeypatch.setattr(r5, "_champion_paths", lambda: {
+        "float": tmp_path / "cf", "int8": tmp_path / "ci"})
+    (tmp_path / "cf").write_bytes(b"F")
+    (tmp_path / "ci").write_bytes(b"I")
+    monkeypatch.setattr(r5, "_ckpt_r5",
+                        lambda run, a, s: tmp_path / "cf")  # alias sha stub
+    (tmp_path / "selection").mkdir()
+    for s, extra in (("R", {}), ("H", {}), ("S", {"best_seed": 2})):
+        (tmp_path / "selection" / f"{s}.json").write_text(json.dumps(
+            {"stage": s, "winner": r5.arm_r5("H_gap", "gap", "val"), **extra}))
+    (tmp_path / "smoke.json").write_text(json.dumps({"frozen_batch": 512}))
+    out = r5.stage_protocol("sweep-r5-test")
+    blob = (tmp_path / "protocol_sweep_r5.json").read_text()
+    for pat in ('"participants"', '"keys"', '"pids"', '"anchor_times"'):
+        assert pat not in blob
+    assert out["boot_seed"] == 20261015
+    assert "disclosure" in out and "D_rtcgm" in out["disclosure"]
