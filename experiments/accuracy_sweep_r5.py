@@ -228,3 +228,67 @@ def stage_smoke(run_id):
     """Batch freeze + same-seed bit-reproduction record, r2 recipe."""
     from experiments.accuracy_sweep_r2 import stage_smoke as smoke_r2
     smoke_r2(run_id)
+
+
+def _flag_for(run, a, seed):
+    """True if the seed's sidecar says every epoch failed the floor."""
+    side = _ckpt_r5(run, a, seed).with_suffix(".json")
+    if not side.exists():
+        return False  # reuse cells have no r5 sidecar
+    return bool(json.loads(side.read_text()).get("epoch_floor_flagged", False))
+
+
+def _select(run, stage, arms):
+    champ = champion_val_stats(run)
+    floor = champ["stable"] - FLOOR_MARGIN_R5
+    table, means = {}, {}
+    for a in arms:
+        per_seed = {str(s): _val_stats_r5(run, a, s) for s in ARM_SEEDS_R5}
+        flags = {str(s): _flag_for(run, a, s) for s in ARM_SEEDS_R5}
+        dir_mean = float(np.mean([v[0] for v in per_seed.values()]))
+        stab_mean = float(np.mean([v[1] for v in per_seed.values()]))
+        dq = stab_mean < floor
+        table[a["name"]] = {
+            "per_seed": {s: {"directional": v[0], "stable": v[1],
+                             "epoch_floor_flagged": flags[s]}
+                         for s, v in per_seed.items()},
+            "mean_directional": dir_mean, "mean_stable": stab_mean,
+            "disqualified": bool(dq)}
+        if not dq:
+            means[a["name"]] = dir_mean
+    if not means:
+        raise SystemExit("REFUSED: every arm failed the stable-recall "
+                         "disqualifier; no winner can be selected")
+    winner = pick_winner_r5(arms, means)
+    out = {"stage": stage, "champion_val": champ, "stable_floor": floor,
+           "table": table, "winner": winner}
+    sel = Path(run) / "selection"
+    sel.mkdir(parents=True, exist_ok=True)
+    _write_json(sel / f"{stage}.json", out)
+    print(json.dumps({k: out[k] for k in out if k != "table"}, indent=1))
+    return out
+
+
+def stage_select(run_id, stage):
+    from experiments.accuracy_sweep_r4 import best_seed_r4
+    run = _run_dir(run_id)
+    if stage in ("R", "H"):
+        return _select(run, stage, _arms_for(run, stage))
+    if stage != "S":
+        raise SystemExit(f"unknown stage {stage}")
+    a = _read_sel(run, "H")["winner"]
+    champ = champion_val_stats(run)
+    floor = champ["stable"] - FLOOR_MARGIN_R5
+    per_seed = {str(s): _val_stats_r5(run, a, s) for s in ARM_SEEDS_R5}
+    flags = {str(s): _flag_for(run, a, s) for s in ARM_SEEDS_R5}
+    best_seed = best_seed_r4(per_seed, floor)  # tie band + lowest seed
+    out = {"stage": "S", "champion_val": champ, "stable_floor": floor,
+           "table": {"per_seed": {s: {"directional": v[0], "stable": v[1],
+                                      "epoch_floor_flagged": flags[s]}
+                                  for s, v in per_seed.items()}},
+           "best_seed": int(best_seed),
+           "winner": dict(a, ensemble=False)}
+    (Path(run) / "selection").mkdir(parents=True, exist_ok=True)
+    _write_json(Path(run) / "selection" / "S.json", out)
+    print(json.dumps({k: out[k] for k in out if k != "table"}, indent=1))
+    return out

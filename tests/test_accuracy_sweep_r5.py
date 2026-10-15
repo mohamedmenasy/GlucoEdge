@@ -177,3 +177,61 @@ def test_train_one_r5_val_recipe_keeps_selected_epoch(tmp_path, monkeypatch):
           / f"epoch{side['kept_epoch']:02d}.pt")
     kept = torch.load(ep, map_location="cpu", weights_only=True)
     assert all(torch.equal(obj["state_dict"][k], kept[k]) for k in kept)
+
+
+def _fake_stats(stats):
+    """stats: {(arm_name, seed): (dir, stable)}"""
+    def f(run, a, seed):
+        return stats[(a["name"], seed)]
+    return f
+
+
+def test_select_floor_is_2pp_and_tie_prefers_cheap(tmp_path, monkeypatch):
+    import experiments.accuracy_sweep_r5 as r5
+    monkeypatch.setattr(r5, "champion_val_stats",
+                        lambda run: {"directional": 0.533, "stable": 0.5485})
+    # R_val mean stable sits between -2pp and -5pp below champion: with the
+    # r5 floor it is DISQUALIFIED (under r3's -5pp it would have survived)
+    stats = {("R_base", s): (0.530, 0.548) for s in range(5)}
+    stats.update({("R_val", s): (0.540, 0.520) for s in range(5)})  # -2.85pp
+    monkeypatch.setattr(r5, "_val_stats_r5", _fake_stats(stats))
+    monkeypatch.setattr(r5, "_flag_for", lambda run, a, seed: False)
+    monkeypatch.setattr(r5, "_run_dir", lambda rid: str(tmp_path))
+    out = r5.stage_select("sweep-r5-test", "R")
+    assert out["stable_floor"] == pytest.approx(0.5485 - 0.02)
+    assert out["table"]["R_val"]["disqualified"] is True
+    assert out["winner"]["name"] == "R_base"
+
+
+def test_select_all_dq_refuses(tmp_path, monkeypatch):
+    import experiments.accuracy_sweep_r5 as r5
+    monkeypatch.setattr(r5, "champion_val_stats",
+                        lambda run: {"directional": 0.533, "stable": 0.5485})
+    stats = {(n, s): (0.54, 0.40) for n in ("R_base", "R_val") for s in range(5)}
+    monkeypatch.setattr(r5, "_val_stats_r5", _fake_stats(stats))
+    monkeypatch.setattr(r5, "_flag_for", lambda run, a, seed: False)
+    monkeypatch.setattr(r5, "_run_dir", lambda rid: str(tmp_path))
+    with pytest.raises(SystemExit, match="REFUSED"):
+        r5.stage_select("sweep-r5-test", "R")
+
+
+def test_stage_s_tie_band_and_floor(tmp_path, monkeypatch):
+    import experiments.accuracy_sweep_r5 as r5
+    monkeypatch.setattr(r5, "champion_val_stats",
+                        lambda run: {"directional": 0.533, "stable": 0.5485})
+    (tmp_path / "selection").mkdir(parents=True)
+    (tmp_path / "selection" / "H.json").write_text(json.dumps(
+        {"winner": r5.arm_r5("H_flat", "flat", "val")}))
+    # seeds 1 and 2 inside the 0.1pp band: lowest seed wins (r3's deviation
+    # would have argmaxed to seed 2); seed 0 fails the per-seed floor
+    stats = {("H_flat", 0): (0.560, 0.500),
+             ("H_flat", 1): (0.5366, 0.536),
+             ("H_flat", 2): (0.5367, 0.526),
+             ("H_flat", 3): (0.530, 0.54),
+             ("H_flat", 4): (0.531, 0.53)}
+    monkeypatch.setattr(r5, "_val_stats_r5", _fake_stats(stats))
+    monkeypatch.setattr(r5, "_flag_for", lambda run, a, seed: seed == 4)
+    monkeypatch.setattr(r5, "_run_dir", lambda rid: str(tmp_path))
+    out = r5.stage_select("sweep-r5-test", "S")
+    assert out["best_seed"] == 1
+    assert out["table"]["per_seed"]["4"]["epoch_floor_flagged"] is True
