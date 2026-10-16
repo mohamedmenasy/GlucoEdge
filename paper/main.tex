@@ -763,9 +763,6 @@ parity tests run 20 synthetic golden windows through Python, Kotlin, and
 Swift and verify each bundled artifact's SHA-256 hash.
 Appendix~\ref{app:calibdetails} gives both protocols.
 
-% ==== WRITER-A owns the Experimental Protocol paragraphs above ====
-%
-% ==== WRITER-B: insert \subsection{Accuracy sweep protocol} below ====
 \subsection{Accuracy sweep protocol}
 \label{sec:sweepprotocol}
 
@@ -861,7 +858,6 @@ contrast compares one candidate artifact, the best validation seed, with
 one champion artifact: the interval resamples participants, is
 conditional on both fitted models, and carries no training-seed
 variation.
-% ==== end of WRITER-B sweep-protocol slot ====
 
 \section{Results: Calibration Coverage}
 
@@ -1277,11 +1273,6 @@ latency cost on this phone, and INT8 is slower than float in every arm
 ($+0.64$ to $+0.70~\mu$s), as expected of a graph that adds quantize and
 dequantize steps to the same float convolutions.
 
-% ==== WRITER-A region ends above (moved Deployment costs go above) ====
-%
-%
-% ==== WRITER-B region starts below ====
-
 \section{Results: Staged Accuracy Sweeps}
 \label{sec:sweepresults}
 
@@ -1554,11 +1545,6 @@ with an operating-point shift from the slow to the fast classes rather
 than better discrimination. Full record: \path{accuracy_sweep_r5.json};
 PEDAP per-class detail: \path{panel_revision_r1.json}.
 
-% ==== WRITER-B region ends above ====
-%
-%
-% ==== WRITER-A region starts below ====
-
 \section{Discussion}
 
 \subsection{Input-range coverage, not sample count}
@@ -1640,9 +1626,6 @@ artifact's input range fits the population, and validates neither the
 labels, the cohort split, probability calibration, clinical safety, nor
 usefulness to a person with diabetes.
 
-% ==== WRITER-A owns the Discussion subsections above ====
-%
-% ==== WRITER-B: insert \subsection{What the sweeps show} below ====
 \subsection{What the sweeps show}
 \label{sec:sweepdiscussion}
 
@@ -1700,7 +1683,6 @@ other three directional classes the $\geq$250~\mgdl\ band is lowest
 (0.38, 0.44). These figures describe a
 research classifier on retrospective data; they are not evidence about
 how a person would use its output.
-% ==== end of WRITER-B sweep-discussion slot ====
 
 \section{Limitations}
 \label{sec:limitations}
@@ -1972,7 +1954,6 @@ medical device.
 
 \section{Provenance and Revision History}
 \label{app:history}
-% ==== WRITER-A: appendix content below ====
 
 \subsection{Bundled artifacts over time}
 
@@ -2071,13 +2052,8 @@ Golden vectors passed & 20/20 & 20/20 \\
 \bottomrule
 \end{tabular}
 \end{table}
-% ==== end of WRITER-A appendix ====
-%
-%
-%
 \section{Cohorts, Model Variants, and Held-Out Read Ledger}
 \label{app:cohorts}
-% ==== WRITER-B: appendix content below ====
 Table~\ref{tab:cohorts} characterizes every cohort used in this work,
 Table~\ref{tab:variants} the model variants bundled at some point, and
 Table~\ref{tab:readledger} every analysis that read held-out, temporal
@@ -2200,7 +2176,6 @@ Date & Analysis & Labels read & Decision taken \\
 \end{tabular}
 \end{table*}
 \endgroup
-% ==== end of WRITER-B appendix ====
 
 \section{Additional Calibration-Study Details}
 \label{app:calibdetails}
