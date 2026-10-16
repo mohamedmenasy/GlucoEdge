@@ -84,10 +84,11 @@ Sources: `paper/results/calibration-coverage/accuracy_sweep_r5.json` (components
 (0.611).
 
 The RT-CGM gain compares one seed-4 artifact with one champion artifact. It is
-smaller than the 1.1-point five-seed held-out spread seen in round three
-(`accuracy_sweep_r3.json`), and the five-seed RT-CGM comparison of the two recipes
-was not run. On both Weinstock components the model would fail the
-beat-the-champion and stable-floor gates. Golden vectors pin float logits to within
+smaller than the 1.1-point spread of round three's five seeds (float, Weinstock
+held-out; `accuracy_sweep_r3.json`); round five's own seed spread on RT-CGM was not
+measured, because the five-seed RT-CGM comparison of the two recipes was not run.
+On both Weinstock components the model would fail the beat-the-champion and
+stable-floor gates. Golden vectors pin float logits to within
 1e-5 of Python and INT8 outputs bit-exactly in the Android unit tests, the iOS
 simulator, and on an iPhone 18 Pro Max (`MODELS.md`).
 
@@ -103,7 +104,7 @@ From the confusion matrices in `panel_revision_r1.json` (`shipped_model`):
 - **Over-calling the fast classes.** 36% of truly `falling` held-out windows are
   labelled `falling_fast` (27% on RT-CGM), and 28% of truly `rising` windows are
   labelled `rising_fast` (19%).
-- **Direction reversals.** 13.9% of truly falling held-out windows (either falling
+- **Direction reversals.** 13.8% of truly falling held-out windows (either falling
   class) are labelled `rising` or `rising_fast`, and 15.1% of truly rising windows
   are labelled `falling` or `falling_fast` (8.6% and 8.8% on RT-CGM).
 - **Low glucose.** When the last reading is below 70 mg/dL, `falling` recall is
