@@ -144,7 +144,7 @@ with the LaTeX sources in an arXiv submission.
   available at <https://github.com/mohamedmenasy/GlucoEdge>.
 
 Before submission, confirm the author name, email, affiliation, category, and
-license in the arXiv form, and complete the funding, competing-interest, and
-CRediT declarations flagged in the draft. The manuscript deliberately labels
+license in the arXiv form. The funding, competing-interest, and CRediT
+declarations follow the Conclusion. The manuscript deliberately labels
 the system as a research engineering demonstration and documents the current
 evaluation limitations; it does not make a medical-device or treatment claim.

@@ -136,7 +136,8 @@ From the confusion matrices in `panel_revision_r1.json` (`shipped_model`):
 ## Licence and contact
 
 - The weights derive from DiaData v3 (doi:10.5281/zenodo.17285631), released under
-  CC BY-NC 4.0, and are released for **non-commercial research use only**. Some
+  CC BY-NC 4.0, and are released under CC BY-NC 4.0 (`LICENSE-MODELS`) for
+  **non-commercial research use only**; the code is MIT (`LICENSE`). Some
   DiaData cohorts originate from the Barbara Davis Center, Jaeb Center for Health
   Research, Joslin Diabetes Center, T1D Exchange, University of Colorado, and
   University of Virginia; this model and its evaluation have not been reviewed or

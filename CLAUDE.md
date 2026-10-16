@@ -5,8 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project
 
 GlucoEdge is a portfolio project: an on-device glucose trend classifier for
-Android and iOS, built entirely on the public [GlucoBench](https://github.com/IrinaStatsLab/GlucoBench)
-CGM research benchmark. **Not a medical device** — no proprietary data,
+Android and iOS, built on public CGM research data: the [GlucoBench](https://github.com/IrinaStatsLab/GlucoBench)
+benchmark and the DiaData v3 collection (CC BY-NC 4.0), which trains the
+bundled models. **Not a medical device** — no proprietary data,
 schemas, or algorithms belong in this repo, and no code, comment, or output
 string should imply clinical validity or treatment guidance.
 

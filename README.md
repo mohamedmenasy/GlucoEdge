@@ -6,13 +6,14 @@ inference, latency), **not a medical device**. It does not diagnose,
 monitor, or advise on diabetes management, and none of its outputs should
 be used to make treatment decisions.
 
-Built entirely on [GlucoBench](https://github.com/IrinaStatsLab/GlucoBench),
-a public academic CGM research benchmark — no proprietary data, schemas,
-or algorithms.
-Optional second source: [DiaData v3](https://zenodo.org/records/17285631)
-(integrated T1D CGM collection, CC BY-NC 4.0) — external sibling
-directory like GlucoBench, never committed; see the audit records in
-`paper/results/diadata_audit_r1.json` and
+Built on public CGM research data — no proprietary data, schemas, or
+algorithms: [GlucoBench](https://github.com/IrinaStatsLab/GlucoBench), a
+public academic CGM research benchmark, and
+[DiaData v3](https://zenodo.org/records/17285631) (integrated T1D CGM
+collection, CC BY-NC 4.0). The bundled models are trained on DiaData
+cohorts, so their weights are CC BY-NC 4.0 too (see [License](#license)).
+Both sources are external sibling directories, never committed; DiaData's
+audit records are `paper/results/diadata_audit_r1.json` and
 `paper/results/diadata_audit_r2.json`.
 
 <p align="center">
@@ -243,22 +244,24 @@ Published aggregates (and only aggregates — no participant IDs,
 timestamps, or per-window predictions ever leave the local run
 directories) live in `paper/results/`.
 
-- **Calibration-coverage study:** the toolchain-default sequential
-  calibration selection (200 contiguous windows = 2 participants,
-  input ceiling 251 mg/dL) was the *sole* cause of a 13.4-point
-  held-out directional-recall loss under INT8 — any randomized
-  200-window selection restores float level, while budget, stratification
-  and observer choice move ≤0.08 points. Confirmed on two further
-  cohorts; mechanism isolated to input clipping; measured latency-free
-  on hardware (nine prespecified artifacts, 30 paired rounds).
+- **Calibration-coverage study:** contiguous first-200 (dataset-order)
+  calibration selection — the project's own conversion-script choice,
+  2 participants, input ceiling 251 mg/dL — cost 13.4 points of held-out
+  directional recall under INT8 (95% CI 10.3–16.9) against uniform random
+  200-window selection. Every randomized selection restores float level;
+  budget, stratification and observer choice move recall by at most about
+  a tenth of a point. A clip-only control attributes the loss to input
+  clipping. Two small further cohorts did not confirm the frozen
+  predictions. Measured latency-free on hardware (nine prespecified
+  artifacts, 30 paired rounds).
 - **Delta encoding:** feeding 11 consecutive differences plus the last
   reading/16 beats absolute inputs (0.509 vs 0.487 held-out directional)
   and makes INT8 nearly calibration-proof (6.4× finer input grid).
   Shipped to both clients as `DeltaEncoding`, pinned by golden vectors.
 - **Accuracy sweep r1 (no ship):** a distance-weighted loss passed every
   pre-registered macro-F1 gate (+5.7 points) — and a post-hoc per-class
-  read showed the gain was majority-class-only, with directional recall
-  *down* 8 points. A pre-registered endpoint can pass all its gates and
+  read showed half the summed per-class F1 gain came from `stable`, with
+  directional recall *down* 8 points (0.517 to 0.438). A pre-registered endpoint can pass all its gates and
   still optimize the wrong thing; r2 regated on a directional endpoint.
 - **Accuracy sweep r2 (shipped):** training on the DiaData collection
   (five audited cohorts, 898 subjects, never a Weinstock training
@@ -282,15 +285,18 @@ directories) live in `paper/results/`.
   the confirmatory read moved to a zero-shot cohort with no prior reads
   (RT-CGM, 12.67M windows, 355 participants): +0.20 directional-recall
   points, CI fully positive [+0.11, +0.29], all three gates passed —
-  the current bundled pair. Known costs are stated in `MODELS.md`.
+  the current bundled pair. It is a single-seed artifact contrast (a fifth
+  of round three's 1.1-point seed spread); it lowers RT-CGM macro-F1
+  (0.410 vs 0.427) and fails two gates on both Weinstock components.
+  Known costs are stated in `MODELS.md`.
 
 ## The quantization tradeoff, measured
 
 **The bundled models have been replaced four times.** On 2026-10-10,
 first with the calibration-coverage study's seed-0 absolute-input
 artifacts (uniform random 200-window calibration instead of the
-toolchain-default first-200-sequential selection, whose under-coverage
-was the sole cause of a 13.4-point held-out directional-recall loss),
+contiguous first-200 selection, whose input clipping cost 13.4 points of
+held-out directional recall),
 then with the delta-encoded (anchor) models from the follow-up
 experiment: both clients feed the network 11 consecutive differences
 plus the last reading/16 (`DeltaEncoding` in Kotlin and Swift, pinned to
@@ -345,13 +351,15 @@ per-class recall:
 exists, loses 62.7% of its recall. (A degenerate model that always
 predicts `stable` scores ~75.5% accuracy with a macro-avg recall of
 exactly 0.20 — which is why this project never reports accuracy alone.)
-Calibration coverage is a plausible but untested contributor. All 200
-calibration windows came from one participant's 17.5 hours, so the INT8
-input range ends at 239.9 mg/dL; 24.4% of training windows contain a
-higher reading, and the conversion record found ~28% of test windows
-saturating at that boundary even with correct clipping. Whether the
-clipping causes the recall loss has not been isolated
-([provenance audit](paper/results/split_audit.json)).
+Calibration coverage is the likely cause. All 200 calibration windows
+came from one participant's 17.5 hours, so the INT8 input range ends at
+239.9 mg/dL; 24.4% of training windows contain a higher reading, and the
+conversion record found ~28% of test windows saturating at that boundary
+even with correct clipping
+([provenance audit](paper/results/split_audit.json)). The later
+calibration-coverage study isolated the mechanism on retrained
+artifacts: a clip-only control reproduces 13.14 of the 13.35-point loss
+of contiguous first-200 selection (paper, Section 7.4).
 
 So the measured tradeoff is: INT8 buys a ~31% smaller file (5.25 KB) and
 costs 9.25 macro-recall points, with no latency benefit — which is why
@@ -408,8 +416,8 @@ reported number has been clinically validated — accuracy and recall
 figures describe performance on a public research benchmark, nothing
 more. The app states this on-screen, verbatim: *"Portfolio demo on public
 research data — not a medical device, not treatment guidance."* All data
-comes from the public GlucoBench research benchmark; no proprietary data,
-schemas, or algorithms are used anywhere in the project.
+comes from public research collections (GlucoBench and DiaData v3); no
+proprietary data, schemas, or algorithms are used anywhere in the project.
 
 ## Data attribution
 
@@ -418,3 +426,21 @@ CGM data via [GlucoBench](https://github.com/IrinaStatsLab/GlucoBench)
 Curated List of Continuous Glucose Monitoring Datasets with Prediction
 Benchmarks," arXiv, 2023). See that repository for the per-dataset
 licenses of the five CGM datasets it bundles.
+
+Sweep data via [DiaData v3](https://doi.org/10.5281/zenodo.17285631)
+(Cinar and Maleshkova, "DiaData: A Multi-Modal, Integrated Time-Series
+Dataset for Type 1 Diabetes Research," Zenodo, 2026), CC BY-NC 4.0. Some
+DiaData cohorts originate from the Barbara Davis Center, Jaeb Center for
+Health Research, Joslin Diabetes Center, T1D Exchange, University of
+Colorado, and University of Virginia; the analyses, content, and
+conclusions here are solely the responsibility of the author and have not
+been reviewed or approved by these institutions.
+
+## License
+
+- Source code and documentation: [MIT](LICENSE).
+- Bundled model weights (`android/app/src/main/assets/*.tflite`, also used
+  by the iOS app): [CC BY-NC 4.0](LICENSE-MODELS), because they are
+  trained on DiaData cohorts released under that license.
+- The manuscript in `paper/` is not covered by either license. CGM data is
+  not distributed here; each source keeps its own terms.
