@@ -181,7 +181,7 @@ paper reports:
     selection takes under 0.03~s, and a prespecified nine-artifact iPhone
     benchmark found the calibration arms within 0.05~$\mu$s of each other,
     so the corrected calibration is free at deployment. INT8 showed no
-    latency advantage over float in any
+    mean-latency advantage over float in any
     measurement and saves 31\% of file size for the study model and 70\% for
     the bundled one;
     \item two exploratory follow-ups: on two small further cohorts the
@@ -1061,8 +1061,8 @@ a uniform random selection of the same size restores the float profile.}
 Table~\ref{tab:mechanism} decomposes the sequential-200 loss with the
 input-grid controls. The clip-only image of the inputs, fed to the float
 model, reproduces essentially the entire 13.35-point float-to-INT8
-difference (float$-$clip $13.14$); re-gridding the clipped inputs moves it
-by only 0.01 points (float$-$QDQ $13.12$), and the INT8 interior adds 0.23
+difference (float$-$clip $13.136$); re-gridding the clipped inputs moves it
+by only 0.01 points (float$-$QDQ $13.125$), and the INT8 interior adds 0.23
 points. Under the sequential-200 range, 27.8\% of held-out windows have at
 least one clipped input slot by the rounded-code rule (60.9\% of
 \texttt{falling\_fast} windows, the class that collapses), against none
@@ -1715,7 +1715,8 @@ how a person would use its output.
     \cite{bergmeir2018crossvalidation}, so intervals come from
     participant-cluster bootstraps conditional on the fitted models and
     calibration sets (Section~\ref{sec:calibprotocol}), and
-    six-participant components get no interval.
+    six-participant components get an exact sign-flip test instead of a
+    valid interval.
     \item The accuracy sweeps reuse the main study's Weinstock splits:
     every round selected on its validation windows; rounds one to three
     read its held-out and temporal labels; round four's arm choice, an
@@ -1904,7 +1905,7 @@ a tenth of a point. These nulls, the null primary contrast among them,
 are scoped to that saturated regime: range-aware selection was not tested
 where random draws under-cover the range, as they did in the two small
 cohorts. The corrected calibration is free at deployment; INT8 brought no
-latency advantage in any measurement and saves 31\% of file size for the
+mean-latency advantage in any measurement and saves 31\% of file size for the
 2,909-parameter study model and 70\% for the bundled model.
 
 The staged sweeps add a methodological lesson. Four rounds spent one
@@ -2069,7 +2070,7 @@ rule could not fail: DiaData rounds timestamps to a five-minute grid
 \cite{cinar2026diadata} and segments split at gaps over 330\,s, so every
 within-segment interval is 300\,s by construction. The 96 admitted
 subjects without a scored window contain no run of 15 consecutive
-five-minute readings (their stored cadence appears to be 10 minutes); the
+five-minute readings; the
 other 355 supply the 12.67M windows used in round five. The first audit's
 collinear fraction, the share of consecutive same-segment reading triples
 whose middle reading is the exact mean of its neighbours, is 0.305 for
@@ -2483,6 +2484,7 @@ operation. The iOS suite applies the same vectors and tolerances and also
 checks the class-name order. It runs on the physical iPhone, on the iOS
 simulator, and in continuous integration.
 
+\clearpage
 \section{Additional Sweep Details}
 \label{app:sweepdetails}
 

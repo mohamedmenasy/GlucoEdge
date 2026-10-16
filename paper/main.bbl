@@ -1,4 +1,4 @@
-\begin{thebibliography}{36}
+\begin{thebibliography}{66}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -68,6 +68,39 @@ Kay~Henning Brodersen, Cheng~Soon Ong, Klaas~Enno Stephan, and Joachim~M.
   3121--3124, 2010.
 \newblock \doi{10.1109/ICPR.2010.764}.
 
+\bibitem[Jacob et~al.(2018)Jacob, Kligys, Chen, Zhu, Tang, Howard, Adam, and
+  Kalenichenko]{jacob2018quantization}
+Benoit Jacob, Skirmantas Kligys, Bo~Chen, Menglong Zhu, Matthew Tang, Andrew
+  Howard, Hartwig Adam, and Dmitry Kalenichenko.
+\newblock Quantization and training of neural networks for efficient
+  integer-arithmetic-only inference.
+\newblock In \emph{Proceedings of the IEEE Conference on Computer Vision and
+  Pattern Recognition}, pages 2704--2713, 2018.
+\newblock \doi{10.1109/CVPR.2018.00286}.
+
+\bibitem[{PyTorch}(2026)]{pytorchPT2E2026}
+{PyTorch}.
+\newblock {PT2E} quantization, 2026.
+\newblock URL
+  \url{https://docs.pytorch.org/ao/stable/pt2e_quantization/index.html}.
+\newblock Accessed 2026-09-19.
+
+\bibitem[{Google AI Edge}(2026{\natexlab{a}})]{googleRepresentativeData}
+{Google AI Edge}.
+\newblock Representative dataset for model quantization.
+\newblock Google AI for Developers documentation, 2026{\natexlab{a}}.
+\newblock URL
+  \url{https://developers.google.com/edge/api/tflite/python/tf/lite/RepresentativeDataset}.
+\newblock Accessed 2026-09-19.
+
+\bibitem[Cinar and Maleshkova(2026)]{cinar2026diadata}
+Beyza Cinar and Maria Maleshkova.
+\newblock {DiaData}: A multi-modal, integrated time-series dataset for type 1
+  diabetes research.
+\newblock Zenodo, version 3, 2026.
+\newblock URL \url{https://doi.org/10.5281/zenodo.17285631}.
+\newblock CC BY-NC 4.0.
+
 \bibitem[Reifman et~al.(2007)Reifman, Rajaraman, Gribok, and
   Ward]{reifman2007predictive}
 Jaques Reifman, Srinivasan Rajaraman, Andrei Gribok, and W.~Kenneth Ward.
@@ -109,6 +142,24 @@ Ruth~S. Weinstock, Stephanie~N. DuBose, Richard~M. Bergenstal, et~al.
 \newblock \emph{Diabetes Care}, 39\penalty0 (4):\penalty0 603--610, 2016.
 \newblock \doi{10.2337/dc15-1426}.
 
+\bibitem[Wadwa et~al.(2023)Wadwa, Reed, Buckingham, et~al.]{wadwa2023pedap}
+R.~Paul Wadwa, Zachariah~W. Reed, Bruce~A. Buckingham, et~al.
+\newblock Trial of hybrid closed-loop control in young children with type 1
+  diabetes.
+\newblock \emph{New England Journal of Medicine}, 388\penalty0 (11):\penalty0
+  991--1001, 2023.
+\newblock \doi{10.1056/NEJMoa2210834}.
+
+\bibitem[{Juvenile Diabetes Research Foundation Continuous Glucose Monitoring
+  Study Group}(2008)]{jdrf2008cgm}
+{Juvenile Diabetes Research Foundation Continuous Glucose Monitoring Study
+  Group}.
+\newblock Continuous glucose monitoring and intensive treatment of type 1
+  diabetes.
+\newblock \emph{New England Journal of Medicine}, 359\penalty0 (14):\penalty0
+  1464--1476, 2008.
+\newblock \doi{10.1056/NEJMoa0805017}.
+
 \bibitem[Bergmeir et~al.(2018)Bergmeir, Hyndman, and
   Koo]{bergmeir2018crossvalidation}
 Christoph Bergmeir, Rob~J. Hyndman, and Bonsoo Koo.
@@ -134,6 +185,25 @@ Xavier Bouthillier, Pierre Delaunay, Mirko Bronzi, et~al.
 \newblock URL
   \url{https://proceedings.mlsys.org/paper_files/paper/2021/hash/0184b0cd3cfb185989f858a1d9f5c1eb-Abstract.html}.
 
+\bibitem[Marling and Bunescu(2020)]{marling2020ohiot1dm}
+Cindy Marling and Razvan Bunescu.
+\newblock The {OhioT1DM} dataset for blood glucose level prediction: Update
+  2020.
+\newblock In \emph{Proceedings of the 5th International Workshop on Knowledge
+  Discovery in Healthcare Data}, volume 2675 of \emph{CEUR Workshop
+  Proceedings}, pages 71--74, 2020.
+\newblock URL \url{https://ceur-ws.org/Vol-2675/paper11.pdf}.
+
+\bibitem[Zhu et~al.(2023)Zhu, Kuang, Daniels, Herrero, Li, and
+  Georgiou]{zhu2023iomt}
+Taiyu Zhu, Lei Kuang, John Daniels, Pau Herrero, Kezhi Li, and Pantelis
+  Georgiou.
+\newblock {IoMT}-enabled real-time blood glucose prediction with deep learning
+  and edge computing.
+\newblock \emph{IEEE Internet of Things Journal}, 10\penalty0 (5):\penalty0
+  3706--3719, 2023.
+\newblock \doi{10.1109/JIOT.2022.3143375}.
+
 \bibitem[Kistkins et~al.(2023)Kistkins, Mihailovs, Lobanovs, P{\=\i}r{\=a}gs,
   Sourij, Moser, and B{\c{l}}iz{\c{n}}uks]{kistkins2023classification}
 S.~Kistkins, T.~Mihailovs, S.~Lobanovs, V.~P{\=\i}r{\=a}gs, H.~Sourij,
@@ -142,6 +212,25 @@ S.~Kistkins, T.~Mihailovs, S.~Lobanovs, V.~P{\=\i}r{\=a}gs, H.~Sourij,
   classification models.
 \newblock \emph{Sensors}, 23\penalty0 (19):\penalty0 8269, 2023.
 \newblock \doi{10.3390/s23198269}.
+
+\bibitem[Kovatchev et~al.(2004)Kovatchev, Gonder-Frederick, Cox, and
+  Clarke]{kovatchev2004cgega}
+Boris~P. Kovatchev, Linda~A. Gonder-Frederick, Daniel~J. Cox, and William~L.
+  Clarke.
+\newblock Evaluating the accuracy of continuous glucose-monitoring sensors:
+  Continuous glucose--error grid analysis illustrated by {TheraSense Freestyle
+  Navigator} data.
+\newblock \emph{Diabetes Care}, 27\penalty0 (8):\penalty0 1922--1928, 2004.
+\newblock \doi{10.2337/diacare.27.8.1922}.
+
+\bibitem[Zanderigo et~al.(2007)Zanderigo, Sparacino, Kovatchev, and
+  Cobelli]{zanderigo2007prediction}
+Francesca Zanderigo, Giovanni Sparacino, Boris Kovatchev, and Claudio Cobelli.
+\newblock Glucose prediction algorithms from continuous monitoring data:
+  Assessment of accuracy via continuous glucose error-grid analysis.
+\newblock \emph{Journal of Diabetes Science and Technology}, 1\penalty0
+  (5):\penalty0 645--651, 2007.
+\newblock \doi{10.1177/193229680700100508}.
 
 \bibitem[De~Bois et~al.(2019)De~Bois, El~Yacoubi, and Ammi]{debois2019coherent}
 Maxime De~Bois, Moun{\^\i}m~A. El~Yacoubi, and Mehdi Ammi.
@@ -188,31 +277,6 @@ Colby Banbury, Vijay~Janapa Reddi, Peter Torelli, et~al.
 \newblock URL
   \url{https://datasets-benchmarks-proceedings.neurips.cc/paper_files/paper/2021/hash/da4fb5c6e93e74d3df8527599fa62642-Abstract-round1.html}.
 
-\bibitem[Jacob et~al.(2018)Jacob, Kligys, Chen, Zhu, Tang, Howard, Adam, and
-  Kalenichenko]{jacob2018quantization}
-Benoit Jacob, Skirmantas Kligys, Bo~Chen, Menglong Zhu, Matthew Tang, Andrew
-  Howard, Hartwig Adam, and Dmitry Kalenichenko.
-\newblock Quantization and training of neural networks for efficient
-  integer-arithmetic-only inference.
-\newblock In \emph{Proceedings of the IEEE Conference on Computer Vision and
-  Pattern Recognition}, pages 2704--2713, 2018.
-\newblock \doi{10.1109/CVPR.2018.00286}.
-
-\bibitem[{PyTorch}(2026)]{pytorchPT2E2026}
-{PyTorch}.
-\newblock {PT2E} quantization, 2026.
-\newblock URL
-  \url{https://docs.pytorch.org/ao/stable/pt2e_quantization/index.html}.
-\newblock Accessed 2026-09-19.
-
-\bibitem[{Google AI Edge}(2026{\natexlab{a}})]{googleRepresentativeData}
-{Google AI Edge}.
-\newblock Representative dataset for model quantization.
-\newblock Google AI for Developers documentation, 2026{\natexlab{a}}.
-\newblock URL
-  \url{https://developers.google.com/edge/api/tflite/python/tf/lite/RepresentativeDataset}.
-\newblock Accessed 2026-09-19.
-
 \bibitem[Banner et~al.(2019)Banner, Nahshan, and Soudry]{banner2019ptq}
 Ron Banner, Yury Nahshan, and Daniel Soudry.
 \newblock Post training 4-bit quantization of convolutional networks for
@@ -240,6 +304,63 @@ Itay Hubara, Yury Nahshan, Yair Hanani, Ron Banner, and Daniel Soudry.
   Learning}, volume 139 of \emph{Proceedings of Machine Learning Research},
   pages 4466--4475, 2021.
 \newblock URL \url{https://proceedings.mlr.press/v139/hubara21a.html}.
+
+\bibitem[Krishnamoorthi(2018)]{krishnamoorthi2018quantizing}
+Raghuraman Krishnamoorthi.
+\newblock Quantizing deep convolutional networks for efficient inference: A
+  whitepaper.
+\newblock arXiv preprint arXiv:1806.08342, 2018.
+\newblock URL \url{https://arxiv.org/abs/1806.08342}.
+
+\bibitem[Nagel et~al.(2021)Nagel, Fournarakis, Amjad, Bondarenko, Van~Baalen,
+  and Blankevoort]{nagel2021whitepaper}
+Markus Nagel, Marios Fournarakis, Rana~Ali Amjad, Yelysei Bondarenko, Mart
+  Van~Baalen, and Tijmen Blankevoort.
+\newblock A white paper on neural network quantization.
+\newblock arXiv preprint arXiv:2106.08295, 2021.
+\newblock URL \url{https://arxiv.org/abs/2106.08295}.
+
+\bibitem[Wu et~al.(2020)Wu, Judd, Zhang, Isaev, and
+  Micikevicius]{wu2020integer}
+Hao Wu, Patrick Judd, Xiaojie Zhang, Mikhail Isaev, and Paulius Micikevicius.
+\newblock Integer quantization for deep learning inference: Principles and
+  empirical evaluation.
+\newblock arXiv preprint arXiv:2004.09602, 2020.
+\newblock URL \url{https://arxiv.org/abs/2004.09602}.
+
+\bibitem[Williams and Aletras(2024)]{williams2024calibration}
+Miles Williams and Nikolaos Aletras.
+\newblock On the impact of calibration data in post-training quantization and
+  pruning.
+\newblock In \emph{Proceedings of the 62nd Annual Meeting of the Association
+  for Computational Linguistics (Volume 1: Long Papers)}, pages 10100--10118,
+  2024.
+\newblock \doi{10.18653/v1/2024.acl-long.544}.
+
+\bibitem[Yu et~al.(2021)Yu, Yang, and Shi]{yu2021crossdomain}
+Haichao Yu, Linjie Yang, and Humphrey Shi.
+\newblock Is in-domain data really needed? {A} pilot study on cross-domain
+  calibration for network quantization.
+\newblock In \emph{2021 IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition Workshops (CVPRW)}, pages 3037--3046, 2021.
+\newblock \doi{10.1109/CVPRW53098.2021.00339}.
+
+\bibitem[Cai et~al.(2020)Cai, Yao, Dong, Gholami, Mahoney, and
+  Keutzer]{cai2020zeroq}
+Yaohui Cai, Zhewei Yao, Zhen Dong, Amir Gholami, Michael~W. Mahoney, and Kurt
+  Keutzer.
+\newblock {ZeroQ}: A novel zero shot quantization framework.
+\newblock In \emph{2020 IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, pages 13166--13175, 2020.
+\newblock \doi{10.1109/CVPR42600.2020.01318}.
+
+\bibitem[{Google AI Edge}(2026{\natexlab{b}})]{googleLiteRTQuantization}
+{Google AI Edge}.
+\newblock Post-training quantization with {LiteRT}.
+\newblock Google AI for Developers documentation, 2026{\natexlab{b}}.
+\newblock URL
+  \url{https://developers.google.com/edge/litert/conversion/tensorflow/quantization/post_training_quantization}.
+\newblock Accessed 2026-09-19.
 
 \bibitem[Kingma and Ba(2015)]{kingma2015adam}
 Diederik~P. Kingma and Jimmy Ba.
@@ -288,28 +409,165 @@ Fabian Pedregosa, Gael Varoquaux, Alexandre Gramfort, et~al.
   \url{https://developer.apple.com/documentation/swift/floatingpointroundingrule/tonearestoreven}.
 \newblock Accessed 2026-10-10.
 
-\bibitem[{Google AI Edge}(2026{\natexlab{b}})]{googleLiteRTCompiledModel}
+\bibitem[{Google AI Edge}(2026{\natexlab{c}})]{googleLiteRTCompiledModel}
 {Google AI Edge}.
 \newblock Run {LiteRT} compiled model {API} on {Android} with {Kotlin}.
-\newblock Google AI for Developers documentation, 2026{\natexlab{b}}.
+\newblock Google AI for Developers documentation, 2026{\natexlab{c}}.
 \newblock URL
   \url{https://developers.google.com/edge/litert/next/android_kotlin}.
 \newblock Accessed 2026-07-20.
 
-\bibitem[Cinar and Maleshkova(2026)]{cinar2026diadata}
-Beyza Cinar and Maria Maleshkova.
-\newblock {DiaData}: A multi-modal, integrated time-series dataset for type 1
-  diabetes research.
-\newblock Zenodo, version 3, 2026.
-\newblock URL \url{https://doi.org/10.5281/zenodo.17285631}.
-\newblock CC BY-NC 4.0.
+\bibitem[Dubosson et~al.(2018)Dubosson, Ranvier, Bromuri, Calbimonte, Ruiz, and
+  Schumacher]{dubosson2018d1namo}
+Fabien Dubosson, Jean-Eudes Ranvier, Stefano Bromuri, Jean-Paul Calbimonte,
+  Juan Ruiz, and Michael Schumacher.
+\newblock The open {D1NAMO} dataset: A multi-modal dataset for research on
+  non-invasive type 1 diabetes management.
+\newblock \emph{Informatics in Medicine Unlocked}, 13:\penalty0 92--100, 2018.
+\newblock \doi{10.1016/j.imu.2018.09.003}.
 
-\bibitem[{Google AI Edge}(2026{\natexlab{c}})]{googleLiteRTQuantization}
-{Google AI Edge}.
-\newblock Post-training quantization with {LiteRT}.
-\newblock Google AI for Developers documentation, 2026{\natexlab{c}}.
-\newblock URL
-  \url{https://developers.google.com/edge/litert/conversion/tensorflow/quantization/post_training_quantization}.
-\newblock Accessed 2026-09-19.
+\bibitem[Hall et~al.(2018)Hall, Perelman, Breschi, Limcaoco, Kellogg,
+  McLaughlin, and Snyder]{hall2018glucotypes}
+Heather Hall, Dalia Perelman, Alessandra Breschi, Patricia Limcaoco, Ryan
+  Kellogg, Tracey McLaughlin, and Michael Snyder.
+\newblock Glucotypes reveal new patterns of glucose dysregulation.
+\newblock \emph{{PLOS} Biology}, 16\penalty0 (7):\penalty0 e2005143, 2018.
+\newblock \doi{10.1371/journal.pbio.2005143}.
+
+\bibitem[Loshchilov and Hutter(2017)]{loshchilov2017sgdr}
+Ilya Loshchilov and Frank Hutter.
+\newblock {SGDR}: Stochastic gradient descent with warm restarts.
+\newblock In \emph{International Conference on Learning Representations}, 2017.
+\newblock URL \url{https://arxiv.org/abs/1608.03983}.
+
+\bibitem[Cameron et~al.(2008)Cameron, Gelbach, and
+  Miller]{cameron2008bootstrap}
+A.~Colin Cameron, Jonah~B. Gelbach, and Douglas~L. Miller.
+\newblock Bootstrap-based improvements for inference with clustered errors.
+\newblock \emph{Review of Economics and Statistics}, 90\penalty0 (3):\penalty0
+  414--427, 2008.
+\newblock \doi{10.1162/rest.90.3.414}.
+
+\bibitem[Lin et~al.(2017)Lin, Goyal, Girshick, He, and
+  Doll{\'a}r]{lin2017focal}
+Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, and Piotr Doll{\'a}r.
+\newblock Focal loss for dense object detection.
+\newblock In \emph{2017 IEEE International Conference on Computer Vision
+  (ICCV)}, pages 2999--3007, 2017.
+\newblock \doi{10.1109/ICCV.2017.324}.
+
+\bibitem[Bai et~al.(2018)Bai, Kolter, and Koltun]{bai2018tcn}
+Shaojie Bai, J.~Zico Kolter, and Vladlen Koltun.
+\newblock An empirical evaluation of generic convolutional and recurrent
+  networks for sequence modeling.
+\newblock arXiv preprint arXiv:1803.01271, 2018.
+\newblock URL \url{https://arxiv.org/abs/1803.01271}.
+
+\bibitem[Facchinetti et~al.(2014)Facchinetti, Del~Favero, Sparacino, Castle,
+  Ward, and Cobelli]{facchinetti2014sensor}
+Andrea Facchinetti, Simone Del~Favero, Giovanni Sparacino, Jessica~R. Castle,
+  W.~Kenneth Ward, and Claudio Cobelli.
+\newblock Modeling the glucose sensor error.
+\newblock \emph{IEEE Transactions on Biomedical Engineering}, 61\penalty0
+  (3):\penalty0 620--629, 2014.
+\newblock \doi{10.1109/TBME.2013.2284023}.
+
+\bibitem[Yang et~al.(2021)Yang, Zha, Chen, Wang, and
+  Katabi]{yang2021imbalanced}
+Yuzhe Yang, Kaiwen Zha, Yingcong Chen, Hao Wang, and Dina Katabi.
+\newblock Delving into deep imbalanced regression.
+\newblock In \emph{Proceedings of the 38th International Conference on Machine
+  Learning}, volume 139 of \emph{Proceedings of Machine Learning Research},
+  pages 11842--11851, 2021.
+\newblock URL \url{https://proceedings.mlr.press/v139/yang21m.html}.
+
+\bibitem[Shi et~al.(2023)Shi, Cao, and Raschka]{shi2023corn}
+Xintong Shi, Wenzhi Cao, and Sebastian Raschka.
+\newblock Deep neural networks for rank-consistent ordinal regression based on
+  conditional probabilities.
+\newblock \emph{Pattern Analysis and Applications}, 26\penalty0 (3):\penalty0
+  941--955, 2023.
+\newblock \doi{10.1007/s10044-023-01181-9}.
+
+\bibitem[Wortsman et~al.(2022)Wortsman, Ilharco, Gadre,
+  et~al.]{wortsman2022soups}
+Mitchell Wortsman, Gabriel Ilharco, Samir~Yitzhak Gadre, et~al.
+\newblock Model soups: Averaging weights of multiple fine-tuned models improves
+  accuracy without increasing inference time.
+\newblock In \emph{Proceedings of the 39th International Conference on Machine
+  Learning}, volume 162 of \emph{Proceedings of Machine Learning Research},
+  pages 23965--23998, 2022.
+\newblock URL \url{https://proceedings.mlr.press/v162/wortsman22a.html}.
+
+\bibitem[Frankle et~al.(2020)Frankle, Dziugaite, Roy, and
+  Carbin]{frankle2020linear}
+Jonathan Frankle, Gintare~Karolina Dziugaite, Daniel Roy, and Michael Carbin.
+\newblock Linear mode connectivity and the lottery ticket hypothesis.
+\newblock In \emph{Proceedings of the 37th International Conference on Machine
+  Learning}, volume 119 of \emph{Proceedings of Machine Learning Research},
+  pages 3259--3269, 2020.
+\newblock URL \url{https://proceedings.mlr.press/v119/frankle20a.html}.
+
+\bibitem[Laffel et~al.(2020)Laffel, Kanapka, Beck, et~al.]{laffel2020city}
+Lori~M. Laffel, Lauren~G. Kanapka, Roy~W. Beck, et~al.
+\newblock Effect of continuous glucose monitoring on glycemic control in
+  adolescents and young adults with type 1 diabetes: A randomized clinical
+  trial.
+\newblock \emph{JAMA}, 323\penalty0 (23):\penalty0 2388--2396, 2020.
+\newblock \doi{10.1001/jama.2020.6940}.
+
+\bibitem[Brown et~al.(2019)Brown, Kovatchev, Raghinaru,
+  et~al.]{brown2019closedloop}
+Sue~A. Brown, Boris~P. Kovatchev, Dan Raghinaru, et~al.
+\newblock Six-month randomized, multicenter trial of closed-loop control in
+  type 1 diabetes.
+\newblock \emph{New England Journal of Medicine}, 381\penalty0 (18):\penalty0
+  1707--1717, 2019.
+\newblock \doi{10.1056/NEJMoa1907863}.
+
+\bibitem[Aleppo et~al.(2017)Aleppo, Ruedy, Riddlesworth,
+  et~al.]{aleppo2017replacebg}
+Grazia Aleppo, Katrina~J. Ruedy, Tonya~D. Riddlesworth, et~al.
+\newblock {REPLACE-BG}: A randomized trial comparing continuous glucose
+  monitoring with and without routine blood glucose monitoring in adults with
+  well-controlled type 1 diabetes.
+\newblock \emph{Diabetes Care}, 40\penalty0 (4):\penalty0 538--545, 2017.
+\newblock \doi{10.2337/dc16-2482}.
+
+\bibitem[{Strategies to Enhance New CGM Use in Early Childhood (SENCE) Study
+  Group}(2021)]{sence2021cgm}
+{Strategies to Enhance New CGM Use in Early Childhood (SENCE) Study Group}.
+\newblock A randomized clinical trial assessing continuous glucose monitoring
+  ({CGM}) use with standardized education with or without a family behavioral
+  intervention compared with fingerstick blood glucose monitoring in very young
+  children with type 1 diabetes.
+\newblock \emph{Diabetes Care}, 44\penalty0 (2):\penalty0 464--472, 2021.
+\newblock \doi{10.2337/dc20-1060}.
+
+\bibitem[Pratley et~al.(2020)Pratley, Kanapka, Rickels,
+  et~al.]{pratley2020wisdm}
+Richard~E. Pratley, Lauren~G. Kanapka, Michael~R. Rickels, et~al.
+\newblock Effect of continuous glucose monitoring on hypoglycemia in older
+  adults with type 1 diabetes: A randomized clinical trial.
+\newblock \emph{JAMA}, 323\penalty0 (23):\penalty0 2397--2406, 2020.
+\newblock \doi{10.1001/jama.2020.6928}.
+
+\bibitem[Mitchell et~al.(2019)Mitchell, Wu, Zaldivar, Barnes, Vasserman,
+  Hutchinson, Spitzer, Raji, and Gebru]{mitchell2019modelcards}
+Margaret Mitchell, Simone Wu, Andrew Zaldivar, Parker Barnes, Lucy Vasserman,
+  Ben Hutchinson, Elena Spitzer, Inioluwa~Deborah Raji, and Timnit Gebru.
+\newblock Model cards for model reporting.
+\newblock In \emph{Proceedings of the Conference on Fairness, Accountability,
+  and Transparency}, pages 220--229, 2019.
+\newblock \doi{10.1145/3287560.3287596}.
+
+\bibitem[Battelino et~al.(2019)Battelino, Danne, Bergenstal,
+  et~al.]{battelino2019timeinrange}
+Tadej Battelino, Thomas Danne, Richard~M. Bergenstal, et~al.
+\newblock Clinical targets for continuous glucose monitoring data
+  interpretation: Recommendations from the international consensus on time in
+  range.
+\newblock \emph{Diabetes Care}, 42\penalty0 (8):\penalty0 1593--1603, 2019.
+\newblock \doi{10.2337/dci19-0028}.
 
 \end{thebibliography}
