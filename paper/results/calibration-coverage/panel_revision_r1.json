@@ -1,0 +1,2325 @@
+{
+  "generated_by": "python -m experiments.panel_revision",
+  "plan": "docs/superpowers/plans/2026-10-16-paper-panel-revision.md (Task 1)",
+  "conventions": {
+    "differences": "recall points (x100)",
+    "levels": "fractions (recall, shares)",
+    "directional_recall": "minority macro recall: mean recall over the four non-stable classes",
+    "classes": [
+      "falling_fast",
+      "falling",
+      "stable",
+      "rising",
+      "rising_fast"
+    ],
+    "bootstrap": "paired participant-cluster bootstrap semantics of analyze_calibration_coverage: percentile 95%, ANALYSIS_SEED 20261010, interval omitted when more than 5% of draws are undefined",
+    "no_new_inference": "every prediction is a cached .npy from a frozen evaluation"
+  },
+  "weinstock": {
+    "seed_draw_variation": {
+      "held_out": {
+        "per_seed": {
+          "0": {
+            "float_directional_recall": 0.5086600750549739,
+            "uniform200_directional_recall_by_draw": {
+              "101": 0.5069000043095979,
+              "102": 0.5065484077757462,
+              "103": 0.5061921749241017
+            },
+            "uniform200_minus_sequential200_pts": 13.072171055518245,
+            "uniform200_within_seed_draw_sd_pts": 0.035391722341511694
+          },
+          "1": {
+            "float_directional_recall": 0.483808001760643,
+            "uniform200_directional_recall_by_draw": {
+              "101": 0.48920686312484507,
+              "102": 0.4895348849697413,
+              "103": 0.48967666269716525
+            },
+            "uniform200_minus_sequential200_pts": 13.558860100452419,
+            "uniform200_within_seed_draw_sd_pts": 0.024097402794867464
+          },
+          "2": {
+            "float_directional_recall": 0.4717112245370279,
+            "uniform200_directional_recall_by_draw": {
+              "101": 0.4652011989040361,
+              "102": 0.46763205596238666,
+              "103": 0.4694454737338124
+            },
+            "uniform200_minus_sequential200_pts": 13.054543046311496,
+            "uniform200_within_seed_draw_sd_pts": 0.21296094666443743
+          },
+          "3": {
+            "float_directional_recall": 0.4844399703285929,
+            "uniform200_directional_recall_by_draw": {
+              "101": 0.4843485412048998,
+              "102": 0.4857957829030614,
+              "103": 0.4837969272372255
+            },
+            "uniform200_minus_sequential200_pts": 13.084550802554935,
+            "uniform200_within_seed_draw_sd_pts": 0.10323283130118559
+          },
+          "4": {
+            "float_directional_recall": 0.48660761780774253,
+            "uniform200_directional_recall_by_draw": {
+              "101": 0.4866263211378001,
+              "102": 0.489900426212758,
+              "103": 0.48918403768342655
+            },
+            "uniform200_minus_sequential200_pts": 14.138972057793413,
+            "uniform200_within_seed_draw_sd_pts": 0.17211861459757993
+          }
+        },
+        "effect_mean_pts": 13.381819412526102,
+        "effect_range_pts": [
+          13.054543046311496,
+          14.138972057793413
+        ],
+        "effect_across_seed_sd_pts": 0.473282179247012,
+        "float_across_seed_sd_pts": 1.3414467742325655,
+        "sd": "sample SD (ddof=1); the effect mean equals the published contrast point",
+        "sources": [
+          "results/calibration-coverage/r1/eval/<component>/seed*_*.npy",
+          "results/calibration-coverage/r1/eval/components.npz"
+        ]
+      },
+      "temporal": {
+        "per_seed": {
+          "0": {
+            "float_directional_recall": 0.5001920206629515,
+            "uniform200_directional_recall_by_draw": {
+              "101": 0.49996678155882573,
+              "102": 0.5000695592317514,
+              "103": 0.49907875903297105
+            },
+            "uniform200_minus_sequential200_pts": 12.617206826049804,
+            "uniform200_within_seed_draw_sd_pts": 0.05447984780908477
+          },
+          "1": {
+            "float_directional_recall": 0.4659538500802811,
+            "uniform200_directional_recall_by_draw": {
+              "101": 0.4689955538149955,
+              "102": 0.46950839129677235,
+              "103": 0.46984150480077885
+            },
+            "uniform200_minus_sequential200_pts": 12.263095145856173,
+            "uniform200_within_seed_draw_sd_pts": 0.04261455071558054
+          },
+          "2": {
+            "float_directional_recall": 0.45811213410774054,
+            "uniform200_directional_recall_by_draw": {
+              "101": 0.45895871804432675,
+              "102": 0.45754258656602614,
+              "103": 0.4583527991288069
+            },
+            "uniform200_minus_sequential200_pts": 12.409150445079026,
+            "uniform200_within_seed_draw_sd_pts": 0.0710517474909001
+          },
+          "3": {
+            "float_directional_recall": 0.4591762880988986,
+            "uniform200_directional_recall_by_draw": {
+              "101": 0.45694538613671387,
+              "102": 0.45944049010029914,
+              "103": 0.4570714196463683
+            },
+            "uniform200_minus_sequential200_pts": 12.013485601387414,
+            "uniform200_within_seed_draw_sd_pts": 0.14055795394511747
+          },
+          "4": {
+            "float_directional_recall": 0.46157590563907613,
+            "uniform200_directional_recall_by_draw": {
+              "101": 0.46458786747802666,
+              "102": 0.4700006772106804,
+              "103": 0.46846733105833493
+            },
+            "uniform200_minus_sequential200_pts": 12.839913817925547,
+            "uniform200_within_seed_draw_sd_pts": 0.27898595333744525
+          }
+        },
+        "effect_mean_pts": 12.428570367259594,
+        "effect_range_pts": [
+          12.013485601387414,
+          12.839913817925547
+        ],
+        "effect_across_seed_sd_pts": 0.31813585664219657,
+        "float_across_seed_sd_pts": 1.7694556209839836,
+        "sd": "sample SD (ddof=1); the effect mean equals the published contrast point",
+        "sources": [
+          "results/calibration-coverage/r1/eval/<component>/seed*_*.npy",
+          "results/calibration-coverage/r1/eval/components.npz"
+        ]
+      }
+    },
+    "interaction": {
+      "held_out": {
+        "uniform_vs_sequential": {
+          "point": -13.333325494875318,
+          "ci95": [
+            -16.758913126136502,
+            -10.29193238959722
+          ],
+          "undefined_fraction": 0.0,
+          "n_boot": 2000,
+          "seed": 20261010,
+          "units": "recall points (x100)"
+        },
+        "randomized_pairs": {
+          "range_minus_balanced": {
+            "point": -0.048540653299897395,
+            "ci95": [
+              -0.16008849254591434,
+              0.06550690645282524
+            ],
+            "undefined_fraction": 0.0,
+            "n_boot": 2000,
+            "seed": 20261010,
+            "units": "recall points (x100)"
+          },
+          "range_minus_uniform": {
+            "point": 0.016450055564761756,
+            "ci95": [
+              -0.11843389954168235,
+              0.15772055619925276
+            ],
+            "undefined_fraction": 0.0,
+            "n_boot": 2000,
+            "seed": 20261010,
+            "units": "recall points (x100)"
+          },
+          "balanced_minus_uniform": {
+            "point": 0.06499070886465914,
+            "ci95": [
+              -0.0375868483476259,
+              0.18080870517012498
+            ],
+            "undefined_fraction": 0.0,
+            "n_boot": 2000,
+            "seed": 20261010,
+            "units": "recall points (x100)"
+          }
+        }
+      },
+      "temporal": {
+        "uniform_vs_sequential": {
+          "point": -12.427479408176072,
+          "ci95": [
+            -14.462996451632334,
+            -10.26159658688307
+          ],
+          "undefined_fraction": 0.0,
+          "n_boot": 2000,
+          "seed": 20261010,
+          "units": "recall points (x100)"
+        },
+        "randomized_pairs": {
+          "range_minus_balanced": {
+            "point": -0.04751838948801749,
+            "ci95": [
+              -0.1559917322183031,
+              0.06376469509503767
+            ],
+            "undefined_fraction": 0.0,
+            "n_boot": 2000,
+            "seed": 20261010,
+            "units": "recall points (x100)"
+          },
+          "range_minus_uniform": {
+            "point": 0.019761333189237302,
+            "ci95": [
+              -0.11284028820498207,
+              0.15727709121285696
+            ],
+            "undefined_fraction": 0.0,
+            "n_boot": 2000,
+            "seed": 20261010,
+            "units": "recall points (x100)"
+          },
+          "balanced_minus_uniform": {
+            "point": 0.0672797226772548,
+            "ci95": [
+              -0.06523533375887988,
+              0.1989052281571404
+            ],
+            "undefined_fraction": 0.0,
+            "n_boot": 2000,
+            "seed": 20261010,
+            "units": "recall points (x100)"
+          }
+        }
+      },
+      "definition": "(A1000 - A200) - (B1000 - B200) in directional recall, averaged over the 15 (seed x draw) pairs; sequential has one order per seed, reused for every draw as in the published contrasts, so uniform_vs_sequential equals (U1000 - S1000) - (U200 - S200)",
+      "protocol_note": "protocol.json lists 'budget-by-strategy interaction' among the secondary contrasts without a formula; the definition above was fixed here, after the primary analysis was published",
+      "sources": [
+        "results/calibration-coverage/r1/eval/<component>/seed*_*.npy",
+        "paper/results/calibration-coverage/protocol.json"
+      ]
+    },
+    "sequential_1000_vs_200": {
+      "held_out": {
+        "point": 13.350194691737027,
+        "ci95": [
+          10.348965697518542,
+          16.7719896105394
+        ],
+        "undefined_fraction": 0.0,
+        "n_boot": 2000,
+        "seed": 20261010,
+        "units": "recall points (x100)"
+      },
+      "temporal": {
+        "point": 12.398922846375552,
+        "ci95": [
+          10.228024183075819,
+          14.427833534849052
+        ],
+        "undefined_fraction": 0.0,
+        "n_boot": 2000,
+        "seed": 20261010,
+        "units": "recall points (x100)"
+      },
+      "note": "five seed pairs (sequential has one order); same bootstrap as the published contrasts",
+      "sources": [
+        "results/calibration-coverage/r1/eval/<component>/seed*_*.npy"
+      ]
+    },
+    "censoring": {
+      "code_evidence": {
+        "held_out": {
+          "unique_input_readings": 53172,
+          "min_mgdl": 39.0,
+          "max_mgdl": 401.0,
+          "below_39": 0,
+          "above_401": 0,
+          "counts_38_to_41_mgdl": {
+            "39": 922,
+            "39.2": 8,
+            "39.4": 1,
+            "39.6": 3,
+            "39.8": 7,
+            "40": 33,
+            "40.2": 5,
+            "40.4": 3,
+            "40.6": 3,
+            "40.8": 3,
+            "41": 28
+          },
+          "counts_399_to_402_mgdl": {
+            "399": 14,
+            "399.2": 1,
+            "399.4": 1,
+            "399.8": 1,
+            "400": 22,
+            "400.2": 1,
+            "400.4": 3,
+            "400.6": 1,
+            "400.8": 1,
+            "401": 1253
+          }
+        },
+        "temporal": {
+          "unique_input_readings": 46126,
+          "min_mgdl": 39.0,
+          "max_mgdl": 401.0,
+          "below_39": 0,
+          "above_401": 0,
+          "counts_38_to_41_mgdl": {
+            "39": 427,
+            "39.2": 1,
+            "39.4": 4,
+            "39.6": 3,
+            "39.8": 4,
+            "40": 29,
+            "40.2": 3,
+            "40.4": 2,
+            "40.6": 2,
+            "40.8": 3,
+            "41": 40
+          },
+          "counts_399_to_402_mgdl": {
+            "399": 7,
+            "399.2": 2,
+            "399.4": 6,
+            "399.6": 2,
+            "400": 15,
+            "400.2": 1,
+            "400.4": 3,
+            "400.6": 3,
+            "400.8": 4,
+            "401": 789
+          }
+        }
+      },
+      "shares": {
+        "held_out": {
+          "codes": [
+            39.0,
+            401.0
+          ],
+          "n_windows": 46376,
+          "inputs": {
+            "window_fraction": 0.06637053648438848,
+            "by_true_class": {
+              "0": 0.09811320754716982,
+              "1": 0.03283322461404653,
+              "2": 0.07094764941420732,
+              "3": 0.043170559094125975,
+              "4": 0.0877742946708464
+            },
+            "per_code": {
+              "39.0": 0.03184836984647231,
+              "401.0": 0.034522166637916164
+            }
+          },
+          "endpoint": {
+            "window_fraction": 0.04174573055028463,
+            "by_true_class": {
+              "0": 0.013836477987421384,
+              "1": 0.007392911502500543,
+              "2": 0.053537001334717484,
+              "3": 0.008964378391129983,
+              "4": 0.016569637259292433
+            }
+          },
+          "inputs_or_endpoint": {
+            "window_fraction": 0.07255908228393997,
+            "by_true_class": {
+              "0": 0.10817610062893082,
+              "1": 0.040008697542944116,
+              "2": 0.07616787779919917,
+              "3": 0.05024769992922859,
+              "4": 0.10210479175996418
+            }
+          }
+        },
+        "temporal": {
+          "codes": [
+            39.0,
+            401.0
+          ],
+          "n_windows": 37361,
+          "inputs": {
+            "window_fraction": 0.04689381975857177,
+            "by_true_class": {
+              "0": 0.06168831168831169,
+              "1": 0.03801348865726548,
+              "2": 0.04962641181581234,
+              "3": 0.032497678737233054,
+              "4": 0.032506415739948676
+            },
+            "per_code": {
+              "39.0": 0.020288536174085277,
+              "401.0": 0.026605283584486498
+            }
+          },
+          "endpoint": {
+            "window_fraction": 0.02877331977195471,
+            "by_true_class": {
+              "0": 0.003246753246753247,
+              "1": 0.003372164316370325,
+              "2": 0.03600347523892267,
+              "3": 0.004642525533890436,
+              "4": 0.00855431993156544
+            }
+          },
+          "inputs_or_endpoint": {
+            "window_fraction": 0.05082840395064372,
+            "by_true_class": {
+              "0": 0.06493506493506493,
+              "1": 0.041385652973635806,
+              "2": 0.053449174630755866,
+              "3": 0.036521200866604764,
+              "4": 0.041060735671514116
+            }
+          }
+        }
+      },
+      "held_out_uniform200_vs_sequential200": {
+        "published_all_windows": {
+          "point": 13.381819412526102,
+          "ci95": [
+            10.29200662136376,
+            16.882804664283775
+          ],
+          "undefined_fraction": 0.0,
+          "n_boot": 2000,
+          "seed": 20261010,
+          "units": "recall points (x100)"
+        },
+        "excluding_coded_anchor": {
+          "point": 13.41553754467785,
+          "ci95": [
+            10.33285057775938,
+            16.959956733914723
+          ],
+          "undefined_fraction": 0.0,
+          "n_boot": 2000,
+          "seed": 20261010,
+          "units": "recall points (x100)",
+          "n_windows": 44478,
+          "n_excluded": 1898
+        },
+        "excluding_coded_anchor_or_endpoint": {
+          "point": 13.273686484289165,
+          "ci95": [
+            10.251935556996534,
+            16.754496476131713
+          ],
+          "undefined_fraction": 0.0,
+          "n_boot": 2000,
+          "seed": 20261010,
+          "units": "recall points (x100)",
+          "n_windows": 44112,
+          "n_excluded": 2264
+        }
+      },
+      "definitions": {
+        "anchor": "last input reading g_t",
+        "endpoint": "label endpoint g_{t+15 min}",
+        "unique_input_readings": "distinct source rows among the eligible windows' inputs"
+      },
+      "sources": [
+        "GlucoBench/raw_data/weinstock.csv via experiments.calibration_coverage._load_study_data (rebuilt windows verified equal to results/calibration-coverage/r1/eval/components.npz and keys equal to sweep-r5/eval/*/meta.json)",
+        "results/calibration-coverage/r1/eval/held_out/seed*_int8_{uniform_random,sequential}_200_*.npy",
+        "paper/results/calibration-coverage/aggregate_r1.json"
+      ]
+    },
+    "facts": {
+      "observer": {
+        "held_out": {
+          "sequential_200_d0": {
+            "seed_mean_minmax_minus_histogram_pts": 0.07196623082776687,
+            "per_seed_pts": [
+              0.04476789210916543,
+              0.03539446492016318,
+              -0.05072843123323789,
+              0.14993143296366807,
+              0.1804657953790756
+            ]
+          },
+          "participant_balanced_range_coverage_200_d101": {
+            "seed_mean_minmax_minus_histogram_pts": 0.11821710265245255,
+            "per_seed_pts": [
+              -0.011110807496494957,
+              0.08209724356949,
+              0.00798282470201861,
+              0.1988615461409715,
+              0.3132547063462776
+            ]
+          }
+        },
+        "temporal": {
+          "sequential_200_d0": {
+            "seed_mean_minmax_minus_histogram_pts": -0.003968678814938453,
+            "per_seed_pts": [
+              -0.0534507755341973,
+              0.0706563761750989,
+              -0.011631435726139339,
+              -0.12631206688868968,
+              0.10089450789923515
+            ]
+          },
+          "participant_balanced_range_coverage_200_d101": {
+            "seed_mean_minmax_minus_histogram_pts": -0.006740426659581633,
+            "per_seed_pts": [
+              -0.2435065096471123,
+              0.013431834285837496,
+              0.24385086827554137,
+              -0.1678035308595116,
+              0.12032520464733687
+            ]
+          }
+        },
+        "max_abs_seed_mean_pts": {
+          "value": 0.11821710265245255,
+          "component": "held_out",
+          "cell": "participant_balanced_range_coverage_200_d101"
+        },
+        "max_abs_single_seed_pts": {
+          "value": 0.3132547063462776,
+          "component": "held_out",
+          "cell": "participant_balanced_range_coverage_200_d101",
+          "seed": 4
+        },
+        "sources": [
+          "results/calibration-coverage/r1/eval/<component>/seed*_int8_*_obsminmax.npy"
+        ]
+      },
+      "randomized_200_participants": {
+        "min": 90,
+        "max": 127,
+        "per_selection": {
+          "participant_balanced_random_200_d101": 127,
+          "participant_balanced_random_200_d102": 127,
+          "participant_balanced_random_200_d103": 127,
+          "participant_balanced_range_coverage_200_d101": 127,
+          "participant_balanced_range_coverage_200_d102": 127,
+          "participant_balanced_range_coverage_200_d103": 127,
+          "uniform_random_200_d101": 96,
+          "uniform_random_200_d102": 92,
+          "uniform_random_200_d103": 90
+        },
+        "sources": [
+          "paper/results/calibration-coverage/aggregate_r1.json (selection_coverage)"
+        ]
+      },
+      "int8_input_ceiling_mgdl_by_cell": {
+        "values": {
+          "participant_balanced_random_1000": [
+            400.8
+          ],
+          "participant_balanced_random_200": [
+            400.8
+          ],
+          "participant_balanced_range_coverage_1000": [
+            400.8
+          ],
+          "participant_balanced_range_coverage_200": [
+            400.8
+          ],
+          "sequential_1000": [
+            400.8
+          ],
+          "sequential_200": [
+            250.9
+          ],
+          "uniform_random_1000": [
+            400.8
+          ],
+          "uniform_random_200": [
+            400.8
+          ]
+        },
+        "note": "top of the INT8 input range, scale * (127 - zero_point), across seeds and draws",
+        "sources": [
+          "results/calibration-coverage/r1/artifacts_manifest.json"
+        ]
+      },
+      "widest_single_tier_interval": {
+        "held_out": {
+          "uniform200_vs_sequential200": {
+            "tier": "gap_filled_inputs",
+            "point_pts": 11.444783518342799,
+            "ci95_pts": [
+              6.564266875347681,
+              15.90498996779131
+            ],
+            "width_pts": 9.34072309244363
+          },
+          "float_vs_int8_uniform200": {
+            "tier": "gap_filled_endpoint",
+            "point_pts": 0.43133879172010503,
+            "ci95_pts": [
+              -0.2480412965640525,
+              1.054777459139609
+            ],
+            "width_pts": 1.3028187557036617
+          }
+        },
+        "temporal": {
+          "uniform200_vs_sequential200": {
+            "tier": "gap_filled_endpoint",
+            "point_pts": 10.530704761976,
+            "ci95_pts": [
+              6.4756242610961845,
+              14.555699503945233
+            ],
+            "width_pts": 8.080075242849048
+          },
+          "float_vs_int8_uniform200": {
+            "tier": "gap_filled_endpoint",
+            "point_pts": 1.0388108635517808,
+            "ci95_pts": [
+              0.17732930889628257,
+              1.8568240278768249
+            ],
+            "width_pts": 1.6794947189805423
+          }
+        },
+        "sources": [
+          "paper/results/calibration-coverage/sensitivity_tiers_r1.json"
+        ]
+      }
+    }
+  },
+  "confirmation": {
+    "dubosson": {
+      "temporal": {
+        "n_participants": 6,
+        "per_participant_mean_contribution_pts": {
+          "P1": 1.6192060611298358,
+          "P2": 0.15510590200992674,
+          "P3": 0.14621365787694385,
+          "P4": 0.06270536042608212,
+          "P5": 0.04107208521642171,
+          "P6": -0.04342965256277949
+        },
+        "participant_labels": "anonymized, ordered by descending contribution",
+        "sum_of_contributions_pts": 1.9808734140964308,
+        "published_delta_pts": 1.9808734140964332,
+        "published_percentile_ci95_pts": [
+          -0.0033772989780448317,
+          3.0543690488842326
+        ],
+        "undefined_fraction": 0.012,
+        "class_support": {
+          "falling_fast": 28,
+          "falling": 58,
+          "stable": 857,
+          "rising": 68,
+          "rising_fast": 57
+        },
+        "clipping": {
+          "by_cell": {
+            "sequential_200_d0": {
+              "window_fraction": 0.15168539325842698,
+              "falling_fast_window_fraction": 0.75,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 286.1
+            },
+            "uniform_random_200_d101": {
+              "window_fraction": 0.10861423220973783,
+              "falling_fast_window_fraction": 0.42857142857142855,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 352.7
+            },
+            "uniform_random_200_d102": {
+              "window_fraction": 0.10861423220973783,
+              "falling_fast_window_fraction": 0.42857142857142855,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 353.0
+            },
+            "uniform_random_200_d103": {
+              "window_fraction": 0.10861423220973783,
+              "falling_fast_window_fraction": 0.42857142857142855,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 354.5
+            }
+          },
+          "uniform_200_mean_over_draws": {
+            "window_fraction": 0.10861423220973783,
+            "falling_fast_window_fraction": 0.42857142857142855
+          },
+          "sequential_minus_uniform_200": {
+            "window_fraction": 0.04307116104868915,
+            "falling_fast_window_fraction": 0.32142857142857145
+          },
+          "definition": "share of windows with at least one input slot whose rounded code falls outside the int8 range; every range starts at 0 mg/dL, so this is the share of windows with an input above the artifact's ceiling"
+        },
+        "sign_flip_test": {
+          "observed": 1.9808734140964308,
+          "p_two_sided": 0.09375,
+          "n_patterns": 64,
+          "min_attainable_p": 0.03125,
+          "statistic": "sum of per-participant mean contributions (points); exact over all sign patterns"
+        },
+        "sources": [
+          "results/calibration-coverage/conf-dubosson/eval/temporal/seed*_int8_*_200_*.npy",
+          "results/calibration-coverage/conf-dubosson/eval/temporal/seed*_int8_*_meta.json",
+          "results/calibration-coverage/conf-dubosson/eval/components.npz",
+          "paper/results/calibration-coverage/confirmation_dubosson.json"
+        ]
+      },
+      "held_out": {
+        "n_participants": 1,
+        "per_participant_mean_contribution_pts": {
+          "P1": 0.2708264371620876
+        },
+        "participant_labels": "anonymized, ordered by descending contribution",
+        "sum_of_contributions_pts": 0.2708264371620876,
+        "published_delta_pts": 0.27082643716208904,
+        "published_percentile_ci95_pts": [
+          0.27082643716208904,
+          0.27082643716208904
+        ],
+        "undefined_fraction": 0.0,
+        "class_support": {
+          "falling_fast": 19,
+          "falling": 106,
+          "stable": 871,
+          "rising": 115,
+          "rising_fast": 15
+        },
+        "clipping": {
+          "by_cell": {
+            "sequential_200_d0": {
+              "window_fraction": 0.0,
+              "falling_fast_window_fraction": 0.0,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 286.1
+            },
+            "uniform_random_200_d101": {
+              "window_fraction": 0.0,
+              "falling_fast_window_fraction": 0.0,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 352.7
+            },
+            "uniform_random_200_d102": {
+              "window_fraction": 0.0,
+              "falling_fast_window_fraction": 0.0,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 353.0
+            },
+            "uniform_random_200_d103": {
+              "window_fraction": 0.0,
+              "falling_fast_window_fraction": 0.0,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 354.5
+            }
+          },
+          "uniform_200_mean_over_draws": {
+            "window_fraction": 0.0,
+            "falling_fast_window_fraction": 0.0
+          },
+          "sequential_minus_uniform_200": {
+            "window_fraction": 0.0,
+            "falling_fast_window_fraction": 0.0
+          },
+          "definition": "share of windows with at least one input slot whose rounded code falls outside the int8 range; every range starts at 0 mg/dL, so this is the share of windows with an input above the artifact's ceiling"
+        },
+        "sign_flip_test": {
+          "observed": 0.2708264371620876,
+          "p_two_sided": 1.0,
+          "n_patterns": 2,
+          "min_attainable_p": 1.0,
+          "statistic": "sum of per-participant mean contributions (points); exact over all sign patterns",
+          "note": "one participant: p = 1 by construction"
+        },
+        "sources": [
+          "results/calibration-coverage/conf-dubosson/eval/held_out/seed*_int8_*_200_*.npy",
+          "results/calibration-coverage/conf-dubosson/eval/held_out/seed*_int8_*_meta.json",
+          "results/calibration-coverage/conf-dubosson/eval/components.npz",
+          "paper/results/calibration-coverage/confirmation_dubosson.json"
+        ]
+      }
+    },
+    "hall": {
+      "temporal": {
+        "n_participants": 50,
+        "per_participant_mean_contribution_pts": {
+          "P1": 1.5751945133631076,
+          "P2": 0.9228538208636115,
+          "P3": 0.7295869874886071,
+          "P4": 0.6405998469027587,
+          "P5": 0.08639308855291576,
+          "P6": 0.08639308855291576,
+          "P7": 0.08520120072937774,
+          "P8": 0.0796491025243528,
+          "P9": 0.06533746754670117,
+          "P10": 0.06378915642458119,
+          "P11": 0.055449207512613403,
+          "P12": 0.046428031396483695,
+          "P13": 0.04086947570978931,
+          "P14": 0.027930612266347164,
+          "P15": 0.02342002420828231,
+          "P16": 0.01982031218524416,
+          "P17": 0.017680213691280307,
+          "P18": 0.014123922665674552,
+          "P19": 0.010799136069114472,
+          "P20": 0.009888260034087786,
+          "P21": 0.008110300081103002,
+          "P22": 0.008110300081103002,
+          "P23": 0.004055150040551501,
+          "P24": 0.004055150040551501,
+          "P25": 0.0004554380175133423,
+          "P26": 0.00045543801751334186,
+          "P27": 0.0,
+          "P28": 0.0,
+          "P29": 0.0,
+          "P30": 0.0,
+          "P31": -0.0004554380175133432,
+          "P32": -0.003144274005524814,
+          "P33": -0.0035997120230381575,
+          "P34": -0.004510588058064844,
+          "P35": -0.0055585556866943895,
+          "P36": -0.006288548011049627,
+          "P37": -0.010343698051601128,
+          "P38": -0.012165450121654502,
+          "P39": -0.012165450121654502,
+          "P40": -0.012165450121654502,
+          "P41": -0.01307632615668119,
+          "P42": -0.013943410074639286,
+          "P43": -0.019364874167730816,
+          "P44": -0.01982031218524416,
+          "P45": -0.02073118822027085,
+          "P46": -0.020771020272515792,
+          "P47": -0.02128388577914211,
+          "P48": -0.024330900243309004,
+          "P49": -0.04456285832899791,
+          "P50": -0.04533627165078556
+        },
+        "participant_labels": "anonymized, ordered by descending contribution",
+        "sum_of_contributions_pts": 4.313031033668415,
+        "published_delta_pts": 4.313031033668416,
+        "published_percentile_ci95_pts": [
+          1.136519635806792,
+          7.335783191202257
+        ],
+        "undefined_fraction": 0.0,
+        "class_support": {
+          "falling_fast": 34,
+          "falling": 463,
+          "stable": 10186,
+          "rising": 411,
+          "rising_fast": 118
+        },
+        "clipping": {
+          "by_cell": {
+            "sequential_200_d0": {
+              "window_fraction": 0.04075990010702819,
+              "falling_fast_window_fraction": 0.6176470588235294,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 165.0
+            },
+            "uniform_random_200_d101": {
+              "window_fraction": 0.004548697823760257,
+              "falling_fast_window_fraction": 0.20588235294117646,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 233.9
+            },
+            "uniform_random_200_d102": {
+              "window_fraction": 0.010524438102033535,
+              "falling_fast_window_fraction": 0.47058823529411764,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 201.9
+            },
+            "uniform_random_200_d103": {
+              "window_fraction": 0.015519086692829111,
+              "falling_fast_window_fraction": 0.5588235294117647,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 189.9
+            }
+          },
+          "uniform_200_mean_over_draws": {
+            "window_fraction": 0.010197407539540968,
+            "falling_fast_window_fraction": 0.411764705882353
+          },
+          "sequential_minus_uniform_200": {
+            "window_fraction": 0.03056249256748722,
+            "falling_fast_window_fraction": 0.20588235294117646
+          },
+          "definition": "share of windows with at least one input slot whose rounded code falls outside the int8 range; every range starts at 0 mg/dL, so this is the share of windows with an input above the artifact's ceiling"
+        },
+        "sign_flip_test": null,
+        "sign_flip_reason": "50 clusters: exact enumeration is limited to G <= 20; the published percentile cluster bootstrap applies at this size",
+        "sources": [
+          "results/calibration-coverage/conf-hall/eval/temporal/seed*_int8_*_200_*.npy",
+          "results/calibration-coverage/conf-hall/eval/temporal/seed*_int8_*_meta.json",
+          "results/calibration-coverage/conf-hall/eval/components.npz",
+          "paper/results/calibration-coverage/confirmation_hall.json"
+        ]
+      },
+      "held_out": {
+        "n_participants": 6,
+        "per_participant_mean_contribution_pts": {
+          "P1": 1.0796380647316204,
+          "P2": 0.20987230766810908,
+          "P3": 0.12082242707029321,
+          "P4": 0.022002200220022004,
+          "P5": -0.03296789449059848,
+          "P6": -0.09256239893683789
+        },
+        "participant_labels": "anonymized, ordered by descending contribution",
+        "sum_of_contributions_pts": 1.3068047062626083,
+        "published_delta_pts": 1.3068047062626071,
+        "published_percentile_ci95_pts": [
+          -0.14365150537430296,
+          3.3031052418549547
+        ],
+        "undefined_fraction": 0.0,
+        "class_support": {
+          "falling_fast": 41,
+          "falling": 261,
+          "stable": 8068,
+          "rising": 303,
+          "rising_fast": 50
+        },
+        "clipping": {
+          "by_cell": {
+            "sequential_200_d0": {
+              "window_fraction": 0.033589361458213916,
+              "falling_fast_window_fraction": 0.2682926829268293,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 165.0
+            },
+            "uniform_random_200_d101": {
+              "window_fraction": 0.0,
+              "falling_fast_window_fraction": 0.0,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 233.9
+            },
+            "uniform_random_200_d102": {
+              "window_fraction": 0.004700217814971913,
+              "falling_fast_window_fraction": 0.14634146341463414,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 201.9
+            },
+            "uniform_random_200_d103": {
+              "window_fraction": 0.009858993465550843,
+              "falling_fast_window_fraction": 0.14634146341463414,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 189.9
+            }
+          },
+          "uniform_200_mean_over_draws": {
+            "window_fraction": 0.004853070426840919,
+            "falling_fast_window_fraction": 0.09756097560975609
+          },
+          "sequential_minus_uniform_200": {
+            "window_fraction": 0.028736291031373,
+            "falling_fast_window_fraction": 0.1707317073170732
+          },
+          "definition": "share of windows with at least one input slot whose rounded code falls outside the int8 range; every range starts at 0 mg/dL, so this is the share of windows with an input above the artifact's ceiling"
+        },
+        "sign_flip_test": {
+          "observed": 1.3068047062626083,
+          "p_two_sided": 0.25,
+          "n_patterns": 64,
+          "min_attainable_p": 0.03125,
+          "statistic": "sum of per-participant mean contributions (points); exact over all sign patterns"
+        },
+        "sources": [
+          "results/calibration-coverage/conf-hall/eval/held_out/seed*_int8_*_200_*.npy",
+          "results/calibration-coverage/conf-hall/eval/held_out/seed*_int8_*_meta.json",
+          "results/calibration-coverage/conf-hall/eval/components.npz",
+          "paper/results/calibration-coverage/confirmation_hall.json"
+        ]
+      }
+    },
+    "weinstock_comparison": {
+      "held_out": {
+        "clipping": {
+          "by_cell": {
+            "sequential_200_d0": {
+              "window_fraction": 0.27772986027255475,
+              "falling_fast_window_fraction": 0.6094339622641509,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 250.9
+            },
+            "uniform_random_200_d101": {
+              "window_fraction": 0.0,
+              "falling_fast_window_fraction": 0.0,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 400.8
+            },
+            "uniform_random_200_d102": {
+              "window_fraction": 0.0,
+              "falling_fast_window_fraction": 0.0,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 400.8
+            },
+            "uniform_random_200_d103": {
+              "window_fraction": 0.0,
+              "falling_fast_window_fraction": 0.0,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 400.8
+            }
+          },
+          "uniform_200_mean_over_draws": {
+            "window_fraction": 0.0,
+            "falling_fast_window_fraction": 0.0
+          },
+          "sequential_minus_uniform_200": {
+            "window_fraction": 0.27772986027255475,
+            "falling_fast_window_fraction": 0.6094339622641509
+          },
+          "definition": "share of windows with at least one input slot whose rounded code falls outside the int8 range; every range starts at 0 mg/dL, so this is the share of windows with an input above the artifact's ceiling"
+        },
+        "sources": [
+          "results/calibration-coverage/r1/eval/held_out/seed*_int8_*_200_*_meta.json"
+        ]
+      },
+      "temporal": {
+        "clipping": {
+          "by_cell": {
+            "sequential_200_d0": {
+              "window_fraction": 0.23979550868552768,
+              "falling_fast_window_fraction": 0.5606060606060606,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 250.9
+            },
+            "uniform_random_200_d101": {
+              "window_fraction": 0.0,
+              "falling_fast_window_fraction": 0.0,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 400.8
+            },
+            "uniform_random_200_d102": {
+              "window_fraction": 0.0,
+              "falling_fast_window_fraction": 0.0,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 400.8
+            },
+            "uniform_random_200_d103": {
+              "window_fraction": 0.0,
+              "falling_fast_window_fraction": 0.0,
+              "identical_across_seeds": true,
+              "input_ceiling_mgdl": 400.8
+            }
+          },
+          "uniform_200_mean_over_draws": {
+            "window_fraction": 0.0,
+            "falling_fast_window_fraction": 0.0
+          },
+          "sequential_minus_uniform_200": {
+            "window_fraction": 0.23979550868552768,
+            "falling_fast_window_fraction": 0.5606060606060606
+          },
+          "definition": "share of windows with at least one input slot whose rounded code falls outside the int8 range; every range starts at 0 mg/dL, so this is the share of windows with an input above the artifact's ceiling"
+        },
+        "sources": [
+          "results/calibration-coverage/r1/eval/temporal/seed*_int8_*_200_*_meta.json"
+        ]
+      }
+    }
+  },
+  "shipped_model": {
+    "held_out": {
+      "identity": {
+        "artifact": "results/calibration-coverage/sweep-r5/artifacts/winner_seed4_int8_uniform_random_200_d101.tflite",
+        "seed": 4,
+        "sha256_equals_bundled_trend_int8": true
+      },
+      "confusion": {
+        "classes": [
+          "falling_fast",
+          "falling",
+          "stable",
+          "rising",
+          "rising_fast"
+        ],
+        "matrix": [
+          [
+            1122,
+            238,
+            62,
+            80,
+            88
+          ],
+          [
+            1650,
+            1689,
+            571,
+            440,
+            249
+          ],
+          [
+            4845,
+            5548,
+            14709,
+            6187,
+            2426
+          ],
+          [
+            459,
+            273,
+            593,
+            1715,
+            1199
+          ],
+          [
+            170,
+            77,
+            118,
+            521,
+            1347
+          ]
+        ],
+        "support": [
+          1590,
+          4599,
+          33715,
+          4239,
+          2233
+        ],
+        "recall_sensitivity": {
+          "falling_fast": 0.7056603773584905,
+          "falling": 0.36725375081539463,
+          "stable": 0.4362746551979831,
+          "rising": 0.4045765510733664,
+          "rising_fast": 0.6032243618450515
+        },
+        "precision_ppv": {
+          "falling_fast": 0.13606597138006307,
+          "falling": 0.21584664536741213,
+          "stable": 0.9162773313399365,
+          "rising": 0.191770099519177,
+          "rising_fast": 0.25372009794688266
+        },
+        "f1": {
+          "falling_fast": 0.22814152094347295,
+          "falling": 0.27189311010946554,
+          "stable": 0.5911027166050474,
+          "rising": 0.2602033075405856,
+          "rising_fast": 0.35719968178202066
+        },
+        "adjacent_error_share": 0.6399550283011554,
+        "reversal_share": {
+          "falling_fast": 0.10566037735849057,
+          "falling": 0.14981517721243748,
+          "rising": 0.1726822363765039,
+          "rising_fast": 0.11061352440662786,
+          "falling_side": 0.13847148166101148,
+          "rising_side": 0.15126699629171816
+        }
+      },
+      "level_stratified": {
+        "bands": {
+          "<70": {
+            "n_windows": 3038,
+            "support": [
+              1,
+              91,
+              2531,
+              260,
+              155
+            ],
+            "per_class_recall": [
+              0.0,
+              0.27472527472527475,
+              0.5246937969182142,
+              0.3076923076923077,
+              0.7419354838709677
+            ],
+            "directional_recall": 0.3310882665721375
+          },
+          "70-180": {
+            "n_windows": 21808,
+            "support": [
+              449,
+              1955,
+              16393,
+              1991,
+              1020
+            ],
+            "per_class_recall": [
+              0.5167037861915368,
+              0.4465473145780051,
+              0.543585676813274,
+              0.4334505273731793,
+              0.6029411764705882
+            ],
+            "directional_recall": 0.49991070115332736
+          },
+          "180-250": {
+            "n_windows": 11301,
+            "support": [
+              476,
+              1419,
+              7765,
+              1055,
+              586
+            ],
+            "per_class_recall": [
+              0.6827731092436975,
+              0.390415785764623,
+              0.38415969092079844,
+              0.4312796208530806,
+              0.5853242320819113
+            ],
+            "directional_recall": 0.5224481869858281
+          },
+          ">=250": {
+            "n_windows": 10229,
+            "support": [
+              664,
+              1134,
+              7026,
+              933,
+              472
+            ],
+            "per_class_recall": [
+              0.8509036144578314,
+              0.20899470899470898,
+              0.2116424708226587,
+              0.3397642015005359,
+              0.5805084745762712
+            ],
+            "directional_recall": 0.4950427498823369
+          }
+        },
+        "anchor": "last input reading (mg/dL), rebuilt with the study loader; keys verified equal to the read's"
+      },
+      "sources": [
+        "results/calibration-coverage/sweep-r5/eval/held_out/{meta.json,winner_int8_preds.npy}",
+        "GlucoBench weinstock via experiments.calibration_coverage._load_study_data"
+      ]
+    },
+    "rtcgm": {
+      "identity": {
+        "artifact": "results/calibration-coverage/sweep-r5/artifacts/winner_seed4_int8_uniform_random_200_d101.tflite",
+        "seed": 4,
+        "sha256_equals_bundled_trend_int8": true
+      },
+      "confusion": {
+        "classes": [
+          "falling_fast",
+          "falling",
+          "stable",
+          "rising",
+          "rising_fast"
+        ],
+        "matrix": [
+          [
+            207525,
+            53566,
+            16803,
+            15026,
+            15465
+          ],
+          [
+            274049,
+            493990,
+            149284,
+            56044,
+            25706
+          ],
+          [
+            421001,
+            1435875,
+            6044964,
+            1823849,
+            264608
+          ],
+          [
+            40867,
+            40238,
+            161706,
+            565695,
+            186444
+          ],
+          [
+            25172,
+            14981,
+            37687,
+            119459,
+            184505
+          ]
+        ],
+        "support": [
+          308385,
+          999073,
+          9990297,
+          994950,
+          381804
+        ],
+        "recall_sensitivity": {
+          "falling_fast": 0.672941290918819,
+          "falling": 0.4944483536238093,
+          "stable": 0.60508351253221,
+          "rising": 0.5685662596110357,
+          "rising_fast": 0.4832453300646405
+        },
+        "precision_ppv": {
+          "falling_fast": 0.21424943269455118,
+          "falling": 0.24231231452186497,
+          "stable": 0.9429867884346232,
+          "rising": 0.2192554241682309,
+          "rising_fast": 0.2726427752361362
+        },
+        "f1": {
+          "falling_fast": 0.3250198316521783,
+          "falling": 0.3252370278659377,
+          "stable": 0.7371574247773317,
+          "rising": 0.3164706912375109,
+          "rising_fast": 0.3486054271387166
+        },
+        "adjacent_error_share": 0.8119679479627566,
+        "reversal_share": {
+          "falling_fast": 0.09887316179451011,
+          "falling": 0.08182585256532805,
+          "rising": 0.08151665912859943,
+          "rising_fast": 0.10516652523284198,
+          "falling_side": 0.08584673465610368,
+          "rising_side": 0.08807528432820969
+        }
+      },
+      "level_stratified": {
+        "bands": {
+          "<70": {
+            "n_windows": 460343,
+            "support": [
+              96,
+              7143,
+              397515,
+              41305,
+              14284
+            ],
+            "per_class_recall": [
+              0.020833333333333332,
+              0.4482710345793084,
+              0.5999798749732714,
+              0.4431424766977364,
+              0.515051806216746
+            ],
+            "directional_recall": 0.35682466270678104
+          },
+          "70-180": {
+            "n_windows": 8329130,
+            "support": [
+              98862,
+              531802,
+              6852027,
+              624854,
+              221585
+            ],
+            "per_class_recall": [
+              0.577026562278732,
+              0.5634051771147909,
+              0.6710519383534245,
+              0.5732811184692744,
+              0.4825597400546066
+            ],
+            "directional_recall": 0.549068149479351
+          },
+          "180-250": {
+            "n_windows": 2754323,
+            "support": [
+              116348,
+              301512,
+              2011938,
+              227950,
+              96575
+            ],
+            "per_class_recall": [
+              0.6794530202495961,
+              0.47321499641805304,
+              0.4927636935134184,
+              0.5970783066461943,
+              0.4812322029510743
+            ],
+            "directional_recall": 0.5577446315662293
+          },
+          ">=250": {
+            "n_windows": 1130713,
+            "support": [
+              93079,
+              158616,
+              728817,
+              100841,
+              49360
+            ],
+            "per_class_recall": [
+              0.7673481666111582,
+              0.3056942553084178,
+              0.2977249432985235,
+              0.5262740353626005,
+              0.48105753646677474
+            ],
+            "directional_recall": 0.5200934984372378
+          }
+        },
+        "anchor": "last input reading (mg/dL) = 16 x the delta-anchor channel of the cached eval inputs; cache rows verified equal to the read's labels and participants"
+      },
+      "anchor_range_mgdl": [
+        14.0,
+        654.0
+      ],
+      "anchor_fraction_below_40": 0.002449404548925722,
+      "anchor_fraction_above_400": 0.004208052556513234,
+      "sources": [
+        "results/calibration-coverage/sweep-r5/eval/rtcgm/{meta.npz,winner_int8_preds.npy}",
+        "results/diadata_cache/hours/RT_CGM.npz"
+      ]
+    }
+  },
+  "round_one_f1": {
+    "held_out": {
+      "paired_windows": 46376,
+      "candidate": "seed 1, uniform INT8",
+      "winner_int8": {
+        "recall_sensitivity": {
+          "falling_fast": 0.5025157232704403,
+          "falling": 0.4322678843226788,
+          "stable": 0.68761678777992,
+          "rising": 0.3647086577022883,
+          "rising_fast": 0.4536497984773847
+        },
+        "precision_ppv": {
+          "falling_fast": 0.25617184995190767,
+          "falling": 0.2741690801268791,
+          "stable": 0.8646824064749543,
+          "rising": 0.24787558120891454,
+          "rising_fast": 0.3424611223799865
+        },
+        "f1": {
+          "falling_fast": 0.33935018050541516,
+          "falling": 0.33552742616033754,
+          "stable": 0.7660509533093216,
+          "rising": 0.2951508209240168,
+          "rising_fast": 0.3902908880755153
+        }
+      },
+      "champion_int8": {
+        "recall_sensitivity": {
+          "falling_fast": 0.5723270440251572,
+          "falling": 0.5518590998043053,
+          "stable": 0.4753967076968708,
+          "rising": 0.3338051427223402,
+          "rising_fast": 0.6117330944917152
+        },
+        "precision_ppv": {
+          "falling_fast": 0.1903367496339678,
+          "falling": 0.2135644564119825,
+          "stable": 0.9107853165132401,
+          "rising": 0.20202741290691034,
+          "rising_fast": 0.2673713055392445
+        },
+        "f1": {
+          "falling_fast": 0.28566943964840685,
+          "falling": 0.30795364921434204,
+          "stable": 0.6247149845068501,
+          "rising": 0.2517121764653562,
+          "rising_fast": 0.3721056932715881
+        }
+      },
+      "macro_f1": {
+        "winner_int8": 0.4252740537949212,
+        "champion_int8": 0.36843118862130864
+      },
+      "f1_change_pts": {
+        "falling_fast": 5.3680740857008304,
+        "falling": 2.75737769459955,
+        "stable": 14.133596880247145,
+        "rising": 4.343864445866058,
+        "rising_fast": 1.8185194803927218
+      },
+      "macro_f1_change_pts": 5.684286517361262,
+      "decomposition": "macro-F1 change = mean of the five per-class F1 changes",
+      "recall_matches_published": true,
+      "sources": [
+        "results/calibration-coverage/sweep-r1/eval/held_out/{winner_meta.json,champion_meta.json,champion_int8_preds.npy,winner_seed*_int8_uniform_random_200_d101_logits.npy}",
+        "results/calibration-coverage/sweep-r1/selection/D.json",
+        "paper/results/calibration-coverage/accuracy_sweep_r1.json"
+      ]
+    },
+    "temporal": {
+      "paired_windows": 37361,
+      "candidate": "seed 1, uniform INT8",
+      "winner_int8": {
+        "recall_sensitivity": {
+          "falling_fast": 0.41233766233766234,
+          "falling": 0.4083384426732066,
+          "stable": 0.7474891398783666,
+          "rising": 0.4091612503868771,
+          "rising_fast": 0.3943541488451668
+        },
+        "precision_ppv": {
+          "falling_fast": 0.2199769053117783,
+          "falling": 0.26822392267418443,
+          "stable": 0.8837983317582282,
+          "rising": 0.2784330244313395,
+          "rising_fast": 0.2921419518377693
+        },
+        "f1": {
+          "falling_fast": 0.2868975903614458,
+          "falling": 0.3237724842002917,
+          "stable": 0.8099487874679921,
+          "rising": 0.331369845845344,
+          "rising_fast": 0.33563887877684745
+        }
+      },
+      "champion_int8": {
+        "recall_sensitivity": {
+          "falling_fast": 0.4816017316017316,
+          "falling": 0.5407725321888412,
+          "stable": 0.5373066898349261,
+          "rising": 0.39925719591457753,
+          "rising_fast": 0.5654405474764757
+        },
+        "precision_ppv": {
+          "falling_fast": 0.16129032258064516,
+          "falling": 0.196524064171123,
+          "stable": 0.9211749285033365,
+          "rising": 0.21961184882533197,
+          "rising_fast": 0.2227088948787062
+        },
+        "f1": {
+          "falling_fast": 0.24165082812924246,
+          "falling": 0.2882823990848178,
+          "stable": 0.6787242915779539,
+          "rising": 0.2833607907742998,
+          "rising_fast": 0.31955523326081703
+        }
+      },
+      "macro_f1": {
+        "winner_int8": 0.41752551733038423,
+        "champion_int8": 0.3623147085654262
+      },
+      "f1_change_pts": {
+        "falling_fast": 4.524676223220333,
+        "falling": 3.5490085115473913,
+        "stable": 13.122449589003827,
+        "rising": 4.800905507104419,
+        "rising_fast": 1.608364551603042
+      },
+      "macro_f1_change_pts": 5.521080876495803,
+      "decomposition": "macro-F1 change = mean of the five per-class F1 changes",
+      "recall_matches_published": true,
+      "sources": [
+        "results/calibration-coverage/sweep-r1/eval/temporal/{winner_meta.json,champion_meta.json,champion_int8_preds.npy,winner_seed*_int8_uniform_random_200_d101_logits.npy}",
+        "results/calibration-coverage/sweep-r1/selection/D.json",
+        "paper/results/calibration-coverage/accuracy_sweep_r1.json"
+      ]
+    }
+  },
+  "pedap_per_class": {
+    "windows": 7003788,
+    "recall_winner_int8": {
+      "falling_fast": 0.7053447206749032,
+      "falling": 0.3956513569317968,
+      "stable": 0.39147676755593314,
+      "rising": 0.42260939033990474,
+      "rising_fast": 0.63328682649832
+    },
+    "recall_champion_int8": {
+      "falling_fast": 0.6384380096816721,
+      "falling": 0.46019531202783204,
+      "stable": 0.3941903936556735,
+      "rising": 0.45345876957833864,
+      "rising_fast": 0.6107174526728549
+    },
+    "recall_change_pts": {
+      "falling_fast": 6.690671099323109,
+      "falling": -6.454395509603522,
+      "stable": -0.27136260997403516,
+      "rising": -3.0849379238433894,
+      "rising_fast": 2.256937382546509
+    },
+    "precision_winner_int8": {
+      "falling_fast": 0.24197344159053716,
+      "falling": 0.26250786491950623,
+      "stable": 0.8738773920358833,
+      "rising": 0.20846805303744687,
+      "rising_fast": 0.32502275536107955
+    },
+    "precision_champion_int8": {
+      "falling_fast": 0.28398189332078627,
+      "falling": 0.27050007298732603,
+      "stable": 0.8727495945013487,
+      "rising": 0.2073624929425775,
+      "rising_fast": 0.33443147317799
+    },
+    "predicted_share_winner_int8": {
+      "falling_fast": 0.1597445553748914,
+      "falling": 0.19583645307367956,
+      "stable": 0.2844512141144192,
+      "rising": 0.22318236931214938,
+      "rising_fast": 0.13678540812486042
+    },
+    "predicted_share_champion_int8": {
+      "falling_fast": 0.1232027582788057,
+      "falling": 0.22105380688278972,
+      "stable": 0.2867930896823262,
+      "rising": 0.24075086224768655,
+      "rising_fast": 0.12819948290839187
+    },
+    "directional_recall": {
+      "winner_int8": 0.5392230736112312,
+      "champion_int8": 0.5407023859901744
+    },
+    "recall_matches_published": true,
+    "note": "descriptive; round-five winner (bundled) vs the previous bundled champion",
+    "sources": [
+      "results/calibration-coverage/sweep-r5/eval/pedap/{meta.npz,winner_int8_preds.npy,champion_int8_preds.npy}",
+      "paper/results/calibration-coverage/accuracy_sweep_r5.json"
+    ]
+  },
+  "artifacts": {
+    "study_r1": {
+      "int8_artifacts": 110,
+      "float_artifacts": 5,
+      "device_timed_int8": 8,
+      "device_timed_float": 1,
+      "untimed_int8": 102,
+      "device_timed": [
+        "seed0_float",
+        "seed0_int8_participant_balanced_random_1000_d101",
+        "seed0_int8_participant_balanced_random_200_d101",
+        "seed0_int8_participant_balanced_range_coverage_1000_d101",
+        "seed0_int8_participant_balanced_range_coverage_200_d101",
+        "seed0_int8_sequential_1000_d0",
+        "seed0_int8_sequential_200_d0",
+        "seed0_int8_uniform_random_1000_d101",
+        "seed0_int8_uniform_random_200_d101"
+      ],
+      "inventory_method_reproduces_manifest": true,
+      "sources": [
+        "results/calibration-coverage/r1/artifacts_manifest.json",
+        "paper/results/calibration-coverage/device_benchmark_ios_r1.json"
+      ]
+    },
+    "confirmation_dubosson": {
+      "int8_artifacts": 20,
+      "float_artifacts": 5,
+      "int8_sizes_bytes": [
+        11976
+      ],
+      "float_sizes_bytes": [
+        17352
+      ],
+      "int8_distinct_sha256": 20,
+      "int8_distinct_operator_inventories": 1,
+      "int8_operator_inventories": [
+        [
+          "ADD",
+          "CONV_2D",
+          "DEPTHWISE_CONV_2D",
+          "DEQUANTIZE",
+          "FULLY_CONNECTED",
+          "MUL",
+          "QUANTIZE",
+          "RESHAPE",
+          "SUM",
+          "TRANSPOSE"
+        ]
+      ],
+      "sources": [
+        "results/calibration-coverage/conf-dubosson/artifacts/*.tflite"
+      ]
+    },
+    "confirmation_hall": {
+      "int8_artifacts": 20,
+      "float_artifacts": 5,
+      "int8_sizes_bytes": [
+        11976
+      ],
+      "float_sizes_bytes": [
+        17352
+      ],
+      "int8_distinct_sha256": 20,
+      "int8_distinct_operator_inventories": 1,
+      "int8_operator_inventories": [
+        [
+          "ADD",
+          "CONV_2D",
+          "DEPTHWISE_CONV_2D",
+          "DEQUANTIZE",
+          "FULLY_CONNECTED",
+          "MUL",
+          "QUANTIZE",
+          "RESHAPE",
+          "SUM",
+          "TRANSPOSE"
+        ]
+      ],
+      "sources": [
+        "results/calibration-coverage/conf-hall/artifacts/*.tflite"
+      ]
+    },
+    "delta_r1": {
+      "int8_artifacts": 20,
+      "float_artifacts": 5,
+      "int8_sizes_bytes": [
+        11976
+      ],
+      "float_sizes_bytes": [
+        17352
+      ],
+      "int8_distinct_sha256": 20,
+      "int8_distinct_operator_inventories": 1,
+      "int8_operator_inventories": [
+        [
+          "ADD",
+          "CONV_2D",
+          "DEPTHWISE_CONV_2D",
+          "DEQUANTIZE",
+          "FULLY_CONNECTED",
+          "MUL",
+          "QUANTIZE",
+          "RESHAPE",
+          "SUM",
+          "TRANSPOSE"
+        ]
+      ],
+      "sources": [
+        "results/calibration-coverage/delta-r1/artifacts/*.tflite"
+      ]
+    },
+    "study_int8_dtype_map": {
+      "artifact": "results/calibration-coverage/r1/artifacts/seed0_int8_uniform_random_200_d101.tflite",
+      "ops": [
+        {
+          "op": "RESHAPE",
+          "inputs": [
+            "int8",
+            "int32"
+          ],
+          "outputs": [
+            "int8"
+          ]
+        },
+        {
+          "op": "DEQUANTIZE",
+          "inputs": [
+            "int8"
+          ],
+          "outputs": [
+            "float32"
+          ]
+        },
+        {
+          "op": "DEQUANTIZE",
+          "inputs": [
+            "int8"
+          ],
+          "outputs": [
+            "float32"
+          ]
+        },
+        {
+          "op": "DEPTHWISE_CONV_2D",
+          "inputs": [
+            "float32",
+            "float32",
+            "float32"
+          ],
+          "outputs": [
+            "float32"
+          ]
+        },
+        {
+          "op": "RESHAPE",
+          "inputs": [
+            "float32",
+            "int32"
+          ],
+          "outputs": [
+            "float32"
+          ]
+        },
+        {
+          "op": "ADD",
+          "inputs": [
+            "float32",
+            "float32"
+          ],
+          "outputs": [
+            "float32"
+          ]
+        },
+        {
+          "op": "QUANTIZE",
+          "inputs": [
+            "float32"
+          ],
+          "outputs": [
+            "int8"
+          ]
+        },
+        {
+          "op": "TRANSPOSE",
+          "inputs": [
+            "int8",
+            "int32"
+          ],
+          "outputs": [
+            "int8"
+          ]
+        },
+        {
+          "op": "RESHAPE",
+          "inputs": [
+            "int8",
+            "int32"
+          ],
+          "outputs": [
+            "int8"
+          ]
+        },
+        {
+          "op": "TRANSPOSE",
+          "inputs": [
+            "int8",
+            "int32"
+          ],
+          "outputs": [
+            "int8"
+          ]
+        },
+        {
+          "op": "DEQUANTIZE",
+          "inputs": [
+            "int8"
+          ],
+          "outputs": [
+            "float32"
+          ]
+        },
+        {
+          "op": "DEQUANTIZE",
+          "inputs": [
+            "int8"
+          ],
+          "outputs": [
+            "float32"
+          ]
+        },
+        {
+          "op": "CONV_2D",
+          "inputs": [
+            "float32",
+            "float32",
+            "float32"
+          ],
+          "outputs": [
+            "float32"
+          ]
+        },
+        {
+          "op": "RESHAPE",
+          "inputs": [
+            "float32",
+            "int32"
+          ],
+          "outputs": [
+            "float32"
+          ]
+        },
+        {
+          "op": "ADD",
+          "inputs": [
+            "float32",
+            "float32"
+          ],
+          "outputs": [
+            "float32"
+          ]
+        },
+        {
+          "op": "QUANTIZE",
+          "inputs": [
+            "float32"
+          ],
+          "outputs": [
+            "int8"
+          ]
+        },
+        {
+          "op": "TRANSPOSE",
+          "inputs": [
+            "int8",
+            "int32"
+          ],
+          "outputs": [
+            "int8"
+          ]
+        },
+        {
+          "op": "RESHAPE",
+          "inputs": [
+            "int8",
+            "int32"
+          ],
+          "outputs": [
+            "int8"
+          ]
+        },
+        {
+          "op": "DEQUANTIZE",
+          "inputs": [
+            "int8"
+          ],
+          "outputs": [
+            "float32"
+          ]
+        },
+        {
+          "op": "SUM",
+          "inputs": [
+            "float32",
+            "int32"
+          ],
+          "outputs": [
+            "float32"
+          ]
+        },
+        {
+          "op": "MUL",
+          "inputs": [
+            "float32",
+            "float32"
+          ],
+          "outputs": [
+            "float32"
+          ]
+        },
+        {
+          "op": "QUANTIZE",
+          "inputs": [
+            "float32"
+          ],
+          "outputs": [
+            "int8"
+          ]
+        },
+        {
+          "op": "FULLY_CONNECTED",
+          "inputs": [
+            "int8",
+            "int8",
+            "int32"
+          ],
+          "outputs": [
+            "int8"
+          ]
+        }
+      ],
+      "sources": [
+        "results/calibration-coverage/r1/artifacts/seed0_int8_uniform_random_200_d101.tflite"
+      ]
+    },
+    "calibration_changes_inside_int8": {
+      "artifacts": [
+        "results/calibration-coverage/r1/artifacts/seed0_int8_sequential_200_d0.tflite",
+        "results/calibration-coverage/r1/artifacts/seed0_int8_uniform_random_200_d101.tflite"
+      ],
+      "n_tensors": 41,
+      "n_changed": 12,
+      "n_changed_outside_layout_ops": 6,
+      "int8_constants_identical": true,
+      "n_int8_constants": 3,
+      "changed": [
+        {
+          "tensor": 0,
+          "dtype": "int8",
+          "role": "graph input",
+          "constant_data_differs": false,
+          "n_scales": 1,
+          "scale": [
+            0.9839077591896057,
+            1.571855902671814
+          ],
+          "zero_point": [
+            -128,
+            -128
+          ]
+        },
+        {
+          "tensor": 14,
+          "dtype": "int32",
+          "role": "constant",
+          "constant_data_differs": true,
+          "n_scales": 5,
+          "scale": [
+            0.0002991899964399636,
+            0.0004529828729573637
+          ],
+          "zero_point": [
+            0,
+            0
+          ]
+        },
+        {
+          "tensor": 16,
+          "dtype": "int8",
+          "role": "output of RESHAPE",
+          "constant_data_differs": false,
+          "n_scales": 1,
+          "scale": [
+            0.9839077591896057,
+            1.571855902671814
+          ],
+          "zero_point": [
+            -128,
+            -128
+          ]
+        },
+        {
+          "tensor": 23,
+          "dtype": "int8",
+          "role": "output of QUANTIZE",
+          "constant_data_differs": false,
+          "n_scales": 1,
+          "scale": [
+            0.5252792835235596,
+            0.788957953453064
+          ],
+          "zero_point": [
+            -128,
+            -128
+          ]
+        },
+        {
+          "tensor": 24,
+          "dtype": "int8",
+          "role": "output of TRANSPOSE",
+          "constant_data_differs": false,
+          "n_scales": 1,
+          "scale": [
+            0.5252792835235596,
+            0.788957953453064
+          ],
+          "zero_point": [
+            -128,
+            -128
+          ]
+        },
+        {
+          "tensor": 25,
+          "dtype": "int8",
+          "role": "output of RESHAPE",
+          "constant_data_differs": false,
+          "n_scales": 1,
+          "scale": [
+            0.5252792835235596,
+            0.788957953453064
+          ],
+          "zero_point": [
+            -128,
+            -128
+          ]
+        },
+        {
+          "tensor": 26,
+          "dtype": "int8",
+          "role": "output of TRANSPOSE",
+          "constant_data_differs": false,
+          "n_scales": 1,
+          "scale": [
+            0.5252792835235596,
+            0.788957953453064
+          ],
+          "zero_point": [
+            -128,
+            -128
+          ]
+        },
+        {
+          "tensor": 33,
+          "dtype": "int8",
+          "role": "output of QUANTIZE",
+          "constant_data_differs": false,
+          "n_scales": 1,
+          "scale": [
+            0.24731343984603882,
+            0.37906399369239807
+          ],
+          "zero_point": [
+            -128,
+            -128
+          ]
+        },
+        {
+          "tensor": 34,
+          "dtype": "int8",
+          "role": "output of TRANSPOSE",
+          "constant_data_differs": false,
+          "n_scales": 1,
+          "scale": [
+            0.24731343984603882,
+            0.37906399369239807
+          ],
+          "zero_point": [
+            -128,
+            -128
+          ]
+        },
+        {
+          "tensor": 35,
+          "dtype": "int8",
+          "role": "output of RESHAPE",
+          "constant_data_differs": false,
+          "n_scales": 1,
+          "scale": [
+            0.24731343984603882,
+            0.37906399369239807
+          ],
+          "zero_point": [
+            -128,
+            -128
+          ]
+        },
+        {
+          "tensor": 39,
+          "dtype": "int8",
+          "role": "output of QUANTIZE",
+          "constant_data_differs": false,
+          "n_scales": 1,
+          "scale": [
+            0.03228897601366043,
+            0.0488865040242672
+          ],
+          "zero_point": [
+            -128,
+            -128
+          ]
+        },
+        {
+          "tensor": 40,
+          "dtype": "int8",
+          "role": "output of FULLY_CONNECTED",
+          "constant_data_differs": false,
+          "n_scales": 1,
+          "scale": [
+            0.03945032134652138,
+            0.03819834440946579
+          ],
+          "zero_point": [
+            63,
+            61
+          ]
+        }
+      ],
+      "note": "scale/zero_point list [first artifact, second]; first channel shown for per-channel tensors"
+    }
+  },
+  "sweep_settings": {
+    "rounds": {
+      "r1": {
+        "training": {
+          "batch_size": 64,
+          "device": "cpu",
+          "source": "no smoke record: experiments/accuracy_sweep.py stage_train calls train_model without batch_size, so training/train.py's default applies"
+        },
+        "int8_calibration": {
+          "selections": [
+            "sequential_200_d0",
+            "uniform_random_200_d101"
+          ],
+          "ship_candidate_calibration": "uniform_random_200_d101",
+          "pool_sha256": [
+            "f27e0f200a23937191f5020568eb5e2cc186b9e382bb4176779a1437d005b223"
+          ],
+          "same_pool_as_main_study": true,
+          "same_windows_as_main_study": true,
+          "sources": [
+            "results/calibration-coverage/sweep-r1/selections/sequential_200_d0.json",
+            "results/calibration-coverage/sweep-r1/selections/uniform_random_200_d101.json"
+          ]
+        }
+      },
+      "r2": {
+        "training": {
+          "batch_size": 512,
+          "device": "mps",
+          "source": "results/calibration-coverage/sweep-r2/smoke.json (frozen_batch)"
+        },
+        "int8_calibration": {
+          "selections": [
+            "sequential_200_d0",
+            "uniform_random_200_d101"
+          ],
+          "ship_candidate_calibration": "uniform_random_200_d101",
+          "pool_sha256": [
+            "f27e0f200a23937191f5020568eb5e2cc186b9e382bb4176779a1437d005b223"
+          ],
+          "same_pool_as_main_study": true,
+          "same_windows_as_main_study": true,
+          "sources": [
+            "results/calibration-coverage/sweep-r2/selections/sequential_200_d0.json",
+            "results/calibration-coverage/sweep-r2/selections/uniform_random_200_d101.json"
+          ]
+        }
+      },
+      "r3": {
+        "training": {
+          "batch_size": 512,
+          "device": "mps",
+          "source": "results/calibration-coverage/sweep-r3/smoke.json (frozen_batch)"
+        },
+        "int8_calibration": {
+          "selections": [
+            "sequential_200_d0",
+            "uniform_random_200_d101"
+          ],
+          "ship_candidate_calibration": "uniform_random_200_d101",
+          "pool_sha256": [
+            "f27e0f200a23937191f5020568eb5e2cc186b9e382bb4176779a1437d005b223"
+          ],
+          "same_pool_as_main_study": true,
+          "same_windows_as_main_study": true,
+          "sources": [
+            "results/calibration-coverage/sweep-r3/selections/sequential_200_d0.json",
+            "results/calibration-coverage/sweep-r3/selections/uniform_random_200_d101.json"
+          ]
+        }
+      },
+      "r4": {
+        "training": {
+          "batch_size": 512,
+          "device": "mps",
+          "source": "results/calibration-coverage/sweep-r4/smoke.json (frozen_batch)"
+        },
+        "int8_calibration": {
+          "selections": [
+            "sequential_200_d0",
+            "uniform_random_200_d101"
+          ],
+          "ship_candidate_calibration": "uniform_random_200_d101",
+          "pool_sha256": [
+            "f27e0f200a23937191f5020568eb5e2cc186b9e382bb4176779a1437d005b223"
+          ],
+          "same_pool_as_main_study": true,
+          "same_windows_as_main_study": true,
+          "sources": [
+            "results/calibration-coverage/sweep-r4/selections/sequential_200_d0.json",
+            "results/calibration-coverage/sweep-r4/selections/uniform_random_200_d101.json"
+          ]
+        }
+      },
+      "r5": {
+        "training": {
+          "batch_size": 512,
+          "device": "mps",
+          "source": "results/calibration-coverage/sweep-r5/smoke.json (frozen_batch)"
+        },
+        "int8_calibration": {
+          "selections": [
+            "sequential_200_d0",
+            "uniform_random_200_d101"
+          ],
+          "ship_candidate_calibration": "uniform_random_200_d101",
+          "pool_sha256": [
+            "f27e0f200a23937191f5020568eb5e2cc186b9e382bb4176779a1437d005b223"
+          ],
+          "same_pool_as_main_study": true,
+          "same_windows_as_main_study": true,
+          "sources": [
+            "results/calibration-coverage/sweep-r5/selections/sequential_200_d0.json",
+            "results/calibration-coverage/sweep-r5/selections/uniform_random_200_d101.json"
+          ]
+        }
+      }
+    },
+    "main_study_pool": {
+      "description": "eligible Weinstock validation windows (primary mask)",
+      "windows": 27109,
+      "participants": 127,
+      "sources": [
+        "paper/results/calibration-coverage/data_availability.json",
+        "results/calibration-coverage/r1/selections/*.json"
+      ]
+    }
+  },
+  "flags": [
+    {
+      "item": "INT8 calibration pool of the sweeps (S2)",
+      "stated": "protocol_sweep_r5.json calibration: 'sequential_200_d0 + uniform_random_200_d101 from weinstock train only; uniform INT8 is the ship candidate'",
+      "observed": "every round's selections carry the main-study pool_sha256: the eligible Weinstock validation pool, not training windows"
+    },
+    {
+      "item": "sweep training batch size (S17; plan Task 5 'batch size 512')",
+      "stated": "roadmap S17 '512 vs the stated 64'; plan Task 5 'batch size 512'",
+      "observed": {
+        "r1": 64,
+        "r2": 512,
+        "r3": 512,
+        "r4": 512,
+        "r5": 512
+      }
+    },
+    {
+      "item": "what calibration changes inside an INT8 artifact (S21)",
+      "stated": "main.tex Deployment costs: 'changes nothing the device sees except the two quantization parameters'",
+      "observed": "12 of 41 graph tensors change between two calibrations of one checkpoint; 6 outside layout ops (constant, graph input, output of FULLY_CONNECTED, output of QUANTIZE); int8 weights identical: True"
+    },
+    {
+      "item": "randomized 200-window participant range (S38)",
+      "stated": "main.tex: 96--127",
+      "observed": [
+        90,
+        127
+      ]
+    }
+  ]
+}
