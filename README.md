@@ -1,5 +1,7 @@
 # GlucoEdge
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23426170.svg)](https://doi.org/10.5281/zenodo.23426170)
+
 An on-device glucose trend classifier for Android and iOS — a portfolio project
 demonstrating production on-device ML deployment (privacy, offline
 inference, latency), **not a medical device**. It does not diagnose,
