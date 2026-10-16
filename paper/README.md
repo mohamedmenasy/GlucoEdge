@@ -127,11 +127,17 @@ model was retrained or re-evaluated on new data.
 
 ```bash
 cd paper
+rm -f main.aux main.out main.log main.blg
 tectonic --keep-intermediates --keep-logs main.tex
 ```
 
+Delete the intermediates first: a leftover `main.aux` from an earlier build
+can shift page breaks, so only a clean build reproduces the committed PDF.
 The command produces `main.pdf` and retains `main.bbl`, which should be included
-with the LaTeX sources in an arXiv submission.
+with the LaTeX sources in an arXiv submission. The `Paper` CI workflow builds
+the same way on every change under `paper/` and fails on undefined
+references, overfull lines, or non-ASCII source (arXiv compiles with
+pdfLaTeX).
 
 ## Suggested arXiv metadata
 
@@ -142,6 +148,12 @@ with the LaTeX sources in an arXiv submission.
 - **Possible cross-lists:** `eess.SP`, `q-bio.QM`
 - **Comments:** 28 pages (18-page body plus appendices), 3 figures, 23 tables. Source code and model artifacts are
   available at <https://github.com/mohamedmenasy/GlucoEdge>.
+- **Abstract** (plain text for the form, 1,915 characters against arXiv's
+  1,920 limit; regenerate it if the LaTeX abstract changes):
+
+  ```text
+  GlucoEdge, an Android/iOS research prototype, maps 12 five-minute continuous glucose monitor (CGM) readings to one of five classes of the mean rate of change over the next 15 minutes. This paper asks how quantization-calibration coverage affects directional (minority-class) recall and deployment cost, and which model and data changes improve that recall under one-read-per-round staged sweeps. A 2,909-parameter convolutional network trained on Weinstock data was quantized to 8-bit integers (INT8) with four calibration-selection strategies at two budgets. In a prespecified secondary contrast, contiguous first-N selection, spanning two participants and capping the input range at 250.9 mg/dL, cost 13.4 points of held-out directional recall (95% CI 10.3-16.9) against equal-size uniform random selection while accuracy rose. The primary contrast (range stratification) was null: with every randomized selection covering the full input range, stratification, budget and observer choice moved recall by at most about a tenth of a point. A clip-only control attributes the loss to clipping; the fix is free to deploy. Two small cohorts did not confirm the frozen predictions; post hoc, difference-encoded inputs shrank the effect to 0.5 points. Four of five sweep rounds spent one pre-registered read (round four none), three on reused Weinstock test components. A macro-averaged F1 (macro-F1) winner passed every gate but was rejected post hoc as directional recall fell (0.517 to 0.438); training only on DiaData cohorts passed its gates; a seed-4 flatten-head artifact (cosine schedule, validation-chosen epoch) passed all gates on a never-evaluated 2008 trial cohort (+0.20 points [+0.11, +0.29] vs. round three's 1.1-point seed spread) but lowered macro-F1 there (0.410 vs. 0.427), failed two gates on both Weinstock components, and is bundled in the research applications. GlucoEdge is not a medical device.
+  ```
 
 Before submission, confirm the author name, email, affiliation, category, and
 license in the arXiv form. The funding, competing-interest, and CRediT

@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use GlucoEdge or its bundled models, please cite it as below."
+type: software
+title: "GlucoEdge: on-device glucose trend classification (research prototype)"
+authors:
+  - family-names: Menasy
+    given-names: Mohamed
+repository-code: "https://github.com/mohamedmenasy/GlucoEdge"
+license: MIT
+version: 1.1.0
+date-released: 2026-10-16
+abstract: >-
+  Android and iOS research prototype that maps 12 five-minute continuous
+  glucose monitor readings to one of five trend classes with a small 1D CNN,
+  converted to LiteRT float and INT8, with the full computational record of
+  its manuscript. Not a medical device. Code is MIT; the bundled model
+  weights are CC BY-NC 4.0 (LICENSE-MODELS).
+keywords:
+  - continuous glucose monitoring
+  - on-device machine learning
+  - post-training quantization
+  - LiteRT

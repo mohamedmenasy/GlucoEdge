@@ -1,0 +1,52 @@
+name: Paper
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ["paper/**", ".github/workflows/paper.yml"]
+  push:
+    branches: [main]
+    paths: ["paper/**", ".github/workflows/paper.yml"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      TECTONIC_VERSION: "0.17.0"
+      TECTONIC_SHA256: 8533d07f9ccbd7a65824b9e0459041bca34af1eb33daba48f59215593753a3b7
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/Tectonic
+          key: tectonic-bundle-${{ env.TECTONIC_VERSION }}
+
+      - name: Install tectonic
+        run: |
+          curl -fsSL -o tectonic.tar.gz "https://github.com/tectonic-typesetting/tectonic/releases/download/tectonic%40${TECTONIC_VERSION}/tectonic-${TECTONIC_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+          echo "${TECTONIC_SHA256}  tectonic.tar.gz" | sha256sum -c -
+          mkdir -p "$HOME/.local/bin"
+          tar -xzf tectonic.tar.gz -C "$HOME/.local/bin" tectonic
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # arXiv compiles with pdfLaTeX, which rejects most non-ASCII input.
+      - name: Sources are ASCII
+        run: |
+          if grep -nP '[^\x00-\x7F]' paper/main.tex paper/references.bib; then
+            echo "::error::non-ASCII characters in the paper sources"
+            exit 1
+          fi
+
+      # A fresh checkout has no stale main.aux, so this is the clean build.
+      - name: Build
+        working-directory: paper
+        run: tectonic --keep-logs main.tex
+
+      - name: No undefined references or overfull lines
+        working-directory: paper
+        run: |
+          if grep -nE 'undefined|Overfull' main.log; then
+            echo "::error::fix the warnings above"
+            exit 1
+          fi
