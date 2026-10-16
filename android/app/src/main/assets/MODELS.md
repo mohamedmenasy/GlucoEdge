@@ -91,7 +91,9 @@ calibration): float acc 0.5184 / macro recall 0.5060, INT8 acc 0.5866 /
 macro recall 0.4135 on the historical test split — see
 docs/superpowers/specs/2026-07-01-litert-conversion-results.md.
 
-Not a medical device. Trained only on the public GlucoBench benchmark.
+Not a medical device. Trained only on public research data: five DiaData
+cohorts (CC BY-NC 4.0), never on Weinstock or any other GlucoBench cohort;
+the INT8 file is calibrated on GlucoBench Weinstock validation windows.
 
 ## Runtime backend note (Task 8, updated by the CompiledModel-restore fix)
 

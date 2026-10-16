@@ -158,8 +158,9 @@ available in the project repository.\footnote{\url{https://github.com/mohamedmen
 
 \subsection{Forecasting tasks, horizons, and inputs}
 
-CGM forecasting has expanded from autoregressive value prediction on sensor
-history \cite{reifman2007predictive} to recurrent and attention models with
+Forecasting from continuous glucose monitoring (CGM) has expanded from
+autoregressive value prediction on sensor history
+\cite{reifman2007predictive} to recurrent and attention models with
 contextual inputs \cite{mirshekarian2019lstm}, recurrent variance estimation
 \cite{martinsson2020variance}, and convolutional--recurrent fusion of CGM,
 insulin, and meals \cite{li2020crnn}. Architecture and input modality change
@@ -178,10 +179,16 @@ held-out-participant splits evaluate unseen people in the same dataset, and
 cross-dataset evaluation also changes the cohort and pipeline. GlucoBench
 standardizes preprocessing, splits, and baselines across five public datasets
 \cite{sergazinov2024glucobench}; experiments across four datasets directly test
-changes in data source \cite{ghimire2024generalize}. \project uses GlucoBench's
-largest type-1 diabetes cohort, Weinstock, whose source study collected blinded
-CGM from older adults with long-standing type-1 diabetes
-\cite{weinstock2016risk}.
+changes in data source \cite{ghimire2024generalize}. The calibration study
+uses GlucoBench's largest type-1 diabetes cohort, Weinstock, a case-control
+sample of older adults with long-standing type-1 diabetes, enriched for
+severe hypoglycemia and recorded with blinded CGM \cite{weinstock2016risk}.
+From round two on, the accuracy sweeps also train on five cohorts from the
+DiaData collection \cite{cinar2026diadata} and evaluate zero-shot on two
+more: PEDAP, a
+closed-loop trial in children aged 2 to under 6 \cite{wadwa2023pedap}, and
+RT-CGM, the JDRF CGM randomized trial \cite{jdrf2008cgm}
+(Table~\ref{tab:cohorts}).
 
 Nearby and overlapping windows are dependent, so time-series splitting requires
 care: cross-validation validity for autoregressive prediction depends on the
@@ -196,22 +203,21 @@ participant, temporal, and dataset boundaries used in evaluation.
 \caption{Representative CGM forecasting studies and evaluation scope. Metrics
 are not compared across rows because datasets and protocols differ.}
 \label{tab:relatedwork}
-\small
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{@{}llllll@{}}
+\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lp{1.9cm}lp{2.3cm}p{4.6cm}p{2.3cm}@{}}
 \toprule
 Study & Target & Horizon & Inputs & Evaluation scope & Device evidence \\
 \midrule
 Reifman et al. \cite{reifman2007predictive} & Value & 30 min & CGM & 9 participants & None reported \\
-Mirshekarian et al. \cite{mirshekarian2019lstm} & Value & 30/60 min & CGM + context & OhioT1DM/synthetic & None reported \\
-Martinsson et al. \cite{martinsson2020variance} & Value + variance & 30/60 min & CGM & OhioT1DM & None reported \\
-Li et al. \cite{li2020crnn} & Value & 30/60 min & CGM, insulin, meals & 10 real + 10 simulated & Android timing \\
-GlucoBench \cite{sergazinov2024glucobench} & Value trajectory & 60 min & Dataset-dependent & Five public datasets & None reported \\
+Mirshekarian et al. \cite{mirshekarian2019lstm} & Value & 30/60 min & CGM + context & OhioT1DM \cite{marling2020ohiot1dm}/synthetic & None reported \\
+Martinsson et al. \cite{martinsson2020variance} & \raggedright Value + variance & 30/60 min & CGM & OhioT1DM \cite{marling2020ohiot1dm} & None reported \\
+Li et al. \cite{li2020crnn} & Value & 30/60 min & \raggedright CGM, insulin, meals & 10 real + 10 simulated & Android timing \\
+Zhu et al. \cite{zhu2023iomt} & \raggedright Value + hypoglycemia & 30/60 min & \raggedright CGM + time of day & \raggedright Three datasets incl.\ OhioT1DM \cite{marling2020ohiot1dm}; 47 participants & \raggedright Wearable system-on-chip \tabularnewline
+GlucoBench \cite{sergazinov2024glucobench} & \raggedright Value trajectory & 60 min & \raggedright Dataset-dependent & Five public datasets & None reported \\
 Ghimire et al. \cite{ghimire2024generalize} & Value & 30/60 min & CGM & Four datasets & None reported \\
-\project (this work) & Trend class & 15 min & CGM & Weinstock held-out + temporal & Android/iOS replay timing \\
+\project (this work) & Trend class & 15 min & CGM & \raggedright Training on Weinstock or five DiaData cohorts; Weinstock held-out and temporal, RT-CGM and PEDAP zero-shot & \raggedright Android/iOS replay timing \tabularnewline
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
 \end{table*}
 
 \subsection{Trend representations and class imbalance}
@@ -231,36 +237,81 @@ though it still does not establish event-level or clinical performance.
 
 No published baseline exists for this exact task (five rate-of-change
 classes at a future sample, scored on held-out participants). The
-nearest classification results predict glucose
-\emph{level} bands, with recalls of 0.85--0.96 at 15-minute and 1-hour
-horizons under within-patient splits \cite{kistkins2023classification};
-level bands inherit the level's autocorrelation, three classes
-are coarser than five rate bands, and within-patient splits exploit
-person-specific dynamics a held-out protocol denies.
-Forecasting work evaluates RMSE, where direction surfaces only as a
-safety penalty on incoherent predicted variation
-\cite{debois2019coherent}.
+nearest classification study predicts three glucose \emph{level} bands
+(hypo-, eu- and hyperglycemia) for 11 participants whose data were
+recorded every 15 minutes, so its 15-minute horizon is one step ahead;
+its best models reach recalls of 0.85--0.98, with euglycemia recall of
+0.59--0.70 at 1~h, under within-patient splits
+\cite{kistkins2023classification}. Level bands inherit the level's
+autocorrelation, three classes are coarser than five rate bands, and
+within-patient splits exploit person-specific dynamics that a held-out
+protocol denies.
+
+Rate and direction are already graded in this domain. Continuous
+glucose-error grid analysis (CG-EGA) pairs a point-accuracy grid with a
+rate-error grid \cite{kovatchev2004cgega} and has been applied to glucose
+predictors \cite{zanderigo2007prediction}; the J index combines a
+forecast's regularity with its time gain \cite{facchinetti2011index}; and
+coherence penalties discourage predicted changes that contradict the
+measured ones \cite{debois2019coherent}. Because the target here is a
+class rather than a value, this paper reports per-class recall
+(sensitivity) and its directional mean, which expose the minority-class
+losses that accuracy hides. Per-class recall counts every misclassification
+alike: it does not distinguish an adjacent rate band from a reversed
+direction, weight errors by the glucose level at which they occur, or
+grade timing, all of which CG-EGA and the J index address.
 
 \subsection{Edge inference and quantization}
 
-One-dimensional CNNs extract local temporal features with compact feed-forward
-networks \cite{kiranyaz2021survey}. Mobile inference systems can reduce
-execution cost through compression and runtime-specific scheduling
-\cite{lane2016deepx}, but latency is a property of model, runtime, and hardware
-together: Li et al. reported Android timing for a glucose forecasting model
-\cite{li2020crnn}, and smartphone and tiny-device benchmarks measure specified
-workloads and platforms because model size alone does not determine speed
-\cite{ignatov2019aibenchmark,banbury2021mlperftiny}.
+One-dimensional convolutional neural networks (CNNs) extract local temporal
+features with compact feed-forward networks \cite{kiranyaz2021survey}. Mobile
+inference systems can reduce execution cost through compression and
+runtime-specific scheduling \cite{lane2016deepx}, but latency is a property of
+model, runtime, and hardware together, so smartphone and tiny-device
+benchmarks measure specified workloads on specified platforms
+\cite{ignatov2019aibenchmark,banbury2021mlperftiny}. Glucose predictors have
+been run on such hardware: Li et al. timed a convolutional--recurrent
+forecaster on Android \cite{li2020crnn}, and Zhu et al. embedded a recurrent
+predictor in a wearable whose low-power system-on-chip performs real-time
+glucose prediction and hypoglycemia detection \cite{zhu2023iomt}. Both
+forecast glucose values rather than trend classes
+(Table~\ref{tab:relatedwork}).
 
 Integer quantization approximates floating-point tensors with discrete values
 parameterized by a scale and zero point \cite{jacob2018quantization}; static
-post-training quantization estimates activation ranges from calibration inputs
-before conversion \cite{pytorchPT2E2026,googleRepresentativeData}. Low-bit
-studies show that clipping, range estimation, and rounding choices can
-determine the resulting error \cite{banner2019ptq,nagel2020adaround}, with
-specialized methods for small calibration sets
-\cite{hubara2021smallcalibration} --- findings that support checking converted
-outputs and per-class metrics alongside model size.
+post-training quantization (PTQ) estimates activation ranges from calibration
+inputs before conversion \cite{pytorchPT2E2026,googleRepresentativeData}.
+Low-bit studies show that clipping, range estimation, and rounding choices
+can determine the resulting error \cite{banner2019ptq,nagel2020adaround}, and
+that accurate PTQ is attainable from small calibration sets
+\cite{hubara2021smallcalibration}.
+
+Which samples calibrate the quantizer is itself a studied lever. Standard
+8-bit integer (INT8) recipes set activation ranges from a small calibration
+set \cite{krishnamoorthi2018quantizing,nagel2021whitepaper}, and range
+estimators (maximum, entropy, percentile) have been compared across vision,
+speech, and language networks \cite{wu2020integer}. In language models, the
+choice of calibration data alone produces substantial variation in
+downstream performance after quantization or pruning
+\cite{williams2024calibration}; in vision, PTQ accuracy tracks how closely
+the calibration set's feature statistics match the source data's, more than
+whether it comes from the same domain \cite{yu2021crossdomain}; and
+data-free methods synthesize calibration inputs that match a network's
+batch-normalization statistics \cite{cai2020zeroq}. Converter documentation
+states the practical rule: the representative dataset is ``a small subset
+of a few hundred samples randomly chosen, in no particular order, from the
+training or evaluation dataset'' \cite{googleRepresentativeData}, and the
+LiteRT (formerly TensorFlow Lite) guide asks for around 100--500 training or
+validation samples \cite{googleLiteRTQuantization}. That calibration data
+must represent the deployment inputs is therefore established guidance, not
+a finding of this paper. What the paper adds is a participant-clustered
+measurement, with a mechanism control, of how a contiguous first-$N$
+(dataset-order) selection of overlapping, time-ordered windows violates
+that guidance --- the first windows of a sorted pool hold under a day of
+readings from one or two participants and truncate the input range ---
+and of its class-level consequence: the clipped inputs concentrate in the
+fast-falling class, whose recall collapses while accuracy rises
+(Section~\ref{sec:mechanism}).
 
 \project connects public preprocessing with conversion parity, class-wise
 evaluation, and offline replay on one Android and one iOS device; it does not
@@ -268,16 +319,17 @@ establish live-sensor, clinical, or cross-hardware performance.
 
 \section{Problem Formulation}
 
-Let $g_t$ be the CGM value at time $t$, in \mgdl, with observations every five
-minutes. The input is
+Let $g_t$ be the CGM sensor reading at time $t$, in \mgdl, with observations
+every five minutes. The input is
 \begin{equation}
     \mathbf{x}_t = [g_{t-55}, g_{t-50}, \ldots, g_t] \in \mathbb{R}^{12}.
 \end{equation}
-The future rate of change is computed from a point outside the input window:
+The target is the mean rate of change over the next 15 minutes, computed
+from a point outside the input window:
 \begin{equation}
-    r_t = \frac{g_{t+15}-g_t}{15}\quad [\mgdl/\mathrm{min}].
+    r_t = \frac{g_{t+15}-g_t}{15}\quad [\mgdl/\mathrm{min}],
 \end{equation}
-The class $y_t$ is assigned by
+not the instantaneous rate at $t+15$. The class $y_t$ is assigned by
 \begin{equation}
 y_t =
 \begin{cases}
@@ -293,10 +345,11 @@ samples at a five-minute cadence. The history length and 15-minute horizon
 are fixed engineering choices for this prototype. The five-class target is a
 simplification based on two samples and does not describe the full intervening
 trajectory.
-The boundaries use rate bands commonly represented by CGM trend arrows, while
-collapsing device-specific arrow taxonomies into five classes
-\cite{pettus2017recommendations,rodacki2021trend}. No threshold was optimized on
-the test labels.
+The boundaries are trend-arrow rate bands ($\pm1$ and $\pm2$~\mgdl/min),
+the rates that CGM trend arrows commonly separate; the five classes
+collapse device-specific arrow taxonomies
+\cite{pettus2017recommendations,rodacki2021trend}. No threshold was
+optimized on the test labels.
 
 \section{Data and Methods}
 
@@ -1805,65 +1858,106 @@ The results should be read with the following limitations in mind.
     historical test run. The protocol, samplers, and endpoint were frozen
     before the new held-out labels were read, but prior exposure cannot be
     undone by re-splitting \cite{kapoor2023leakage}.
-    \item One architecture, one quantizer, and one primary cohort. The
-    source cohort comprised older adults with long-standing type-1
-    diabetes and blinded CGM collection \cite{weinstock2016risk}. The
-    sequential-versus-uniform effect was confirmed on two further
-    cohorts with prespecified paired predictions
-    (Table~\ref{tab:confirmation}), but all other contrasts remain
-    single-cohort \cite{ghimire2024generalize}, and the null results for range
-    stratification, budget, and observer are statements about this
-    2,909-parameter CNN with per-tensor affine input quantization, not
-    about PTQ in general. Larger models, other datasets, or other
-    quantizers may behave differently
+    \item The calibration findings rest on one architecture, one
+    quantizer, and one primary cohort: a case-control sample of older
+    adults with long-standing type-1 diabetes, about half of whom had a
+    severe hypoglycemic event in the prior year, recorded with blinded CGM
+    \cite{weinstock2016risk}. The range-stratification and budget nulls
+    hold in a saturated regime: every randomized 200-window selection
+    already spans the pool's 39--401~\mgdl\ and receives the same INT8
+    input range, so the primary contrast compared arms with identical
+    input quantization and says nothing about range-aware selection, which
+    was not tested on cohorts where random draws under-cover the range. These
+    nulls and the observer comparison describe this 2,909-parameter CNN
+    with per-tensor affine input quantization, not PTQ in general
     \cite{bouthillier2021variance,hubara2021smallcalibration}.
-    \item The accuracy sweeps reuse evaluation data. Weinstock held-out
-    and temporal labels were read in rounds one to three, so round five
-    demoted them to descriptive secondaries and moved its primary
-    endpoint to RT-CGM, which no round had evaluated; a rejected
-    round-three arm had trained on that cohort, though neither model in
-    the round-five comparison did. The certified round-five gain is small
-    ($+0.20$ points) and endpoint-shaped: macro-F1 and secondary stable
-    recall fall, the winner is a single seed, and its validation numbers
-    are selection-biased.
+    \item The second-cohort evidence is exploratory. Neither designated
+    six-participant contrast is significant at the 5\% level under an
+    exact sign-flip test (smallest attainable $p=0.031$): dubosson temporal is
+    $+1.98$ points ($p=0.094$), 1.62 of them from one participant, and
+    hall held-out $+1.31$ ($p=0.25$). Hall's 50-participant temporal
+    component is positive, $+4.31$ $[+1.14,+7.34]$, against a frozen
+    near-zero prediction whose premise, that sequential selection could
+    not meaningfully under-cover hall's range, failed (sequential ceiling
+    165~\mgdl\ against a 303~\mgdl\ maximum). All other calibration
+    contrasts are single-cohort \cite{ghimire2024generalize}.
     \item Stride-one windows remain overlapping and dependent
     \cite{bergmeir2018crossvalidation}; uncertainty therefore comes from
     participant-cluster bootstrap intervals conditional on the fitted
     models and calibration sets, with model-seed and draw variation
     averaged inside each bootstrap draw rather than treated as
-    independent participants.
+    independent participants. Six-participant components get an exact
+    sign-flip test over participants and no interval, because inference
+    with so few clusters is anti-conservative \cite{cameron2008bootstrap}.
+    \item The accuracy sweeps reuse the main study's Weinstock splits:
+    every round selected on its validation windows, rounds one to three
+    read its held-out and temporal labels, and round five reports them
+    again as descriptive secondaries (Table~\ref{tab:readledger}). Round
+    five is an artifact-level ship decision between the seed-4
+    flatten-head artifact (cosine schedule, validation-chosen epoch) and
+    one champion artifact. Its RT-CGM gain, $+0.20$ points, is smaller
+    than the 1.1-point five-seed held-out spread; its RT-CGM macro-F1 is
+    lower (0.410 against 0.427); on both Weinstock components it would
+    fail the beat-the-champion and stable-floor gates; and PEDAP is a
+    near-tie (0.539 against 0.541). The five-seed RT-CGM comparison that
+    could credit the flatten head or the cosine schedule was not run. No
+    round had evaluated RT-CGM labels before, but a rejected round-three
+    arm trained on the cohort.
     \item The gap-fill mask removes windows around missing readings, but
     the retained grid still contains formatter re-gridding between
     adjacent readings, and interpolation precedes windowing, so
     retrospective preprocessing may use information unavailable in real
-    time. The three frozen sensitivity tiers (exact-observed windows;
-    gap-filled inputs with gap-free endpoints; any gap-filled endpoint)
-    reproduce both headline findings
-    (Table~\ref{tab:sensitivity}), but the tier evaluation ran after the
-    primary analysis was published, and the gap-filled-endpoint tier's
+    time. The three frozen sensitivity tiers reproduce both headline
+    findings (Table~\ref{tab:sensitivity}), but they were evaluated after
+    the primary analysis was published, and the gap-filled-endpoint tier's
     labels score agreement with the formatter's interpolated grid, not
-    with unobserved sensor readings.
-    \item The five labels are deterministic transformations of a future
-    CGM point, not expert annotations, and the CGM-only model omits meal,
-    insulin, activity, illness, and other covariates. Probability
-    calibration and event-level performance were not evaluated.
-    \item The nine prespecified artifacts were device-timed on one
-    iPhone (Table~\ref{tab:devicebench}); repeated calls on one phone
-    are not evidence across devices, the historical Android device is
-    no longer available, initialization was measured within-process,
-    and energy and memory were not measured. The remaining 101 matrix,
-    confirmation-cohort, and delta-encoded artifacts were not
-    device-timed but share one operator inventory and byte size with
-    the timed ones; earlier bundled pairs (delta-r1 and round-two)
-    passed on-device parity, with single live in-app sessions (100
-    inferences per model) observing means between 0.080 and 0.149~ms
-    --- observations, not paired-protocol measurements. The round-five
-    pair bundled at submission passed the simulator and JVM parity
-    suites bit-exactly, the same suite passed on the iPhone 18 Pro
-    Max on ship day (51 tests, golden parity included), and a live
-    in-app session the same day observed float 0.124~ms mean /
-    0.182~ms p95 and INT8 0.126~ms / 0.179~ms --- again observations,
-    not paired-protocol measurements.
+    with unobserved sensor readings. Readings of 39 and 401~\mgdl,
+    consistent with the sensor's LOW and HIGH codes, are treated as
+    glucose values, so a window that starts or ends at one carries only a
+    bound on its rate; excluding held-out windows whose anchor or endpoint
+    is such a value leaves the uniform-versus-sequential contrast at
+    $+13.27$ $[+10.25,+16.75]$ points (\texttt{panel\_revision\_r1.json}).
+    \item The five labels are deterministic transformations of the
+    sensor trace, not expert annotations, and that trace lags blood
+    glucose through blood-to-interstitial diffusion and carries
+    calibration drift and autocorrelated noise \cite{facchinetti2014sensor}.
+    Round four checked only label-definition stability --- agreement
+    between two labels computed from the same horizon readings, also under
+    independent Gaussian noise of $\sigma=1$ and 2~\mgdl, a gentler
+    perturbation than published autoregressive sensor-error models
+    \cite{facchinetti2014sensor}. The recall attainable from 12 past CGM
+    readings is unknown. The CGM-only model omits meal, insulin, activity,
+    illness, and other covariates, and probability calibration and
+    event-level performance were not evaluated.
+    \item Wear and therapy regimes differ across cohorts. Weinstock
+    participants wore blinded CGM; most DiaData cohorts mix masked run-in
+    and real-time wear, which DiaData does not separate, and DCLP3 and
+    PEDAP include closed-loop insulin delivery (Table~\ref{tab:cohorts}). The future
+    15-minute trajectory is therefore not the same physiological object
+    across cohorts, and a deployed trend display would itself change the
+    wearer's behaviour and so the trajectories it predicts. PEDAP
+    randomized preschool children to automated insulin delivery or
+    standard care \cite{wadwa2023pedap}. Every cohort behind the bundled
+    model has type-1 diabetes; no type-2 diabetes, pregnancy, or
+    inpatient data entered its training or evaluation.
+    \item Device evidence is narrow. Of the 110 study INT8 artifacts, 8
+    (with one float artifact) were timed on one iPhone
+    (Table~\ref{tab:devicebench}); the other 102, and the 60 INT8
+    artifacts of the confirmation and delta-encoding runs, were not
+    device-timed, though all 170 share one byte size and one operator
+    inventory (\texttt{panel\_revision\_r1.json}). Repeated calls on one
+    phone are not evidence across devices, the historical Android device
+    is no longer available, initialization was measured within-process,
+    and energy and memory were not measured. The delta-encoded, round-two
+    and round-five bundled pairs each passed golden parity on the iPhone
+    with bit-exact INT8 outputs, and single live in-app sessions of 100
+    inferences per model observed means of 0.080--0.149~ms ---
+    observations, not paired-protocol measurements. INT8 showed no
+    latency advantage over float in any measurement; its size saving is
+    31\% (5,376 bytes) for the 2,909-parameter study model and 70\% for
+    the 50,645-parameter bundled model. The quantization trade-off
+    studied here is therefore an accuracy risk against a size saving,
+    with no measured speed benefit.
     \item The application replays synthetic or locally extracted
     historical traces. It does not ingest a live sensor stream and has
     not undergone prospective, external, usability, or clinical
@@ -1876,81 +1970,108 @@ The results should be read with the following limitations in mind.
 \subsection{Code, artifacts, and computational record}
 
 The repository contains the training, conversion, benchmark, Android, iOS,
-and test code. The bundled artifacts are the round-five sweep winner
-(seed 4), whose confirmatory protocol was frozen at repository commit
-\texttt{f9010b6} before the read. Their SHA-256 digests are \texttt{bfb37468...6153}
+and test code. The bundled artifacts are the round-five seed-4
+flatten-head pair (cosine schedule, validation-chosen epoch), whose
+confirmatory protocol was frozen at repository commit \texttt{f9010b6}
+before the read. Their SHA-256 digests are \texttt{bfb37468...6153}
 (float) and \texttt{eacc0a74...f554} (INT8); full hashes are stored beside
-the assets and asserted by the golden-parity tests. Python unit
-tests cover label boundaries, segment-aware windows, model shape, conversion
-helpers, synthetic replay behavior, and the provenance audit's split
-bookkeeping. Android unit tests cover replay, buffering, quantization,
-latency aggregation, and view-model behavior; a merged-manifest check
-enforces the absence of Internet permission. The iOS suite covers the
-same units plus golden-vector parity, run in CI on a simulator with a
-source scan for networking APIs.
+the assets and asserted by the golden-parity tests. The pair replaced, in
+turn, the study's seed-0 float and uniform-200 INT8 artifacts, the
+delta-encoded pair, and the round-two sweep winner; the application's
+model manifest (\texttt{MODELS.md}) records each pair's hashes and
+provenance. Python unit tests cover label boundaries, segment-aware
+windows, model shape, conversion helpers, synthetic replay behavior, and
+the provenance audit's split bookkeeping. Android unit tests cover replay,
+buffering, quantization, latency aggregation, and view-model behavior; a
+merged-manifest check enforces the absence of Internet permission. The iOS
+suite covers the same units plus golden-vector parity and runs in
+continuous integration on a simulator, with a source scan that fails on
+networking calls.
 
 The conversion requirements record LiteRT Torch 0.9.1, TorchAO 0.17.0, and
 Python LiteRT 2.1.5, and document PyTorch 2.12.1 and NumPy 2.5.0 in the
 historical environment (the top-level requirements pinned older versions);
 these records are not a complete environment lock. PyTorch seed 0 and the
 formatter's split seed 0 control separate randomization steps; neither
-guarantees bitwise retraining across platforms. The artifact hashes identify
-the exact models used for replay.
-
-The September revision reused the July results and computed descriptive
-summaries from the rounded tables; the subsequent provenance audit reran only
-the GlucoBench formatter and window construction; and the October revision
-added the iOS client and its device measurements (10 October 2026, unchanged
-artifacts, same SHA-256 hashes) --- none of these retrained, re-evaluated, or
-touched held-out glucose values. The audit's aggregate output, including the
-GlucoBench commit and a SHA-256 hash of the Weinstock data file, is versioned
-as \texttt{paper/results/split\_audit.json}; machine-readable run reports and
-the training checkpoint regenerate locally and are not versioned paper
-supplements, so a fresh run may produce different numbers.
+guarantees bitwise retraining across platforms. Training used batch size
+64 in the calibration study and sweep round one and 512 in rounds two to
+five (\texttt{sweep\_settings} in \texttt{panel\_revision\_r1.json}). The
+artifact hashes identify the exact models used for replay. Earlier
+revisions of this work, and what each one reran, are listed in
+Appendix~\ref{app:history}; the provenance audit's aggregate output,
+including the GlucoBench commit and a SHA-256 hash of the Weinstock data
+file, is versioned as \texttt{paper/results/split\_audit.json}.
 
 The calibration-coverage study is versioned under
 \texttt{paper/results/calibration-coverage/}: the frozen protocol, the
 sanitized environment (\texttt{environment.txt}; conversion pins,
 PyTorch 2.12.1, NumPy 2.5.3, reconciling the previously recorded
 drift), the eligibility audit, the complete aggregate results with all
-100 planned cells (\texttt{aggregate\_r1.json}), and the artifact
-summary; per-artifact SHA-256 hashes live in the local run manifest.
-Checkpoints, window keys, per-window predictions, and
-participant-level summaries remain local and regenerate from the
-committed runner with GlucoBench cloned; every published number
-regenerates from the cached predictions via one analysis command. After the study's publication within the repository,
-the bundled application artifacts were replaced by its seed-0 float and
-uniform-200 INT8 models, later by the delta-encoded pair, then by the
-round-two sweep winner, and finally by the round-five flatten-head
-winner, with hashes and provenance recorded in the application's model
-manifest at each step. Each sweep round's frozen protocol and full record
-are versioned in the same directory (\texttt{protocol\_sweep\_r$N$.json},
-\texttt{accuracy\_sweep\_r$N$.json}; round four, which skipped its
-read, publishes its binding noise-ceiling measurement as
-\texttt{exp0\_sweep\_r4.json}).
+100 planned cells (\texttt{aggregate\_r1.json}), the artifact summary,
+and the SHA-256 hashes of all 190 study, confirmation, and delta-encoding
+artifacts (\texttt{artifact\_hashes\_r1.json}). The re-analyses added in
+this revision use cached results only (\texttt{panel\_revision\_r1.json},
+written by \texttt{experiments/panel\_revision.py}). Checkpoints, window
+keys, per-window predictions, and run reports stay local because they derive from
+participant-level data distributed under the providers' terms, so a third
+party must regenerate them with the committed runners before recomputing
+any interval; the committed analysis commands then regenerate the
+published numbers from the cached predictions. Accuracy-sweep rounds one,
+two, three, and five each version a frozen protocol and a full record in
+the same directory (\texttt{protocol\_sweep\_r$N$.json},
+\texttt{accuracy\_sweep\_r$N$.json}). Round four, which spent no read,
+versions its record (\texttt{accuracy\_sweep\_r4.json}) and its
+label-definition stability check (\texttt{exp0\_sweep\_r4.json}); its
+design and pre-registered abort rule
+are in the round-four specification (commit \texttt{c8f3de6}). The
+synthetic diagnostic that motivated round five,
+\texttt{recency\_collision.json}, is versioned with its reproduction script
+in \texttt{paper/analysis/} \texttt{accuracy-review-2026-10-13/}.
 
 \subsection{Data availability and research-use scope}
 
-The CGM data are public research data. The Weinstock, Dubosson, and Hall
-cohorts are accessed through GlucoBench under the source datasets' reuse
-terms \cite{sergazinov2024glucobench}; the sweep cohorts come from DiaData
-v3 \cite{cinar2026diadata} under CC BY-NC 4.0, using only its raw
-(non-imputed) five-minute archive. Some DiaData cohorts originate from the
+The CGM data are public research data. The Weinstock
+\cite{weinstock2016risk}, Dubosson \cite{dubosson2018d1namo}, and Hall
+\cite{hall2018glucotypes} cohorts are accessed through GlucoBench under the
+source datasets' reuse terms \cite{sergazinov2024glucobench}. The sweep
+cohorts come from DiaData v3 \cite{cinar2026diadata} under CC BY-NC 4.0,
+using only its raw (non-imputed) five-minute archive: CITY
+\cite{laffel2020city}, DCLP3 (DiaData label DLCP3) \cite{brown2019closedloop},
+REPLACE-BG \cite{aleppo2017replacebg}, SENCE \cite{sence2021cgm}, and WISDM
+\cite{pratley2020wisdm} for training; PEDAP \cite{wadwa2023pedap} as a
+zero-shot probe; and, as round five's primary endpoint, RT-CGM, the JDRF
+CGM randomized trial (enrolment in 2007), recorded with DexCom SEVEN,
+MiniMed Paradigm REAL-Time, and FreeStyle Navigator sensors whose
+assignment to subjects is not recoverable \cite{jdrf2008cgm}
+(Table~\ref{tab:cohorts}). Some DiaData cohorts originate from the
 Barbara Davis Center, Jaeb Center for Health Research, Joslin Diabetes
 Center, T1D Exchange, University of Colorado, and University of Virginia;
 the analyses, content, and conclusions presented here are solely the
 responsibility of the author and have not been reviewed or approved by
 these institutions. No CGM data are committed to the \project repository
-or the distributed applications. The
-committed replay trace is synthetic. This work makes no diagnosis, monitoring,
-treatment, or dosing claim. Its outputs must not be used for medical decisions.
-The application displays this restriction in the primary interface.
+or the distributed applications, and the committed replay trace is
+synthetic. The bundled weights were trained on DiaData cohorts released
+under CC BY-NC 4.0, and their INT8 quantization parameters were calibrated
+on Weinstock validation windows; the weights are released for
+non-commercial research use only. This work makes no diagnosis,
+monitoring, treatment, or dosing claim. Its outputs must not be used for
+medical decisions. The application displays this restriction in the
+primary interface.
+
+The repository's \texttt{MODEL\_CARD.md}, structured after Mitchell et
+al.\ \cite{mitchell2019modelcards}, states the bundled model's intended
+use (offline research replay), out-of-scope uses (live decision support,
+alerts, dosing, and any clinical use), input requirements, evaluation
+results, and known failure modes, among them frequent movement labels
+during stable glucose and over-calling of the fast classes, together with
+the populations its data do not represent.
 
 Code, bundled model files, and synthetic golden vectors are available at
-\url{https://github.com/mohamedmenasy/GlucoEdge}; source CGM access is described
-by GlucoBench \cite{sergazinov2024glucobench}. The work uses secondary research
-data and the prototype has not been studied with newly recruited participants.
-We do not claim an institutional ethics determination for this work.
+\url{https://github.com/mohamedmenasy/GlucoEdge}; source CGM access is
+described by GlucoBench \cite{sergazinov2024glucobench} and DiaData
+\cite{cinar2026diadata}. This secondary analysis used only public,
+de-identified data under the providers' terms; no participants were
+recruited, and no ethics review was sought.
 
 \section{Conclusion}
 
