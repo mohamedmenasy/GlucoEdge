@@ -2142,10 +2142,18 @@ continuous-integration simulators, and the delta pair also passed
 on-device golden parity (INT8 bit-exact); hashes and provenance are
 recorded in the application's model manifest at each step.
 
-\subsection{Historical comparison}
+\subsection{Earlier revisions}
 
-The earlier revision reported accuracy 0.5184 and macro recall 0.5060 for
-float and 0.5866/0.4135 for INT8. Those numbers came from a different
+After the July results, neither the September revision, the provenance
+audit that followed it, nor the October revision retrained a model,
+re-evaluated one, or touched held-out glucose values. September reused the
+July results and computed its descriptive summaries from the rounded
+tables; the audit reran only the GlucoBench formatter and window
+construction; and October added the iOS client and its device observations
+(10 October 2026) on unchanged artifacts with the same SHA-256 hashes.
+
+Those revisions reported accuracy 0.5184 and macro recall 0.5060 for
+float and 0.5866/0.4135 for INT8. These numbers came from a different
 denominator --- the uncorrected aggregate frame, with context-target
 overlap and no gap mask --- and from the original sequential calibration,
 so they are not comparable to Table~\ref{tab:calibmain} row by row. The
