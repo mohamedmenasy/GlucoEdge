@@ -368,6 +368,7 @@ def test_gates_r5_boot_seed_and_none_ci(monkeypatch):
     g = r5.gate_results_r5(y, pids, y.copy(), y.copy(), y.copy(), n_boot=7)
     assert captured["seed"] == r5.BOOT_SEED_R5 == 20261015
     assert g["gate1_beats_champion"] is False  # undefined CI never passes
+    assert g["gate1_reason"] == "undefined bootstrap CI"
 
 
 def test_gates_r5_pass_case(monkeypatch):
@@ -383,6 +384,7 @@ def test_gates_r5_pass_case(monkeypatch):
     pids = np.array(["a", "b"] * 10)
     g = r5.gate_results_r5(y, pids, y.copy(), y.copy(), y.copy())
     assert g["gate1_beats_champion"] is True
+    assert g["gate1_reason"] is None
     assert g["gate2_stable_floor"] is True
     assert g["gate3_int8_within_half_pp_of_float"] is True
 

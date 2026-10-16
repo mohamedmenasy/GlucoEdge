@@ -64,3 +64,8 @@ def test_flat_head_converts_to_litert(tmp_path):
     ipath = tmp_path / "flat_int8.tflite"
     convert_int8(model, sample, calib, ipath)
     assert ipath.exists() and ipath.stat().st_size > 0
+
+
+def test_unknown_head_raises():
+    with pytest.raises(ValueError, match="unknown head"):
+        TrendCNN(num_classes=5, head="flt")

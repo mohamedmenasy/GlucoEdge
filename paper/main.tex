@@ -1334,7 +1334,11 @@ W & best single seed (winner) & \textbf{0.539} & 0.539 \\
 cohort}
 
 Round five tested the last untried axis of the model itself: the global
-average pool that erases within-window position. The sweep staged a
+average pool that erases within-window position. A timing diagnostic
+motivated the axis: windows that differ only in \emph{when} the movement
+happens inside the hour collide to near-identical pooled features
+(\texttt{recency\_collision.json}), so the pooled head cannot
+distinguish a recent swing from an old one. The sweep staged a
 training recipe against the shipped one (cosine learning-rate decay over
 20 epochs with the kept epoch chosen by validation directional recall
 subject to the stable floor), then a flatten head (the final
@@ -1348,7 +1352,10 @@ best-seed stage and the kept-epoch choice. The recipe won its stage
 (five-seed mean 0.535 against 0.532), the flatten head won its own
 (0.538 against 0.535), and seed 4 led with validation 0.541 directional
 / 0.546 stable --- the first candidate since round two to beat the
-champion's validation directional recall outright.
+champion's validation directional recall outright. These validation
+numbers are selection-biased --- the kept-epoch and best-seed picks
+optimize on the same validation split they are quoted from --- which is
+why the confirmatory read below is what certifies the winner, not these.
 
 The confirmatory read moved to a cohort with no prior reads: the
 pre-registered primary endpoint is zero-shot directional recall on

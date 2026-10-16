@@ -463,6 +463,16 @@ def gate_results_r5(y, pids, cand_int8, cand_float, champ_int8, n_boot=2000):
     d_int8 = directional_recall(acc.confusion_counts(y, cand_int8))
     s_cand = stable_recall(acc.confusion_counts(y, cand_int8))
     s_champ = stable_recall(acc.confusion_counts(y, champ_int8))
+    gate1 = bool(contrast["delta"] is not None and contrast["delta"] > 0
+                 and ci_low is not None and ci_low > -0.005)
+    if gate1:
+        gate1_reason = None
+    elif contrast["delta"] is None:
+        gate1_reason = "undefined delta"
+    elif ci_low is None:
+        gate1_reason = "undefined bootstrap CI"
+    else:
+        gate1_reason = "delta or CI lower bound below threshold"
     return {
         "contrast_int8_vs_champion": contrast,
         "candidate_float_directional": d_float,
@@ -471,11 +481,10 @@ def gate_results_r5(y, pids, cand_int8, cand_float, champ_int8, n_boot=2000):
             acc.confusion_counts(y, champ_int8)),
         "candidate_int8_stable": s_cand,
         "champion_int8_stable": s_champ,
-        "gate1_beats_champion": bool(contrast["delta"] is not None
-                                     and contrast["delta"] > 0
-                                     and ci_low is not None
-                                     and ci_low > -0.005),
+        "gate1_beats_champion": gate1,
+        "gate1_reason": gate1_reason,
         "gate2_stable_floor": bool(s_cand >= s_champ - FLOOR_MARGIN_R5),
+        # one-sided by r2-r5 convention: INT8 beating its own float passes
         "gate3_int8_within_half_pp_of_float": bool(d_float - d_int8 <= 0.005),
     }
 

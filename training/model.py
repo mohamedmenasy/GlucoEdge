@@ -14,9 +14,11 @@ class TrendCNN(nn.Module):
             # position-preserving: classify the full [c2, length] feature map
             self.pool = None
             self.fc = nn.Linear(c2 * length, num_classes)
-        else:
+        elif head == "gap":
             self.pool = nn.AdaptiveAvgPool1d(1)
             self.fc = nn.Linear(c2, num_classes)
+        else:
+            raise ValueError(f"unknown head: {head!r} (expected 'gap' or 'flat')")
 
     def forward(self, x):
         x = self.relu(self.conv1(x))

@@ -14,10 +14,13 @@ def load_checkpoint(checkpoint_path: Path, num_classes: int):
             model = TrendTCN(num_classes=num_classes, channels=obj["channels"],
                              in_channels=obj["in_channels"])
         else:
+            # r4 checkpoints store the OBJECTIVE head name ('ce', 'wtemp', ...)
+            # in this slot; every architecture before r5's 'flat' is gap
+            meta_head = obj.get("head", "gap")
             model = TrendCNN(num_classes=num_classes,
                              channels=tuple(obj["channels"]),
                              in_channels=obj["in_channels"],
-                             head=obj.get("head", "gap"))
+                             head="flat" if meta_head == "flat" else "gap")
         model.load_state_dict(obj["state_dict"])
     else:
         channels = (obj["conv1.weight"].shape[0], obj["conv2.weight"].shape[0])

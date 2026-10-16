@@ -10,7 +10,7 @@ position-preserving flatten head (50,645 params — the global average
 pool is gone, the final features of all 12 positions feed the
 classifier), 1-hour window, cosine learning-rate decay over 20 epochs
 with the kept epoch picked by validation directional recall under the
-stable floor (seed 4, kept epoch 11), delta-anchor inputs (11
+stable floor (seed 4, kept epoch 11 of 0--19), delta-anchor inputs (11
 consecutive differences + last reading / 16 — the same `DeltaEncoding`
 transform both clients already apply; golden vectors pin
 Python/Kotlin/Swift to the same bytes). INT8 is calibrated on the
