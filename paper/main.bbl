@@ -1,4 +1,4 @@
-\begin{thebibliography}{35}
+\begin{thebibliography}{36}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -295,6 +295,14 @@ Fabian Pedregosa, Gael Varoquaux, Alexandre Gramfort, et~al.
 \newblock URL
   \url{https://developers.google.com/edge/litert/next/android_kotlin}.
 \newblock Accessed 2026-07-20.
+
+\bibitem[Cinar and Maleshkova(2026)]{cinar2026diadata}
+Beyza Cinar and Maria Maleshkova.
+\newblock {DiaData}: A multi-modal, integrated time-series dataset for type 1
+  diabetes research.
+\newblock Zenodo, version 3, 2026.
+\newblock URL \url{https://doi.org/10.5281/zenodo.17285631}.
+\newblock CC BY-NC 4.0.
 
 \bibitem[{Google AI Edge}(2026{\natexlab{c}})]{googleLiteRTQuantization}
 {Google AI Edge}.
