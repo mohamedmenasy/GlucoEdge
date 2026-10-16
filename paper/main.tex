@@ -12,6 +12,8 @@
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \usepackage{xurl}
+% File names break only after _ . / - (xurl alone breaks them anywhere).
+\DeclareUrlCommand\path{\urlstyle{tt}\def\UrlBreaks{\do\_\do\.\do\/\do\-}}
 \usepackage{xspace}
 \usepackage[numbers,sort&compress]{natbib}
 
@@ -21,7 +23,7 @@
 % Page budget: compact heading, list, and float spacing (content unchanged).
 \usepackage{enumitem}
 \setlist{nosep}
-\usepackage{titlesec}
+\usepackage[raggedright]{titlesec}
 \titlespacing*{\section}{0pt}{2.1ex plus .6ex minus .2ex}{1.2ex plus .3ex}
 \titlespacing*{\subsection}{0pt}{1.8ex plus .5ex minus .2ex}{0.9ex plus .2ex}
 \setlength{\textfloatsep}{11pt plus 2pt minus 4pt}
@@ -1169,9 +1171,9 @@ ceilings are 352.7--354.5~\mgdl\ against Dubosson's 400 maximum and
 Dubosson temporal windows. In every cohort the sequential selection again
 drew on two early participants, and uniform calibration sits within about
 a point of the float model. Per-seed records:
-\texttt{confirmation\_dubosson.json}, \texttt{confirmation\_hall.json};
+\path{confirmation_dubosson.json}, \path{confirmation_hall.json};
 contributions, sign-flip tests, and clipped shares:
-\texttt{panel\_revision\_r1.json}.
+\path{panel_revision_r1.json}.
 
 \begin{table*}[t]
 \centering
@@ -1953,6 +1955,24 @@ medical device.
 
 \clearpage
 \appendix
+% The appendices are mostly tables: allow more floats per page and pack
+% float-only pages from the top instead of centring them.
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\dbltopfraction}{0.9}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.8}
+\renewcommand{\dblfloatpagefraction}{0.8}
+\setcounter{topnumber}{4}
+\setcounter{dbltopnumber}{4}
+\setcounter{totalnumber}{6}
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{\floatsep}
+\setlength{\@fpbot}{0pt plus 1fil}
+\setlength{\@dblfptop}{0pt}
+\setlength{\@dblfpsep}{\dblfloatsep}
+\setlength{\@dblfpbot}{0pt plus 1fil}
+\makeatother
 
 \section{Provenance and Revision History}
 \label{app:history}
@@ -2029,7 +2049,7 @@ and Swift therefore agreed on the tested vectors; model outputs may still
 differ on untested inputs, although input quantization now follows the
 same rounding rule on both sides.
 
-\begin{table}[t]
+\begin{table}[!tp]
 \centering
 \caption{Historical artifact and physical-device observations for the
 originally bundled models (uncorrected protocol era). Timing ends before
@@ -2054,31 +2074,7 @@ Golden vectors passed & 20/20 & 20/20 \\
 \bottomrule
 \end{tabular}
 \end{table}
-\section{Cohorts, Model Variants, and Held-Out Read Ledger}
-\label{app:cohorts}
-Table~\ref{tab:cohorts} characterizes every cohort used in this work,
-Table~\ref{tab:variants} the model variants bundled at some point, and
-Table~\ref{tab:readledger} every analysis that read held-out, temporal
-or RT-CGM labels, in date order.
-
-RT-CGM needs more provenance than the table holds. The DiaData audit lists
-DexCom SEVEN, MiniMed Paradigm and FreeStyle Navigator sensors
-(\path{diadata_audit_r1.json}), and DiaData records neither the device nor
-the wear mode behind a subject's data. A re-audit admitted all 451
-subjects (modal within-segment interval 300\,s and $\geq$95\% of
-intervals within 270--330\,s; \path{diadata_audit_r2.json}), but that
-rule could not fail: DiaData rounds timestamps to a five-minute grid
-\cite{cinar2026diadata} and segments split at gaps over 330\,s, so every
-within-segment interval is 300\,s by construction. The 96 admitted
-subjects without a scored window contain no run of 15 consecutive
-five-minute readings; the
-other 355 supply the 12.67M windows used in round five. The first audit's
-collinear fraction, the share of consecutive same-segment reading triples
-whose middle reading is the exact mean of its neighbours, is 0.305 for
-RT-CGM against at most 0.229 for the admitted cohorts; the excess comes
-mainly from runs of identical readings, which the statistic cannot tell
-apart from linear interpolation.
-
+% Appendix B's wide tables precede its heading so they land beside its text.
 \begingroup
 % Ragged-right p-cells below (array.sty is not loaded): extend the
 % kernel's cell setup locally, after each caption.
@@ -2086,7 +2082,7 @@ apart from linear interpolation.
 \def\raggedcells{\expandafter\def\csname @arrayparboxrestore\endcsname
   {\GEpbr\rightskip 0pt plus 2em\relax}}
 
-\begin{table*}[t]
+\begin{table*}[!tp]
 \centering
 \caption{Cohorts used in this work. Study = calibration-coverage study;
 R$N$ = sweep round $N$. $n$ = subjects in the data used (DiaData counts
@@ -2120,7 +2116,7 @@ RT-CGM (JDRF trial) & R3: training arm (rejected). R5: primary endpoint, 355 sub
 \end{tabular}
 \end{table*}
 
-\begin{table*}[t]
+\begin{table*}[!tp]
 \centering
 \caption{Model variants bundled in the applications at some point. All
 use Adam (learning rate $10^{-3}$, 20 epochs), the 12-reading window, a
@@ -2147,7 +2143,7 @@ Round-five winner, seed~4 & CNN (96,144), flatten head ($144\times12\to5$) & 50,
 \end{tabular}
 \end{table*}
 
-\begin{table*}[t]
+\begin{table*}[!tp]
 \centering
 \caption{Read ledger: every analysis that read held-out, temporal or
 RT-CGM labels, in date order (PEDAP, Dubosson and Hall reads included).
@@ -2178,6 +2174,31 @@ Date & Analysis & Labels read & Decision taken \\
 \end{tabular}
 \end{table*}
 \endgroup
+\section{Cohorts, Model Variants, and Held-Out Read Ledger}
+\label{app:cohorts}
+Table~\ref{tab:cohorts} characterizes every cohort used in this work,
+Table~\ref{tab:variants} the model variants bundled at some point, and
+Table~\ref{tab:readledger} every analysis that read held-out, temporal
+or RT-CGM labels, in date order.
+
+RT-CGM needs more provenance than the table holds. The DiaData audit lists
+DexCom SEVEN, MiniMed Paradigm and FreeStyle Navigator sensors
+(\path{diadata_audit_r1.json}), and DiaData records neither the device nor
+the wear mode behind a subject's data. A re-audit admitted all 451
+subjects (modal within-segment interval 300\,s and $\geq$95\% of
+intervals within 270--330\,s; \path{diadata_audit_r2.json}), but that
+rule could not fail: DiaData rounds timestamps to a five-minute grid
+\cite{cinar2026diadata} and segments split at gaps over 330\,s, so every
+within-segment interval is 300\,s by construction. The 96 admitted
+subjects without a scored window contain no run of 15 consecutive
+five-minute readings; the
+other 355 supply the 12.67M windows used in round five. The first audit's
+collinear fraction, the share of consecutive same-segment reading triples
+whose middle reading is the exact mean of its neighbours, is 0.305 for
+RT-CGM against at most 0.229 for the admitted cohorts; the excess comes
+mainly from runs of identical readings, which the statistic cannot tell
+apart from linear interpolation.
+
 
 \section{Additional Calibration-Study Details}
 \label{app:calibdetails}
@@ -2189,7 +2210,7 @@ composition of the originally bundled calibration set from the audit of
 Section~\ref{sec:provenance}, and Figure~\ref{fig:range} that set's INT8
 input range against the development data.
 
-\begin{figure}[t]
+\begin{figure}[!tp]
 \centering
 \begin{tikzpicture}[x=0.0152cm]
 \draw[-{Latex[length=1.6mm]}, black!60] (0,0) -- (445,0);
@@ -2216,7 +2237,7 @@ Inputs there are clipped to 239.9~\mgdl.}
 \label{fig:range}
 \end{figure}
 
-\begin{table}[t]
+\begin{table}[!tp]
 \centering
 \caption{Window provenance and calibration-set composition from the audit.
 Shares are within each split.}
@@ -2249,7 +2270,7 @@ INT8 input range & \multicolumn{2}{r}{0--239.9 \mgdl} \\
 Table~\ref{tab:baselines} gives the held-out accuracy, macro recall, and
 directional recall of the baselines and of the float CNN.
 
-\begin{table}[t]
+\begin{table}[!tp]
 \centering
 \caption{Held-out baselines. The CNN row is the five-seed float mean;
 baselines are deterministic or single fits.}
@@ -2272,7 +2293,7 @@ TrendCNN (float) & 0.507 & 0.494 & 0.487 \\
 Table~\ref{tab:protocolmap} maps each frozen hypothesis and contrast of
 the calibration study to its outcome.
 
-\begin{table*}[t]
+\begin{table*}[!tp]
 \centering
 \caption{Protocol-to-report map of the calibration study. Hypotheses are
 abbreviated from the study plan named in \texttt{protocol.json}; contrasts
@@ -2354,7 +2375,7 @@ anchor or label endpoint is a 39 or 401~\mgdl\ code: the
 uniform$-$sequential contrast stays at $+13.27$ $[+10.25, +16.75]$ points
 (\texttt{panel\_revision\_r1.json}).
 
-\begin{table}[t]
+\begin{table}[!tp]
 \centering
 \caption{Held-out directional recall by sensitivity tier: five-seed float
 mean, sequential-200 INT8 mean, and uniform-200 INT8 mean (seeds $\times$
@@ -2385,7 +2406,7 @@ No coded value$^\dagger$ & \multicolumn{4}{r}{$+13.27$ $[+10.25, +16.75]$} \\
 Table~\ref{tab:delta} gives the five-seed results of the delta-encoding
 experiment (Section~\ref{sec:deltainputs}).
 
-\begin{table}[t]
+\begin{table}[!tp]
 \centering
 \caption{Delta-encoded inputs (held-out directional recall, five-seed
 means; uniform over three draws). The absolute-input rows repeat the main
@@ -2433,7 +2454,7 @@ iPhone with bit-exact INT8 outputs, and single live in-app sessions of
 pair: float 0.124~ms mean and 0.182~ms p95, INT8 0.126 and 0.179~ms;
 \texttt{MODELS.md}) --- observations, not paired-protocol measurements.
 
-\begin{table}[t]
+\begin{table}[!tp]
 \centering
 \caption{Nine-artifact device benchmark (iPhone 18 Pro Max, iOS 27.0.1,
 back-to-back calls; inner timer: quantize + run + dequantize, no
@@ -2485,7 +2506,6 @@ operation. The iOS suite applies the same vectors and tolerances and also
 checks the class-name order. It runs on the physical iPhone, on the iOS
 simulator, and in continuous integration.
 
-\clearpage
 \section{Additional Sweep Details}
 \label{app:sweepdetails}
 
@@ -2525,7 +2545,7 @@ predicts \texttt{stable} more often, consistent with an operating-point
 shift rather than better separation of the directional classes. Per-class
 precision and F1: \path{panel_revision_r1.json}.
 
-\begin{table}[t]
+\begin{table}[!tp]
 \centering
 \caption{Round one, held-out per-class metrics, candidate/champion INT8
 on the 46,376 paired windows. Recall = sensitivity; precision =
@@ -2553,7 +2573,7 @@ Macro-F1 & & & 0.425/0.368 \\
 
 Table~\ref{tab:sweepfour} lists round four's validation stage means.
 
-\begin{table}[t]
+\begin{table}[!tp]
 \centering
 \caption{Round four, validation stage means (directional and stable
 recall, five seeds, float checkpoints on the 27,109 eligible Weinstock
@@ -2601,7 +2621,9 @@ RT-CGM \texttt{falling\_fast} windows, of which the model recalls 0 and
 2; without that class the $\geq$250~\mgdl\ band is lowest. Source:
 \path{panel_revision_r1.json}.
 
-\begin{table}[t]
+% Side by side so the last page uses both columns.
+\begin{table*}[!tp]
+\begin{minipage}[t]{\dimexpr(\textwidth-\columnsep)/2\relax}
 \centering
 \caption{Error profile of the bundled model (round-five candidate,
 uniform-200 INT8) on the Weinstock held-out component (46,376 windows)
@@ -2638,9 +2660,8 @@ $<70$ & \multicolumn{2}{c}{0.331 (3,038)} & \multicolumn{2}{c}{0.357 (0.46M)} \\
 $\geq$250 & \multicolumn{2}{c}{0.495 (10,229)} & \multicolumn{2}{c}{0.520 (1.13M)} \\
 \bottomrule
 \end{tabular}
-\end{table}
-
-\begin{table}[t]
+\end{minipage}\hfill
+\begin{minipage}[t]{\dimexpr(\textwidth-\columnsep)/2\relax}
 \centering
 \caption{Confusion matrices of the bundled INT8 model, row-normalized
 (\% of each true class); predicted columns in the order
@@ -2667,6 +2688,7 @@ True class & ff & f & s & r & rf \\
 \texttt{rising\_fast}  & 6.6 & 3.9 & 9.9 & 31.3 & 48.3 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{minipage}
+\end{table*}
 
 \end{document}

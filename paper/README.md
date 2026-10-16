@@ -140,7 +140,7 @@ with the LaTeX sources in an arXiv submission.
 - **Author:** Mohamed Menasy
 - **Primary category:** `cs.LG`
 - **Possible cross-lists:** `eess.SP`, `q-bio.QM`
-- **Comments:** 31 pages (18-page body plus appendices), 3 figures, 23 tables. Source code and model artifacts are
+- **Comments:** 28 pages (18-page body plus appendices), 3 figures, 23 tables. Source code and model artifacts are
   available at <https://github.com/mohamedmenasy/GlucoEdge>.
 
 Before submission, confirm the author name, email, affiliation, category, and
