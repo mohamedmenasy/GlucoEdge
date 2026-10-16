@@ -103,6 +103,26 @@ introduction question and contributions, a Limitations bullet on reused
 evaluation data, current bundled hashes, the DiaData citation and its
 required source-institution disclaimer, and the conclusion.
 
+The panel-review revision (16 October 2026) answers a simulated five-seat
+review (`analysis/panel-review-2026-10-16/`: decision letter, roadmap,
+reviewer cards, and `response_to_reviewers.md`). The paper now states two
+research questions, quantization-calibration coverage and staged model
+selection, and the title changed to "GlucoEdge: Quantization-Calibration
+Coverage and Staged Model Selection in On-Device Glucose Trend
+Classification". The sweeps get their own protocol, results and
+discussion sections. Round five is stated at artifact level, and the
+second-cohort follow-up is reported as not confirmed (exact sign-flip
+tests replace six-participant percentile intervals). The "label-noise
+ceiling" is renamed a label-definition stability check. Related work now
+covers calibration-data selection and on-device glucose prediction.
+Appendices hold the revision history, cohorts, model variants, a held-out
+read ledger, and the detail tables moved out of the 18-page body. New
+numbers come only from cached predictions and committed records, via
+`experiments/panel_revision.py`, whose output is
+`results/calibration-coverage/panel_revision_r1.json`. Per-artifact
+hashes are in `results/calibration-coverage/artifact_hashes_r1.json`. No
+model was retrained or re-evaluated on new data.
+
 ## Build
 
 ```bash
@@ -115,16 +135,16 @@ with the LaTeX sources in an arXiv submission.
 
 ## Suggested arXiv metadata
 
-- **Title:** GlucoEdge: Calibration Coverage and Quantization Trade-offs in
-  On-Device Glucose Trend Classification
+- **Title:** GlucoEdge: Quantization-Calibration Coverage and Staged Model
+  Selection in On-Device Glucose Trend Classification
 - **Author:** Mohamed Menasy
 - **Primary category:** `cs.LG`
 - **Possible cross-lists:** `eess.SP`, `q-bio.QM`
-- **Comments:** 17 pages, 3 figures, 20 tables. Source code and model artifacts are
+- **Comments:** 28 pages (18-page body plus appendices), 3 figures, 23 tables. Source code and model artifacts are
   available at <https://github.com/mohamedmenasy/GlucoEdge>.
 
 Before submission, confirm the author name, email, affiliation, category, and
-license in the arXiv form, and complete the funding, competing-interest, and
-CRediT declarations flagged in the draft. The manuscript deliberately labels
+license in the arXiv form. The funding, competing-interest, and CRediT
+declarations follow the Conclusion. The manuscript deliberately labels
 the system as a research engineering demonstration and documents the current
 evaluation limitations; it does not make a medical-device or treatment claim.

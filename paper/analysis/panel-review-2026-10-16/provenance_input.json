@@ -1,0 +1,59 @@
+{
+  "schema_version": "review-panel-provenance-input/1.0",
+  "panel_id": "glucoedge-main-tex-round-1",
+  "mode": "reviewer_full",
+  "contract_id": "reviewer/reviewer_full/v2",
+  "contract_sha256": "e9712090d2469fea15a37b8e22d4e137afbcb2bf38d5789939c5df56738ef7af",
+  "seats": [
+    {
+      "seat_id": "EIC",
+      "role_id": "eic",
+      "context_id": "subagent-seat-eic",
+      "peer_outputs_visible": false,
+      "actor_type": "model",
+      "model_family": "claude-opus-5-5",
+      "provider": "anthropic",
+      "human_reviewer_id": null
+    },
+    {
+      "seat_id": "R1",
+      "role_id": "methodology",
+      "context_id": "subagent-seat-r1",
+      "peer_outputs_visible": false,
+      "actor_type": "model",
+      "model_family": "claude-opus-5-5",
+      "provider": "anthropic",
+      "human_reviewer_id": null
+    },
+    {
+      "seat_id": "R2",
+      "role_id": "domain",
+      "context_id": "subagent-seat-r2",
+      "peer_outputs_visible": false,
+      "actor_type": "model",
+      "model_family": "claude-opus-5-5",
+      "provider": "anthropic",
+      "human_reviewer_id": null
+    },
+    {
+      "seat_id": "R3",
+      "role_id": "perspective",
+      "context_id": "subagent-seat-r3",
+      "peer_outputs_visible": false,
+      "actor_type": "model",
+      "model_family": "claude-opus-5-5",
+      "provider": "anthropic",
+      "human_reviewer_id": null
+    },
+    {
+      "seat_id": "DA",
+      "role_id": "da",
+      "context_id": "subagent-seat-da",
+      "peer_outputs_visible": false,
+      "actor_type": "model",
+      "model_family": "claude-opus-5-5",
+      "provider": "anthropic",
+      "human_reviewer_id": null
+    }
+  ]
+}

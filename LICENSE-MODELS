@@ -1,0 +1,24 @@
+GlucoEdge model weights
+Copyright (c) 2026 Mohamed Menasy
+
+The trained model weights bundled with GlucoEdge,
+
+    android/app/src/main/assets/trend_float.tflite
+    android/app/src/main/assets/trend_int8.tflite
+
+(used by both the Android and the iOS application), are licensed under the
+Creative Commons Attribution-NonCommercial 4.0 International License
+(CC BY-NC 4.0): https://creativecommons.org/licenses/by-nc/4.0/
+
+The weights were trained on DiaData v3 cohorts (Cinar and Maleshkova, Zenodo,
+doi:10.5281/zenodo.17285631), which are distributed under CC BY-NC 4.0, and
+their INT8 quantization parameters were calibrated on GlucoBench (Weinstock)
+validation windows. Provenance and SHA-256 hashes:
+android/app/src/main/assets/MODELS.md.
+
+Attribution: credit "GlucoEdge, Mohamed Menasy
+(https://github.com/mohamedmenasy/GlucoEdge)" and DiaData as above.
+
+GlucoEdge is a research prototype, not a medical device. The weights are not
+intended for diagnosis, monitoring, treatment, dosing, or any other medical
+decision, and are provided as-is, without warranty (Section 5 of the license).
