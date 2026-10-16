@@ -60,7 +60,9 @@ CI (`.github/workflows/tests.yml`) runs three jobs on every PR/push to
 guards, and the iOS simulator suite (golden parity included) + a
 no-network source scan. It deliberately does not clone GlucoBench or run
 the training CLI — no unit test needs real CGM data, and real training
-runs are too slow to gate every PR.
+runs are too slow to gate every PR. A separate `paper.yml` workflow builds
+the manuscript with tectonic when `paper/` changes and fails on undefined
+references, overfull lines, or non-ASCII source.
 
 ## Architecture
 
