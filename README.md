@@ -15,6 +15,15 @@ directory like GlucoBench, never committed; see the audit records in
 `paper/results/diadata_audit_r1.json` and
 `paper/results/diadata_audit_r2.json`.
 
+<p align="center">
+  <img src="docs/media/ios-int8-session.png" width="320" alt="iOS app replaying a synthetic trace on the INT8 model (iPhone 18 Pro Max, CompiledModel, mean 0.126 ms)">
+  <img src="docs/media/ios-float-session.png" width="320" alt="iOS app on the float model (same device, mean 0.124 ms)">
+</p>
+<p align="center"><em>Live sessions on an iPhone 18 Pro Max (2026-10-15): the bundled
+round-five INT8 and float models replaying a synthetic trace —
+100 on-device inferences each at ~0.13 ms mean. Demo on synthetic
+data; not a medical device.</em></p>
+
 ## What this is, right now
 
 The task: predict a 5-class glucose trend arrow (`falling_fast` /
