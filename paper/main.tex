@@ -204,7 +204,8 @@ paper reports:
     a fifth of the 1.1-point float spread of round three's five seeds on
     Weinstock held-out (round five's own seed spread on RT-CGM was not
     measured), while failing two gates on both Weinstock components and
-    lowering RT-CGM macro-F1 (0.410 against 0.427). Its four changed factors are not separately identified; it is
+    lowering RT-CGM macro-F1 (0.410 against 0.427); PEDAP is a near-tie
+    (0.539 against 0.541). Its four changed factors are not separately identified; it is
     bundled in the research applications.
 \end{itemize}
 
@@ -1653,7 +1654,7 @@ pre-registered gates on a cohort no round had evaluated, by $+0.20$
 points against the 1.1-point float spread of round three's five seeds on
 Weinstock held-out, while failing gates~1 and~2
 on both Weinstock components and lowering macro-F1 on RT-CGM (0.410
-against 0.427). It did not show that a flatten head, a cosine schedule or
+against 0.427), with PEDAP a near-tie (0.539 against 0.541). It did not show that a flatten head, a cosine schedule or
 validation-chosen epochs improve this task: the four factors changed
 together, one seed per side was compared, and the five-seed RT-CGM
 comparison was not run. No round measured the recall attainable from 55
@@ -1769,7 +1770,7 @@ how a person would use its output.
     inventory. Repeated calls on one phone are not evidence across
     devices, the historical Android device is no longer available,
     initialization was measured within-process, and energy and memory were
-    not measured (Appendix~\ref{app:calibdetails}). INT8 showed no latency
+    not measured (Appendix~\ref{app:calibdetails}). INT8 showed no mean-latency
     advantage over float in any measurement; its size saving is 31\%
     (5,376 bytes) for the 2,909-parameter study model and 70\% (146,624
     bytes) for the 50,645-parameter bundled model. The quantization trade-off studied here
@@ -2114,7 +2115,7 @@ REPLACE-BG (DiaData: RBG) & R2--R5: training & \cite{aleppo2017replacebg} & 226 
 SENCE & R2--R5: training & \cite{sence2021cgm} & 144 & 2 to $<$8 & T1D; --- & masked Dexcom G4 Platinum run-in, then Dexcom G5; mixed & 2017--19 & 39/401 codes; rare values outside \\
 WISDM & R2--R5: training & \cite{pratley2020wisdm} & 206 & $\geq$60 & T1D; pump or injections & Dexcom G5; mixed & 2017--18 & 39/401 codes; rare values outside \\
 PEDAP & R2, R3, R5: zero-shot probe; never trained & \cite{wadwa2023pedap} & 103 & 2 to $<$6 & T1D; closed loop vs pump or injections & Dexcom G6; real-time & 2021--22 & 39/401 codes \\
-RT-CGM (JDRF trial) & R3: training arm (rejected). R5: primary endpoint, 355 subjects with scored windows & \cite{jdrf2008cgm} & 451 & $\geq$8 & T1D; intensive insulin & DexCom SEVEN, MiniMed Paradigm or FreeStyle Navigator per DiaData audit, per subject not recoverable; mixed & --- & device-de\-pen\-dent; 14--654 \\
+RT-CGM (JDRF trial) & R3: training arm (rejected). R5: primary endpoint, 355 subjects with scored windows & \cite{jdrf2008cgm} & 451 & $\geq$8 & T1D; intensive insulin & DexCom SEVEN, MiniMed Paradigm or FreeStyle Navigator per DiaData audit, per subject not recoverable; wear not stated in the cited report & --- & device-de\-pen\-dent; 14--654 \\
 \bottomrule
 \end{tabular}
 \end{table*}
