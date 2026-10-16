@@ -95,6 +95,14 @@ for absolute inputs; input grid 6.4x finer). Post-hoc on touched data,
 disclosed. New subsection + table (tab:delta); record in
 `results/calibration-coverage/delta_inputs_r1.json`. Now 14 tables.
 
+Accuracy sweeps r1-r5 each add a Results subsection and record
+(`results/calibration-coverage/accuracy_sweep_r{1..5}.json`). A follow-up
+pass brings the front and back matter in line with them: abstract (now
+under arXiv's 1,920-character limit, so it can be pasted into the form),
+introduction question and contributions, a Limitations bullet on reused
+evaluation data, current bundled hashes, the DiaData citation and its
+required source-institution disclaimer, and the conclusion.
+
 ## Build
 
 ```bash
@@ -112,7 +120,7 @@ with the LaTeX sources in an arXiv submission.
 - **Author:** Mohamed Menasy
 - **Primary category:** `cs.LG`
 - **Possible cross-lists:** `eess.SP`, `q-bio.QM`
-- **Comments:** 14 pages, 3 figures, 14 tables. Source code and model artifacts are
+- **Comments:** 17 pages, 3 figures, 20 tables. Source code and model artifacts are
   available at <https://github.com/mohamedmenasy/GlucoEdge>.
 
 Before submission, confirm the author name, email, affiliation, category, and

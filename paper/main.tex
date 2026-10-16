@@ -44,40 +44,31 @@ Independent Researcher\\
 
 \begin{abstract}
 How does calibration-data coverage affect minority-class performance and
-deployment cost in a compact, quantized glucose trend classifier? We answer
-this with a controlled study on \project, an open-source Android and iOS
-prototype that maps 12 five-minute continuous glucose monitor (CGM) readings
-to one of five rate-of-change classes 15 minutes ahead. On a corrected
-evaluation protocol --- split-role provenance masks, gap-free windows, and a
-separate held-out-participant component --- we trained a 2,909-parameter CNN
-at five seeds on public Weinstock data prepared by GlucoBench, then
-quantized each checkpoint with four calibration-selection strategies at two
-budgets and three draws: 100 INT8 artifacts, evaluated pairwise against
-their float sources. The toolchain-default sequential selection reproduces
-the failure we previously shipped: the first eligible windows cover two
-participants, cap the INT8 input range at 251~\mgdl, and cost 13.4
-percentage points of held-out directional recall (95\% CI 10.3--16.9)
-relative to a uniform random selection of the same size, while raw accuracy
-rises --- an illusion created by the majority class. Any randomized
-200-window selection restores float-level directional recall (0.487 vs.\
-0.487); range-aware stratification adds nothing further (+0.06 points, CI
-$-0.02$ to $+0.13$), a five-fold calibration budget changes it by at
-most $+0.08$ points, and a
-min--max observer behaves like the default histogram observer. Clip-only
-controls attribute the entire sequential-arm loss to input-range clipping
-rather than grid resolution, and every INT8 artifact is byte-identical in
-size, so the fix costs nothing at deployment time: calibration coverage
-here means covering participants, not tuning budgets or samplers. The CNN
-outperforms recent-slope and logistic-regression baselines on directional
-recall. A paired-round benchmark on one phone finds the eight calibration
-arms latency-indistinguishable; the sequential-coverage effect reproduces
-on two further cohorts under prespecified paired predictions, with
-magnitude tracking each cohort's coverage deficit; and re-encoding the
-input as consecutive differences plus a scaled anchor raises float
-directional recall to 0.509 while shrinking the INT8 input grid
-$6.4\times$, leaving quantization nearly calibration-proof --- the
-bundled application models now use this encoding. \project is a
-research demonstration, not a medical device or treatment system.
+deployment cost in a compact, quantized glucose trend classifier, and which
+changes improve it once that is fixed? We study both on \project, an
+open-source Android and iOS prototype that maps 12 five-minute continuous
+glucose monitor (CGM) readings to one of five rate-of-change classes 15
+minutes ahead. On a corrected, provenance-masked protocol, a
+2,909-parameter CNN trained at five seeds on public Weinstock data
+prepared by GlucoBench was quantized with four calibration-selection
+strategies at two budgets and three draws (100 INT8 artifacts). The toolchain-default sequential
+selection covers two participants, caps the INT8 input range at
+251~\mgdl, and costs 13.4 points of held-out directional recall (95\% CI
+10.3--16.9) against a uniform random selection of the same size, while raw
+accuracy rises. Any randomized selection restores float-level recall;
+range stratification, a five-fold budget, and the observer choice add
+essentially nothing; clip-only controls attribute the loss to input-range
+clipping; and the fix costs nothing at deployment. The effect reproduces
+on two further cohorts, and difference-encoded inputs make quantization
+nearly calibration-proof. Five staged accuracy sweeps followed, each
+judged by one pre-registered read. A macro-F1 winner passed every gate
+but gained only on the majority class and was rejected; a model trained
+only on the public DiaData collection passed a directional endpoint; a
+TCN broke the stable-recall floor; a fourth round reproduced the shipped
+model exactly; and a position-preserving flatten head passed all gates
+zero-shot on a never-read cohort (RT-CGM, 12.7M windows; $+0.20$ points,
+CI $+0.11$ to $+0.29$) and now ships in both applications. \project is a
+research demonstration, not a medical device.
 \end{abstract}
 
 \section{Introduction}
@@ -131,7 +122,10 @@ min--max-observer arm. The evaluation protocol is corrected relative to the
 earlier revision: split-role provenance masks remove context-only targets,
 a gap-fill mask removes windows touched by interpolation of missing
 readings, and held-out-participant evaluation is separated from temporal
-evaluation on training participants. This paper reports:
+evaluation on training participants. With calibration settled, the work
+then asks which model and data changes improve directional recall, through
+five staged accuracy sweeps that each spend one pre-registered
+confirmatory read. This paper reports:
 \begin{itemize}
     \item a corrected, provenance-masked evaluation protocol for
     GlucoBench-formatted CGM windows, with eligible-window and class-support
@@ -147,7 +141,14 @@ evaluation on training participants. This paper reports:
     \item deployment-cost accounting: every INT8 artifact has identical
     size, sampler and export times are fractions of a second, so the
     corrected calibration is free at deployment time. Prior
-    single-device latency observations are retained as historical context.
+    single-device latency observations are retained as historical context;
+    and
+    \item five accuracy sweeps under that one-read discipline
+    (Sections~\ref{sec:sweep1}--\ref{sec:sweep5}): a macro-F1 winner
+    rejected because its gain was majority-class only, external DiaData
+    training, a measured label-noise ceiling, and a position-preserving
+    flatten head confirmed zero-shot on a never-read cohort, which now
+    ships in both applications.
 \end{itemize}
 
 All source code, tests, synthetic replay data, and shipped model artifacts are
@@ -439,9 +440,10 @@ baseline maps $(g_t - g_{t-15})/15$, computed from the inputs alone, through
 the same five thresholds. The logistic-regression baseline is a multinomial
 model on the 12 readings with training-only standardization, balanced class
 weights, and fixed $C=1$; it converged. The constant-\texttt{stable}
-classifier shows the effect of prevalence. The shipped application artifact
-(seed 0, historical protocol) is unchanged; no new artifact replaces it in
-the applications.
+classifier shows the effect of prevalence. The calibration study starts
+from the originally shipped artifact (seed 0, historical protocol); the
+applications' bundled models were later replaced by study and sweep
+winners (Section~\ref{sec:repro}).
 
 \begin{figure*}[t]
 \centering
@@ -473,7 +475,7 @@ committed to the Android and iOS applications.}
 
 \subsection{Shipped artifacts (historical protocol)}
 
-The shipped application checkpoint was converted with LiteRT Torch: float
+The originally shipped application checkpoint was converted with LiteRT Torch: float
 conversion with a fixed $(1,1,12)$ input signature, INT8 conversion through
 PyTorch 2 Export (PT2E) with LiteRT Torch's
 \texttt{get\_symmetric\_quantization\_config} helper
@@ -1065,6 +1067,7 @@ Deltas + anchor/16 & 0.509 & 0.504 & 0.509 & $+0.005$ $[+0.004, +0.007]$ \\
 \end{table}
 
 \subsection{Accuracy sweep: staged selection with one pre-registered read}
+\label{sec:sweep1}
 
 Having settled the input encoding, a staged greedy sweep asked whether
 loss design, capacity, window length, multi-cohort pooling, or seed
@@ -1154,7 +1157,7 @@ recall (the mean recall of the four non-stable classes), guarded by a
 stable-recall floor at both selection and confirmation, with the same
 one-read discipline (\texttt{protocol\_sweep\_r2.json}, committed before
 any held-out label). The new ingredient is training data: the DiaData
-collection's overlap and sensor audit admitted six T1D cohorts (1{,}001
+collection's \cite{cinar2026diadata} overlap and sensor audit admitted six T1D cohorts (1{,}001
 subjects; \texttt{diadata\_audit\_r1.json}); five (898 subjects) fed
 training, capped near 15M windows per arm by whole-subject sampling,
 and the sixth, PEDAP (103), was excluded from all training as a
@@ -1332,6 +1335,7 @@ W & best single seed (winner) & \textbf{0.539} & 0.539 \\
 
 \subsection{Accuracy sweep, round five: a flatten head and a fresh
 cohort}
+\label{sec:sweep5}
 
 Round five tested the last untried axis of the model itself: the global
 average pool that erases within-window position. A timing diagnostic
@@ -1435,7 +1439,8 @@ experiment passed its frozen gates (Table~\ref{tab:delta}); both clients
 apply the same delta transform before quantization, and both
 golden-parity suites pass against the bundled files bit-exactly on the
 continuous-integration simulators; the delta pair also passed on-device
-golden parity (INT8 bit-exact).
+golden parity (INT8 bit-exact). The round-two and round-five sweep
+winners later replaced it in turn, each re-pinned by the same suites.
 
 The prespecified nine-artifact benchmark was then executed on the
 iPhone~18~Pro~Max (iPhone19,3, iOS~27.0.1), the only study device still
@@ -1605,6 +1610,15 @@ The results should be read with the following limitations in mind.
     about PTQ in general. Larger models, other datasets, or other
     quantizers may behave differently
     \cite{bouthillier2021variance,hubara2021smallcalibration}.
+    \item The accuracy sweeps reuse evaluation data. Weinstock held-out
+    and temporal labels were read in rounds one to three, so round five
+    demoted them to descriptive secondaries and moved its primary
+    endpoint to RT-CGM, which no round had evaluated; a rejected
+    round-three arm had trained on that cohort, though neither model in
+    the round-five comparison did. The certified round-five gain is small
+    ($+0.20$ points) and endpoint-shaped: macro-F1 and secondary stable
+    recall fall, the winner is a single seed, and its validation numbers
+    are selection-biased.
     \item Stride-one windows remain overlapping and dependent
     \cite{bergmeir2018crossvalidation}; uncertainty therefore comes from
     participant-cluster bootstrap intervals conditional on the fitted
@@ -1650,14 +1664,16 @@ The results should be read with the following limitations in mind.
 \end{enumerate}
 
 \section{Reproducibility and Ethics}
+\label{sec:repro}
 
 \subsection{Code, artifacts, and computational record}
 
 The repository contains the training, conversion, benchmark, Android, iOS,
-and test code. The bundled artifacts were generated from repository commit
-\texttt{361148a} with seed 0. Their SHA-256 digests are
-\texttt{eb96c7e...08e6} (float) and \texttt{0dc35387...ea29} (INT8); full hashes
-are stored beside the assets and asserted by instrumentation tests. Python unit
+and test code. The bundled artifacts are the round-five sweep winner
+(seed 4), whose confirmatory protocol was frozen at repository commit
+\texttt{f9010b6} before the read. Their SHA-256 digests are \texttt{bfb37468...6153}
+(float) and \texttt{eacc0a74...f554} (INT8); full hashes are stored beside
+the assets and asserted by the golden-parity tests. Python unit
 tests cover label boundaries, segment-aware windows, model shape, conversion
 helpers, synthetic replay behavior, and the provenance audit's split
 bookkeeping. Android unit tests cover replay, buffering, quantization,
@@ -1700,13 +1716,25 @@ the bundled application artifacts were replaced by its seed-0 float and
 uniform-200 INT8 models, later by the delta-encoded pair, then by the
 round-two sweep winner, and finally by the round-five flatten-head
 winner, with hashes and provenance recorded in the application's model
-manifest at each step.
+manifest at each step. Each sweep round's frozen protocol and full record
+are versioned in the same directory (\texttt{protocol\_sweep\_r$N$.json},
+\texttt{accuracy\_sweep\_r$N$.json}; round four, which skipped its
+read, publishes its binding noise-ceiling measurement as
+\texttt{exp0\_sweep\_r4.json}).
 
 \subsection{Data availability and research-use scope}
 
-The CGM data are public research data accessed through GlucoBench under the
-source dataset's reuse terms \cite{sergazinov2024glucobench}. They are not
-committed to the \project repository or the distributed Android build. The
+The CGM data are public research data. The Weinstock, Dubosson, and Hall
+cohorts are accessed through GlucoBench under the source datasets' reuse
+terms \cite{sergazinov2024glucobench}; the sweep cohorts come from DiaData
+v3 \cite{cinar2026diadata} under CC BY-NC 4.0, using only its raw
+(non-imputed) five-minute archive. Some DiaData cohorts originate from the
+Barbara Davis Center, Jaeb Center for Health Research, Joslin Diabetes
+Center, T1D Exchange, University of Colorado, and University of Virginia;
+the analyses, content, and conclusions presented here are solely the
+responsibility of the author and have not been reviewed or approved by
+these institutions. No CGM data are committed to the \project repository
+or the distributed applications. The
 committed replay trace is synthetic. This work makes no diagnosis, monitoring,
 treatment, or dosing claim. Its outputs must not be used for medical decisions.
 The application displays this restriction in the primary interface.
@@ -1735,8 +1763,21 @@ milliseconds: the corrected calibration is free at deployment time.
 Coverage means covering participants; the other knobs were the wrong
 ones.
 
-The conclusions are scoped to one primary cohort, one architecture, and
-one quantizer, on a reanalysis of previously touched data; the frozen
+The five accuracy sweeps that followed add a methodological lesson. Each
+round spent one pre-registered confirmatory read, and gates alone were
+not enough: round one's macro-F1 winner passed every gate while losing
+directional recall, which made a directional endpoint and a stable-recall
+floor part of every later protocol. Under those rules two changes were
+promoted, external training data (DiaData) and a position-preserving
+head with a cosine schedule; a TCN, time-of-day inputs, class reweighting, ordinal and regression
+heads, slope labels, input noise, and weight averaging did not, and a
+measured label-noise ceiling far above the champion places the remaining
+error in the model and data, not the labels. The round-five model,
+confirmed zero-shot on a cohort with no prior reads, ships in both
+applications; its gain is small and is reported with its costs.
+
+The calibration conclusions are scoped to one primary cohort, one
+architecture, and one quantizer, on a reanalysis of previously touched data; the frozen
 sensitivity tiers reproduce both headline findings, the device
 benchmark measured the fix latency-free, and the
 sequential-versus-uniform effect was confirmed on two further cohorts
