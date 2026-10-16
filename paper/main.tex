@@ -653,6 +653,12 @@ outputs with the same float32 operation. The iOS suite applies the same
 vectors and tolerances and also checks the class-name order. It runs on the
 physical iPhone, on the iOS simulator, and in continuous integration.
 
+% ==== WRITER-A owns the Experimental Protocol paragraphs above ====
+%
+% ==== WRITER-B: insert \subsection{Accuracy sweep protocol} below ====
+%
+% ==== end of WRITER-B sweep-protocol slot ====
+
 \section{Results}
 
 \subsection{Split and calibration provenance}
@@ -1066,6 +1072,11 @@ Deltas + anchor/16 & 0.509 & 0.504 & 0.509 & $+0.005$ $[+0.004, +0.007]$ \\
 \end{tabular}}
 \end{table}
 
+% ==== WRITER-A region ends above (moved Deployment costs go above) ====
+%
+%
+% ==== WRITER-B region starts below ====
+
 \subsection{Accuracy sweep: staged selection with one pre-registered read}
 \label{sec:sweep1}
 
@@ -1410,6 +1421,11 @@ Temporal & 0.509 & 0.505 & 0.502 & $+0.3$ $[-0.6, +1.2]$ \\
 \end{tabular}
 \end{table}
 
+% ==== WRITER-B region ends above ====
+%
+%
+% ==== WRITER-A region starts below ====
+
 \subsection{Historical comparison}
 
 The earlier revision reported accuracy 0.5184 and macro recall 0.5060 for
@@ -1586,6 +1602,12 @@ outputs for the tested vectors, yet parity says nothing about whether the
 artifact's input range fits the population, and validates neither the
 labels, the cohort split, probability calibration, clinical safety, nor
 usefulness to a person with diabetes.
+
+% ==== WRITER-A owns the Discussion subsections above ====
+%
+% ==== WRITER-B: insert \subsection{What the sweeps show} below ====
+%
+% ==== end of WRITER-B sweep-discussion slot ====
 
 \section{Limitations}
 \label{sec:limitations}
@@ -1790,5 +1812,22 @@ deficit. \project remains a research prototype, not a medical device.
 \setlength{\bibsep}{1.5pt}
 \bibliography{references}
 \endgroup
+
+\clearpage
+\appendix
+
+\section{Provenance and Revision History}
+\label{app:history}
+% ==== WRITER-A: appendix content below ====
+%
+% ==== end of WRITER-A appendix ====
+%
+%
+%
+\section{Cohorts, Model Variants, and Held-Out Read Ledger}
+\label{app:cohorts}
+% ==== WRITER-B: appendix content below ====
+%
+% ==== end of WRITER-B appendix ====
 
 \end{document}
