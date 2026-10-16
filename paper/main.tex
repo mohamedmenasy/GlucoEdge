@@ -32,8 +32,8 @@
 \newcommand{\mgdl}{\ensuremath{\mathrm{mg/dL}}}
 \newcommand{\project}{\textsc{GlucoEdge}\xspace}
 
-\title{\project: Calibration Coverage and Quantization Trade-offs\\
-in On-Device Glucose Trend Classification}
+\title{\project: Quantization-Calibration Coverage and\\
+Staged Model Selection in On-Device Glucose Trend Classification}
 \author{Mohamed Menasy\\
 Independent Researcher\\
 \texttt{mohamedmenasy@gmail.com}}
@@ -43,40 +43,42 @@ Independent Researcher\\
 \maketitle
 
 \begin{abstract}
-How does calibration-data coverage affect minority-class performance and
-deployment cost in a compact, quantized glucose trend classifier, and which
-changes improve it once that is fixed? We study both on \project, an
-open-source Android and iOS prototype that maps 12 five-minute continuous
-glucose monitor (CGM) readings to one of five rate-of-change classes 15
-minutes ahead. On a corrected, provenance-masked protocol, a
-2,909-parameter CNN trained at five seeds on public Weinstock data
-prepared by GlucoBench was quantized with four calibration-selection
-strategies at two budgets and three draws (100 INT8 artifacts). The toolchain-default sequential
-selection covers two participants, caps the INT8 input range at
-251~\mgdl, and costs 13.4 points of held-out directional recall (95\% CI
-10.3--16.9) against a uniform random selection of the same size, while raw
-accuracy rises. Any randomized selection restores float-level recall;
-range stratification, a five-fold budget, and the observer choice add
-essentially nothing; clip-only controls attribute the loss to input-range
-clipping; and the fix costs nothing at deployment. The effect reproduces
-on two further cohorts, and difference-encoded inputs make quantization
-nearly calibration-proof. Five staged accuracy sweeps followed, each
-judged by one pre-registered read. A macro-F1 winner passed every gate
-but gained only on the majority class and was rejected; a model trained
-only on the public DiaData collection passed a directional endpoint; a
-TCN broke the stable-recall floor; a fourth round reproduced the shipped
-model exactly; and a position-preserving flatten head passed all gates
-zero-shot on a never-read cohort (RT-CGM, 12.7M windows; $+0.20$ points,
-CI $+0.11$ to $+0.29$) and now ships in both applications. \project is a
-research demonstration, not a medical device.
+\project, an Android and iOS research prototype, maps 12 five-minute
+continuous glucose monitor (CGM) readings to one of five classes of the
+mean rate of change over the next 15 minutes. This paper asks how
+quantization-calibration coverage affects minority-class recall and
+deployment cost, and which model and data changes improve directional
+recall under one-read-per-round staged sweeps. A 2,909-parameter
+convolutional network trained on Weinstock data was quantized to 8-bit
+integers (INT8) with four calibration-selection strategies at two budgets.
+In a prespecified secondary, contiguous first-$N$ (dataset-order)
+selection, spanning two participants and capping the input range at
+250.9~\mgdl, cost 13.4 points of held-out directional recall (95\% CI
+10.3--16.9) against equal-size uniform random selection while accuracy
+rose. The primary contrast (range stratification) was null: with every
+randomized selection covering the full input range, stratification, budget
+and observer choice moved recall by at most about a tenth of a point. A
+clip-only control attributes the loss to clipping; the fix is free at
+deployment. Two small cohorts did not confirm the frozen predictions; post
+hoc, difference-encoded inputs shrank the effect to 0.5 points. Four of
+five sweep rounds spent one pre-registered read (round four none), three
+on the reused Weinstock test split. A macro-F1 winner passed every gate but
+was rejected post hoc as directional recall fell (0.517 to 0.438);
+DiaData-only training passed a directional endpoint; a seed-4 flatten-head
+artifact (cosine schedule, validation-chosen epoch) passed all gates on
+never-evaluated RT-CGM ($+0.20$ points [$+0.11$, $+0.29$] against a
+1.1-point seed spread) but fails two gates on both Weinstock components,
+lowers macro-F1 (0.410 vs.\ 0.427), and is bundled in the research
+applications. \project is a research demonstration, not a medical device.
 \end{abstract}
 
 \section{Introduction}
 
-A CGM sampled every five minutes produces 12 observations per hour. These
-readings can be used to predict a near-future glucose value, event, or trend
-\cite{sergazinov2024glucobench}. Here, we study such predictions for research
-purposes; they are not intended to guide treatment.
+A continuous glucose monitor (CGM) sampled every five minutes produces 12
+readings per hour. These readings can be used to predict a near-future
+glucose value, event, or trend \cite{sergazinov2024glucobench}. This paper
+studies such predictions for research purposes; they are not intended to
+guide treatment.
 
 These targets define different learning problems --- value regression, event
 prediction, and trend classification --- and published studies further differ
@@ -90,9 +92,10 @@ protocols should not be compared directly.
 Commercial CGM trend arrows are related but not equivalent targets: they
 summarize recent or current direction and rate using device-specific
 definitions \cite{pettus2017recommendations,rodacki2021trend}, whereas
-\project derives each label from the change between the current sample and the
-sample 15 minutes later --- a compact research representation that neither
-reproduces a manufacturer's algorithm nor provides a dosing rule.
+\project labels each window by the mean rate of change over the next 15
+minutes, computed from the current sample and the sample 15 minutes later
+--- a compact research representation that neither replicates a
+manufacturer's algorithm nor provides a dosing rule.
 
 Deployment raises further questions. Conversion may change a model's outputs,
 the client may need different input handling, and lower precision does not
@@ -100,59 +103,114 @@ guarantee lower latency on a given device. Class imbalance can hide conversion
 errors: accuracy can increase as predictions concentrate on a majority class
 even while minority-class recall declines \cite{brodersen2010balanced}.
 
-The research question is: \emph{how does calibration-data coverage affect
-minority-class performance and deployment cost in compact glucose trend
-classifiers?} Here, coverage refers to the input values and trajectories
-represented during quantizer calibration, not calibration of predicted
-probabilities. An earlier revision of this work could only motivate the
-question: a provenance audit traced the shipped INT8 artifact's input range
-to a single participant's 17.5 hours of data, whose maximum set a ceiling
-below readings found in a quarter of training windows, but no comparison of
-calibration selections existed. This revision runs that comparison under a
-prespecified protocol, frozen --- hypotheses, samplers, endpoint,
-missing-class rules, and environment --- before any held-out label was read.
+This paper asks two research questions. The first is how
+quantization-calibration coverage affects the minority-class recall and
+deployment cost of a compact glucose trend classifier. Static 8-bit integer
+(INT8) post-training quantization (PTQ) sets activation ranges from a set
+of calibration inputs \cite{jacob2018quantization,pytorchPT2E2026}, and
+coverage means the input values and trajectories that set represents.
+Calibration here always means this quantization step: it is neither CGM
+sensor calibration against blood glucose nor calibration of predicted
+probabilities. The second question is which model and training-data
+changes improve directional recall, the mean recall (sensitivity) of the
+four non-stable classes, when model selection runs in staged rounds that
+may each spend at most one pre-registered confirmatory read of protected
+labels.
 
-The study holds the architecture, loss, quantizer, and data split fixed and
-varies only calibration selection: four strategies (the toolchain-default
-sequential order, uniform random, participant-balanced random, and
-participant-balanced range coverage), two budgets (200 and 1,000 windows,
-nested), three random draws, and five training seeds, giving 100 INT8
-artifacts evaluated against their five float sources, plus a ten-artifact
-min--max-observer arm. The evaluation protocol is corrected relative to the
-earlier revision: split-role provenance masks remove context-only targets,
-a gap-fill mask removes windows touched by interpolation of missing
-readings, and held-out-participant evaluation is separated from temporal
-evaluation on training participants. With calibration settled, the work
-then asks which model and data changes improve directional recall, through
-five staged accuracy sweeps that each spend one pre-registered
-confirmatory read. This paper reports:
+Representative calibration data is established guidance: converter
+documentation asks for a few hundred samples ``randomly chosen, in no
+particular order'' \cite{googleRepresentativeData}. This work measures,
+with participant-clustered intervals and a clip-only control, how
+contiguous first-$N$ (dataset-order) selection of overlapping, time-ordered
+windows violates that guidance, and the class-level consequence: the
+clipped inputs concentrate in the fast-falling class, whose recall
+collapses while accuracy rises (Sections~\ref{sec:mechanism}
+and~\ref{sec:calibevidence}). The question arose in this project's own
+pipeline, whose conversion script calibrated the originally bundled INT8
+artifact on the first 200 validation windows: 17.5 hours of one
+participant's readings, with a maximum below readings found in a quarter of
+training windows (Section~\ref{sec:provenance}). Earlier revisions of this
+work scored the same held-out participants under an uncorrected protocol
+(Appendix~\ref{app:history}), so the study is a locked, corrected
+reanalysis rather than a fresh test.
+
+The calibration study holds the architecture, loss, quantizer, and data
+split fixed and varies only calibration selection: four strategies
+(sequential, the contiguous first-$N$ selection; uniform random;
+participant-balanced random; and participant-balanced range coverage), two
+budgets (200 and 1,000 windows, nested), three random draws, and five
+training seeds, giving 100 INT8 artifacts evaluated against their five
+float sources, plus a ten-artifact min--max-observer arm. Its hypotheses,
+samplers, budgets, endpoint, bootstrap, and missing-class rules were frozen
+before the study read any held-out label (Table~\ref{tab:protocolmap}).
+Split-role provenance masks remove context-only targets, a gap-fill mask
+removes windows touched by interpolation of missing readings, and
+held-out-participant evaluation is separated from temporal evaluation on
+training participants.
+
+The second question is addressed by five rounds of staged greedy selection
+(Section~\ref{sec:sweepprotocol}). The rounds train on Weinstock or, from
+round two on, on cohorts of the public DiaData collection
+\cite{cinar2026diadata} (Table~\ref{tab:cohorts}), select on Weinstock
+validation windows, and decide each candidate with frozen gates. Rounds one
+to three confirmed on the Weinstock test components that the calibration
+study had already read, and round five on RT-CGM, a randomized-trial cohort
+that no round had evaluated (Table~\ref{tab:readledger}). This paper
+reports:
 \begin{itemize}
     \item a corrected, provenance-masked evaluation protocol for
     GlucoBench-formatted CGM windows, with eligible-window and class-support
     audits published alongside the code;
-    \item a controlled answer to the coverage question: randomizing a
-    200-window calibration selection recovers all of the directional recall
-    the default sequential selection loses (13.4 points, 95\% CI
-    10.3--16.9), while range-aware stratification, a five-fold budget, and
-    an observer change add nothing measurable;
-    \item mechanism controls that attribute the sequential-arm loss to
-    input-range clipping rather than input-grid resolution or internal
-    quantization; and
-    \item deployment-cost accounting: every INT8 artifact has identical
-    size, sampler and export times are fractions of a second, so the
-    corrected calibration is free at deployment time. Prior
-    single-device latency observations are retained as historical context;
-    and
-    \item five accuracy sweeps under that one-read discipline
-    (Sections~\ref{sec:sweep1}--\ref{sec:sweep5}): a macro-F1 winner
-    rejected because its gain was majority-class only, external DiaData
-    training, a measured label-noise ceiling, and a position-preserving
-    flatten head confirmed zero-shot on a never-read cohort, which now
-    ships in both applications.
+    \item a controlled answer to the coverage question
+    (Section~\ref{sec:maineffects}): in a prespecified secondary contrast,
+    contiguous first-$N$ selection lost 13.4 points of held-out directional
+    recall (95\% confidence interval (CI) 10.3--16.9) relative to uniform
+    random selection of the same size, which restored float-level recall.
+    The prespecified primary contrast, range coverage versus
+    participant-balanced random selection, was null ($+0.06$ points, CI
+    $-0.02$ to $+0.13$) and could not probe range coverage, because both arms
+    received the same input range. Where every randomized selection covers
+    the full input range, as in this pool, stratification, a five-fold
+    budget, and the observer choice move recall by at most about a tenth of
+    a point;
+    \item mechanism controls that attribute the loss to input-range
+    clipping rather than input-grid resolution or internal quantization:
+    clipping alone accounts for 13.14 points of the sequential arm's
+    13.35-point float-to-INT8 loss (Section~\ref{sec:mechanism});
+    \item deployment-cost accounting: every INT8 artifact of the
+    2,909-parameter study model has the same size and operator inventory,
+    selection takes under 0.03~s, and a prespecified nine-artifact iPhone
+    benchmark found the calibration arms within 0.05~$\mu$s of each other
+    (Table~\ref{tab:devicebench}), so the corrected calibration is free at
+    deployment. INT8 itself showed no latency advantage over float in any
+    measurement and saves 31\% of file size for the study model and 70\% for
+    the bundled one;
+    \item two exploratory follow-ups: on two small further cohorts the
+    frozen predictions were not confirmed (dubosson $+2.0$ points, exact
+    sign-flip $p=0.094$; hall inconclusive, its premise failed;
+    Table~\ref{tab:confirmation}), and in a post-hoc experiment
+    difference-encoded inputs shrank the uniform-versus-sequential
+    difference to $+0.5$ points (Table~\ref{tab:delta}); and
+    \item five staged accuracy sweeps (Sections~\ref{sec:sweepresults}
+    and~\ref{sec:sweepdiscussion}), of which four spent one pre-registered
+    confirmatory read each and round
+    four, whose candidate converted to the champion's own artifacts, spent
+    none: a winner on macro-averaged F1 (macro-F1) that passed every gate
+    but was rejected post hoc because directional recall fell from 0.517 to
+    0.438; DiaData-only training, bundled after round two; a
+    label-definition stability check; and the seed-4 flatten-head artifact
+    (cosine schedule, validation-chosen epoch), which passed all gates on
+    never-evaluated RT-CGM by $+0.20$ points (CI $+0.11$ to $+0.29$), about
+    a fifth of the 1.1-point five-seed spread, while failing two gates on
+    both Weinstock components and lowering RT-CGM macro-F1 (0.410 against
+    0.427). Its four changed factors are not separately identified; it is
+    bundled in the research applications.
 \end{itemize}
 
-All source code, tests, synthetic replay data, and shipped model artifacts are
-available in the project repository.\footnote{\url{https://github.com/mohamedmenasy/GlucoEdge}}
+All source code, tests, and synthetic replay data are available in the
+project repository,\footnote{\url{https://github.com/mohamedmenasy/GlucoEdge}}
+together with the bundled model artifacts, which are released for
+non-commercial research use only.
 
 \section{Related Work}
 
@@ -2277,41 +2335,61 @@ recruited, and no ethics review was sought.
 \section{Conclusion}
 
 On a corrected, provenance-masked protocol with five training seeds and
-100 paired INT8 artifacts, calibration-data coverage fully determined
-whether static INT8 quantization damaged this compact CGM trend
-classifier. The toolchain-default sequential selection, whose 200
-windows span two participants and cap the input range at 251~\mgdl,
-cost 13.4 points of held-out directional recall while raising raw
-accuracy --- an illusion a class-balanced metric exposes. Any
-randomized selection of the same 200 windows restored float-level
-directional recall; stratification, budget, and observer choice moved
-it by at most eight hundredths of a point; clip-only controls
-attributed the loss to input-range clipping, not grid resolution.
-Every INT8 artifact is byte-identical in size and selection takes
-milliseconds: the corrected calibration is free at deployment time.
-Coverage means covering participants; the other knobs were the wrong
-ones.
+100 paired INT8 artifacts, the input range covered by the
+quantization-calibration windows decided whether static INT8 quantization
+damaged this compact CGM trend classifier. Contiguous first-$N$
+selection, whose 200 windows span two participants and cap the input
+range at 250.9~\mgdl, cost 13.4 points of held-out directional recall in
+a prespecified secondary contrast while raising raw accuracy --- an
+illusion that a class-balanced metric exposes. Any randomized selection
+of 200 windows restored float-level directional recall, and clip-only
+controls attributed the loss to input-range clipping, not grid
+resolution. What mattered was covering the deployment input range, which
+any randomized selection did in this pool; once it was covered,
+stratification, budget, and observer choice moved recall by at most about
+a tenth of a point. These nulls, the null primary contrast among them,
+are scoped to that saturated regime: range-aware selection was not tested
+where random draws under-cover the range, as they did in the two small
+cohorts. Every INT8 artifact of the study model has the same size and
+operator inventory, and selection takes under 0.03~s, so the corrected
+calibration is free at deployment. INT8 brought no latency advantage in
+any measurement; it saves 31\% of file size for the 2,909-parameter study
+model and 70\% for the bundled model.
 
-The five accuracy sweeps that followed add a methodological lesson. Each
-round spent one pre-registered confirmatory read, and gates alone were
-not enough: round one's macro-F1 winner passed every gate while losing
-directional recall, which made a directional endpoint and a stable-recall
-floor part of every later protocol. Under those rules two changes were
-promoted, external training data (DiaData) and a position-preserving
-head with a cosine schedule; a TCN, time-of-day inputs, class reweighting, ordinal and regression
-heads, slope labels, input noise, and weight averaging did not, and a
-measured label-noise ceiling far above the champion places the remaining
-error in the model and data, not the labels. The round-five model,
-confirmed zero-shot on a cohort with no prior reads, ships in both
-applications; its gain is small and is reported with its costs.
+The staged sweeps add a methodological lesson. Four rounds spent one
+pre-registered confirmatory read each; round four, whose candidate
+converted to the champion's own artifacts, spent none. Gates alone were
+not enough: round one's macro-F1 winner passed every gate while
+directional recall fell from 0.517 to 0.438, and its post-hoc rejection
+made a directional endpoint and a stable-recall floor part of every later
+protocol. Under those rules, DiaData-only training passed round two's
+gates, with an interval that includes zero, and was bundled; RT-CGM
+training data, time-of-day inputs, a temporal convolutional network,
+square-root class weights, ordinal and regression heads, slope labels,
+input noise, and weight averaging were not adopted. Round four's
+label-definition stability check compares two labels computed from the
+same future readings, so it bounds nothing that a model of past readings
+can reach; the recall attainable from CGM history is unknown. Round five
+was a choice between two artifacts: the seed-4 flatten-head artifact
+(cosine schedule, validation-chosen epoch) passed all gates on
+never-evaluated RT-CGM by $+0.20$ points, about a fifth of the 1.1-point
+five-seed spread, while failing gates~1 and~2 on both Weinstock
+components and lowering RT-CGM macro-F1 (0.410 against 0.427); on the
+pediatric PEDAP cohort, directional recall was a near-tie (0.539 against
+0.541). Its head, schedule, kept epoch, and seed changed together and are
+not separately identified. That artifact is bundled in the research
+applications.
 
 The calibration conclusions are scoped to one primary cohort, one
-architecture, and one quantizer, on a reanalysis of previously touched data; the frozen
-sensitivity tiers reproduce both headline findings, the device
-benchmark measured the fix latency-free, and the
-sequential-versus-uniform effect was confirmed on two further cohorts
-with prespecified paired predictions tracking the calibration-coverage
-deficit. \project remains a research prototype, not a medical device.
+architecture, and one quantizer, on a reanalysis of previously touched
+data; both headline findings hold in every frozen sensitivity tier, and
+the device benchmark found the fix latency-free. On two small further
+cohorts the frozen predictions were not confirmed: dubosson's designated
+difference was $+2.0$ points with an exact sign-flip $p=0.094$, and
+hall's, $+1.3$ points ($p=0.25$), was inconclusive, its premise having
+failed when the contiguous selection reached only 165~\mgdl. That
+evidence is exploratory. \project remains a research prototype, not a
+medical device.
 
 \bibliographystyle{unsrtnat}
 \begingroup
