@@ -1,0 +1,1094 @@
+{
+  "contract_version": "1.1",
+  "round_id": "glucoedge-rr-2026-10-16",
+  "input_manifest_hash": "32f711f8c8ec3cb9dd8af74fcb364b2cb3e9b23d23f686c01327d25f7c98fc89",
+  "items": [
+    {
+      "item_id": "REV-01",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "Title, abstract, contribution list and conclusion name the same contribution or contributions, and every reported study has a Methods description outside Results.",
+        "letter_text": "Title, abstract, contribution list and conclusion name the same contribution or contributions, and every reported study has a Methods description outside Results.",
+        "letter_item_ref": "R1"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] Either Round-1 route is admissible. (a) Single-study route: the title, abstract, section 1 contribution list and section 11 conclusion all name the calibration-coverage study as the contribution; the five accuracy sweeps (Round-1 sections 7.9-7.13) are not named as a contribution on any of those four surfaces (at most a pointer to an appendix or separate report); any sweep material kept in the document has its own methods description outside Results. (b) Two-question route: section 1 states two research questions; title, abstract, contribution list and conclusion each name the same two contributions; the sweep program and the calibration study each have a methods description outside the Results section. Check: list the contribution(s) named on each of the four surfaces (the sets must be identical) and, for every study whose results are reported, locate its methods description in a non-Results section.",
+        "partially_addressed": "The four surfaces agree but the sweep methods still appear only inside Results; or methods were moved out of Results but one surface names a different contribution set (e.g., title calibration-only while abstract and conclusion still carry both studies, or the abstract still closes on the sweep result under route (a)); or two research questions are stated in section 1 without matching Methods structure.",
+        "made_worse_discriminator": "The contribution sets named across title, abstract, contribution list and conclusion diverge more than in the original (e.g., an additional study or contribution named on some surfaces only); or a reported study's methods that sat outside Results now sit inside Results; or a new study is reported without its own methods description."
+      },
+      "expected_change_surface": "Title; Abstract; section 1 (research question, contribution list); sections 7.9-7.13 (sweep rounds); section 8 Discussion; section 11 Conclusion; a possible new Methods subsection or appendix (roadmap cost scope: Title, Abstract, section 1, sections 7.9-7.13, section 8, section 11).",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W1; DA-O1",
+      "source_reviewer_labels": [
+        "EIC",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-02",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "§2.4 characterizes the named calibration-data literature, and the §1 and §8.1 novelty statement names the time-series-specific mechanism instead of \"nominal sample count said nothing\".",
+        "letter_text": "§2.4 characterizes the named calibration-data literature, and the §1 and §8.1 novelty statement names the time-series-specific mechanism instead of \"nominal sample count said nothing\".",
+        "letter_item_ref": "R2"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] Section 2.4 (or an equivalent Related Work location) contains a calibration-data-selection paragraph that characterizes, not merely cites, what the named works report about calibration-data choice: Williams and Aletras 2024; Yu, Yang and Shi 2021; Cai et al. 2020 (ZeroQ); Krishnamoorthi 2018; Nagel et al. 2021; Wu et al. 2020 (a substantively equivalent set covering calibration-data choice as a studied lever, calibration-data statistics/representativeness, and range setting from calibration data is admissible), with matching reference-list entries. AND the novelty statement in section 1 and in section 8.1 is stated around the time-series-specific mechanism (overlapping, time-ordered windows concentrating a nominal calibration set on one or two participants, with its class-asymmetric clipping consequence), and neither place presents 'nominal sample count said nothing' (or a paraphrase making nominal count the novel finding) as the novelty. Consistent with the Requirement: the result is framed as confirmation and measurement of a known lever.",
+        "partially_addressed": "The named literature is cited only as a list without characterization, or only a subset is engaged with no equivalent coverage; or section 2.4 is fixed but section 1 or section 8.1 still states the novelty as 'nominal sample count said nothing'; or the novelty is restated in only one of section 1 / section 8.1.",
+        "made_worse_discriminator": "The novelty claim is broadened (e.g., calibration-data selection itself claimed as a new lever), the named works are characterized inaccurately in a way that inflates novelty, or the time-series-specific mechanism disappears from the novelty statement."
+      },
+      "expected_change_surface": "Section 2.4 Related Work; section 1 novelty statement and contribution list; section 8.1; reference list.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W2; R2-W2; DA-CA",
+      "source_reviewer_labels": [
+        "EIC",
+        "R2",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-03",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "Table 1 and §2 include on-device glucose-prediction prior work with device evidence and the OhioT1DM citation.",
+        "letter_text": "Table 1 and §2 include on-device glucose-prediction prior work with device evidence and the OhioT1DM citation.",
+        "letter_item_ref": "R3"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] Table 1 (tab:relatedwork) contains a prior on-device glucose-prediction row with device evidence recorded in its Device evidence column beyond Li et al. 2020 (the Requirement names Zhu et al., IEEE Internet of Things Journal 2022; another prior on-device glucose-prediction work with comparable device evidence is admissible), section 2 discusses that work, and OhioT1DM is cited (Marling and Bunescu 2020 or the dataset's canonical citation) wherever a Table 1 row or section 2 sentence gives OhioT1DM as evaluation scope; the reference list contains these entries.",
+        "partially_addressed": "The on-device glucose work appears in section 2 text but not as a Table 1 device-evidence row (or the reverse); or a row is added without its device evidence; or the OhioT1DM citation is still missing from at least one row or sentence that names the dataset.",
+        "made_worse_discriminator": "Table 1's device-evidence column becomes less accurate (prior work's device evidence misstated, or the Li et al. row dropped without replacement), or the text newly claims a first-of-kind on-device position that the added prior work contradicts."
+      },
+      "expected_change_surface": "Section 2 Related Work; Table 1 (tab:relatedwork) Device evidence column; reference list.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W2; R2-W10",
+      "source_reviewer_labels": [
+        "EIC",
+        "R2"
+      ]
+    },
+    {
+      "item_id": "REV-04",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "No sentence credits the flatten head or the cosine schedule with an improvement unless a multi-seed RT-CGM comparison is reported, and every citation of the +0.20-point gain states the seed spread.",
+        "letter_text": "No sentence credits the flatten head or the cosine schedule with an improvement unless a multi-seed RT-CGM comparison is reported, and every citation of the +0.20-point gain states the seed spread.",
+        "letter_item_ref": "R4"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] Either Round-1 route is admissible. (b) Artifact-level route: the contribution list, abstract and conclusion, and every other sentence that summarizes round five, describe it as a pre-registered ship decision between the specific seed-4 candidate artifact and the champion artifact (e.g., 'the seed-4 flatten-head artifact passed the pre-registered gates'); no sentence credits the flatten head, a position-preserving head, or the cosine schedule with an improvement; and every occurrence of the +0.20-point gain states the 1.1-point five-seed spread in the same or adjacent sentence. (a) Multi-seed route: a multi-seed RT-CGM comparison of the candidate and champion recipes is reported (Requirement: all five seeds of each recipe, labelled descriptive because the confirmatory read is spent, with seed-and-participant uncertainty such as a two-stage bootstrap or a mixed model; an equivalent seed-aware uncertainty is admissible), any remaining head or schedule credit is no stronger than that comparison shows, and every occurrence of the +0.20-point gain still states the seed spread. Check: enumerate every '+0.20' / '0.20 points' occurrence and every sentence naming the head or schedule as a source of improvement.",
+        "partially_addressed": "Artifact-level wording is adopted on some summary surfaces but at least one sentence (e.g., contribution list 'confirmed' or conclusion 'promoted') still credits the head or the schedule; or the seed spread accompanies the +0.20 gain in some occurrences but not all; or a multi-seed analysis is reported only on validation/held-out data rather than RT-CGM, or without seed-level variation shown, while head or schedule credit is retained.",
+        "made_worse_discriminator": "A new design-level credit to the head or the schedule appears without multi-seed RT-CGM evidence; a multi-seed RT-CGM analysis is presented as confirmatory or used to re-certify the design; the seed spread is removed from a place it appeared; or multi-seed results inside seed noise are presented as supporting the head."
+      },
+      "expected_change_surface": "Abstract; section 1 contribution list; sections 7.12-7.13 and Table 18 (round five); section 11 Conclusion; optional new descriptive five-seed RT-CGM analysis (roadmap cost scope: re_analysis from cached checkpoints, or sentence edits in Abstract, section 1, section 11).",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W3; R1-W3; DA-M3",
+      "source_reviewer_labels": [
+        "EIC",
+        "R1",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-05",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "No passage calls the sequential arm a toolchain default without a cited toolchain source, and §8.1 quotes the random, unordered selection instruction.",
+        "letter_text": "No passage calls the sequential arm a toolchain default without a cited toolchain source, and §8.1 quotes the random, unordered selection instruction.",
+        "letter_item_ref": "R5"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] Every passage that Round 1 found calling the sequential arm the toolchain default (six passages: Abstract, section 1, section 5.2, section 7.8, section 8.1, section 11) either uses a neutral description (e.g., 'contiguous first-N, dataset-order selection') or, if the default label is kept, cites a toolchain source naming the toolchain, version and example code that feeds calibration data in stored order; no other passage introduces the label without such a source. AND section 8.1 quotes the cited RepresentativeDataset guidance's instruction that the calibration subset be randomly chosen, in no particular order (quotation with citation). Consistent with the Requirement: section 2.4 quotes the guidance accurately and the text states that the sequential arm contravenes it.",
+        "partially_addressed": "The label is replaced in most but not all passages (e.g., abstract and conclusion fixed while section 5.2 or 7.8 keeps it); or the label is replaced but section 8.1 still paraphrases the guidance as 'representative' without the random, unordered instruction; or the quotation appears only in section 2.4.",
+        "made_worse_discriminator": "Additional passages describe the sequential arm as a default or common practice without a source; the guidance is misquoted; or a cited source is added that does not show stored-order feeding (miscitation)."
+      },
+      "expected_change_surface": "Abstract; section 1; section 5.2; section 7.8; section 8.1; section 11; quotation in section 2.4.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W4; R2-W1; DA-m11",
+      "source_reviewer_labels": [
+        "EIC",
+        "R2",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-06",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "No passage states that the predictions held or that the effect reproduced, and §7.7 reports each designated contrast with its interval and the outcome of the hall premise.",
+        "letter_text": "No passage states that the predictions held or that the effect reproduced, and §7.7 reports each designated contrast with its interval and the outcome of the hall premise.",
+        "letter_item_ref": "R6"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] No sentence anywhere (Round-1 locations: Abstract 'reproduces on two further cohorts'; section 7.7 'Both predictions held' and 'near zero as predicted'; Limitations item 2; section 11 'confirmed on two further cohorts') states or implies that the frozen second-cohort predictions held or were confirmed, or that the effect reproduced or replicated. AND section 7.7 reports each designated contrast with its point estimate and interval (Round-1 record: dubosson temporal about +2.0 [-0.0, +3.1] points, lower bound -0.0000338; hall held-out about +1.3 [-0.1, +3.3] points) and states the outcome of the hall premise (assumed ceiling near 240 mg/dL; realized sequential ceiling 165 mg/dL, so the premise was contradicted). Consistent with the Requirement and letter D2, not required by this criterion: each prediction's outcome stated separately, hall temporal +4.3 [+1.1, +7.3] reported, interpretation labelled exploratory (see NS-2).",
+        "partially_addressed": "Confirmation wording is removed from some of the four Round-1 locations but kept, or replaced by an equivalent confirmation claim, in at least one; or section 7.7 reports both designated intervals but not the hall premise outcome; or reports the premise outcome but omits one designated interval.",
+        "made_worse_discriminator": "New confirmation language is added (e.g., a post-hoc decision rule or margin introduced to declare a prediction held); a designated interval is misreported (e.g., a lower bound rounded to a positive value); the hall premise failure is concealed; or hall's temporal +4.3 is presented as confirming the hall prediction."
+      },
+      "expected_change_surface": "Section 7.7 (second-cohort confirmation); Table 11; Abstract; Limitations item 2; section 11 Conclusion.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W5; R1-W1; DA-M1",
+      "source_reviewer_labels": [
+        "EIC",
+        "R1",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-08",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "Every cohort named in the abstract, §7.10–§7.13 or Table 1 appears in the cohort table with its role and sensor generation.",
+        "letter_text": "Every cohort named in the abstract, §7.10–§7.13 or Table 1 appears in the cohort table with its role and sensor generation.",
+        "letter_item_ref": "R7"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] A cohort table exists, and every cohort named in the abstract, sections 7.10-7.13 or Table 1 has a row stating its role (e.g., training, calibration pool, held-out, confirmatory, probe) and its CGM sensor model/generation, with mixed or unrecoverable devices marked as such (Round-1 audit record: RT-CGM = JDRF CGM RCT with DexCom SEVEN, MiniMed Paradigm and FreeStyle Navigator, per-subject sensor not recoverable). Round-1 known names to check include Weinstock, CITY, DLCP3, REPLACE-BG, SENCE, WISDM, RT-CGM, PEDAP, dubosson and hall, plus any other cohort named on those surfaces. Check by enumerating cohort names on the four surfaces and matching rows. The Requirement's further columns (source trial and citation, n, age range, diabetes type, therapy, blinded or real-time wear, collection years, reportable range) and an RT-CGM device/era description in sections 7.11 and 10.2 are consistent with, but not required by, this criterion.",
+        "partially_addressed": "A table exists but at least one cohort named on the four surfaces is missing, or at least one row lacks role or sensor generation without an 'unrecoverable' marking; or the cohorts are characterized in prose only.",
+        "made_worse_discriminator": "A cohort characterization contradicts the Round-1 audit record (e.g., RT-CGM described as current real-time CGM or a single modern device); cohort information present in the original is removed; or new cohorts are named on those surfaces without characterization."
+      },
+      "expected_change_surface": "New cohort table (section 4.1, Methods, or an appendix); sections 7.10-7.13; section 7.11; section 10.2; Table 1.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W6; R2-W8; R3-W2",
+      "source_reviewer_labels": [
+        "EIC",
+        "R2",
+        "R3"
+      ]
+    },
+    {
+      "item_id": "REV-13",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "The abstract and contribution list agree with Table 13's per-class values.",
+        "letter_text": "The abstract and contribution list agree with Table 13's per-class values.",
+        "letter_item_ref": "R8"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] Neither the abstract nor the section 1 contribution list says the round-one winner gained 'only' on the majority class or is 'majority-class only'; every per-class statement on those two surfaces is consistent with Table 13's per-class values (stable gained; rising also improved, 0.365 versus 0.334), e.g., 'almost entirely on the majority class'. Consistent with the Requirement: the no-ship decision is grounded in the directional-recall drop (0.517 to 0.438).",
+        "partially_addressed": "Fixed on one of the two surfaces only; or 'only' is removed but replaced by another per-class statement that Table 13 contradicts.",
+        "made_worse_discriminator": "A new per-class claim on either surface contradicts Table 13, or Table 13's values change to fit the summary wording without explanation."
+      },
+      "expected_change_surface": "Abstract; section 1 contribution list; Table 13 (tab:sweeprecall).",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W7; R1-W9; DA-m5",
+      "source_reviewer_labels": [
+        "EIC",
+        "R1",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-14",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "The count of confirmatory reads in the abstract, contribution list and conclusion matches §7.12 and the Table 17 caption.",
+        "letter_text": "The count of confirmatory reads in the abstract, contribution list and conclusion matches §7.12 and the Table 17 caption.",
+        "letter_item_ref": "R9"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] The abstract, the contribution list and the conclusion each either state that four rounds spent one confirmatory read each and round four spent none (ended on an identity outcome without a read), or make no read-count claim at all; no sentence on those surfaces says each round was judged by, or spent, one read; the stated count matches section 7.12 and the Table 17 caption.",
+        "partially_addressed": "Corrected on one or two of the three surfaces but not all three.",
+        "made_worse_discriminator": "Section 7.12 or the Table 17 caption is changed to match the erroneous summary, or a new incorrect read count appears."
+      },
+      "expected_change_surface": "Abstract; section 1 contribution list; section 11 Conclusion; section 7.12; Table 17 caption.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W8; R1-W6; DA-m1",
+      "source_reviewer_labels": [
+        "EIC",
+        "R1",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-15",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "Each quantitative bound in the abstract, contribution list and conclusion is at least the largest corresponding contrast in `aggregate_r1.json`.",
+        "letter_text": "Each quantitative bound in the abstract, contribution list and conclusion is at least the largest corresponding contrast in `aggregate_r1.json`.",
+        "letter_item_ref": "R10"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] Every quantitative bound on the null knobs (stratification, budget, observer) in the abstract, contribution list and conclusion is at least the largest corresponding contrast in aggregate_r1.json. From the Round-1 record this means the observer bound must be at least 0.12 points (range coverage 200, draw 101: 0.48653 to 0.48771), e.g., 'about a tenth of a point', or the observer comparison is reported separately with its value. Replacing a numeric bound by the contrasts themselves is admissible. Consistent with S37's quantitative wording (balanced 1,000 vs 200: +0.08 [+0.02, +0.15] points).",
+        "partially_addressed": "The conclusion is fixed but a bound below the largest corresponding contrast persists in the abstract or contribution list; or the bound is raised but still sits below one corresponding contrast.",
+        "made_worse_discriminator": "A tighter bound is introduced, or a bound now conflicts with additional contrasts in aggregate_r1.json."
+      },
+      "expected_change_surface": "Section 11 Conclusion; Abstract; section 1 contribution list; section 7.3.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W9; R1-W8; DA-m2",
+      "source_reviewer_labels": [
+        "EIC",
+        "R1",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-17",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "§7.7 quotes the Table 5 ceiling for the 13.4-point contrast.",
+        "letter_text": "§7.7 quotes the Table 5 ceiling for the 13.4-point contrast.",
+        "letter_item_ref": "R11"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] Section 7.7's mechanism/dose-response argument pairs the 13.4-point contrast with the Table 5 corrected sequential-200 ceiling (250.9 mg/dL, maximum 251), and any 239.9 mg/dL figure in section 7.7 is attributed only to the historical artifact (Table 4); any gap figure derived for Weinstock uses 250.9.",
+        "partially_addressed": "250.9 is introduced but 239.9 is still paired with the 13.4-point effect elsewhere in section 7.7, or a Weinstock gap figure is still computed from 239.9.",
+        "made_worse_discriminator": "A different incorrect ceiling is used, or Table 5's value changes without explanation, or 239.9 is newly paired with a corrected-protocol effect elsewhere."
+      },
+      "expected_change_surface": "Section 7.7; Table 5; Table 4.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W10; R1-W8; DA-M1",
+      "source_reviewer_labels": [
+        "EIC",
+        "R1",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-18",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "§7.7 or Table 11 reports the clipped-window shares, and the dose-response sentence cites them.",
+        "letter_text": "§7.7 or Table 11 reports the clipped-window shares, and the dose-response sentence cites them.",
+        "letter_item_ref": "R12"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] Section 7.7 or Table 11 (or a table referenced from section 7.7) reports, per cohort and component (Weinstock, dubosson, hall), the share of windows above that cohort's sequential-200 ceiling; and every dose-response statement in section 7.7 cites those shares as its ordering quantity rather than mg/dL gaps. If the shares do not order the effects, withdrawing or qualifying the dose-response claim while still reporting the shares is admissible.",
+        "partially_addressed": "Shares are reported for only some cohorts or components; or shares are reported but the dose-response sentence still argues from mg/dL gaps; or the dose-response sentence is removed without the shares being reported.",
+        "made_worse_discriminator": "The dose-response claim is strengthened (e.g., 'tracks the deficit') without share data, or shares are reported that contradict the ordering while the text still asserts it."
+      },
+      "expected_change_surface": "Section 7.7 dose-response argument; Table 11; re-analysis of clipped-window shares from cached windows.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W10; DA-A5; DA-M1",
+      "source_reviewer_labels": [
+        "EIC",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-21",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "No occurrence of \"clinical threshold\" or \"clinical-shape\" remains in the manuscript.",
+        "letter_text": "No occurrence of \"clinical threshold\" or \"clinical-shape\" remains in the manuscript.",
+        "letter_item_ref": "R13"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] A full-text search of the manuscript (abstract, body, captions, tables, appendices) finds no occurrence of 'clinical threshold' (including 'clinical thresholds') or 'clinical-shape'. The replacements (Requirement: 'trend-arrow rate bands (+/-1 and +/-2 mg/dL/min)' in section 7.12; 'directional classifier' or 'directional-recall profile' in section 8.2), or equivalents, are neutral and add no other clinical-validity wording.",
+        "partially_addressed": "Removed from one location (e.g., section 8.2) but at least one occurrence remains (e.g., one of section 7.12's two uses).",
+        "made_worse_discriminator": "The replacement wording is equally or more clinically loaded (e.g., 'clinically meaningful cut-points'), or new occurrences appear elsewhere."
+      },
+      "expected_change_surface": "Section 7.12; section 8.2.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W15; R2-W9; R3-W5; DA-m12",
+      "source_reviewer_labels": [
+        "EIC",
+        "R2",
+        "R3",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-25",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "Table 11 reports per-class support and undefined-draw fractions (for example, 0.012 for the dubosson temporal contrast).",
+        "letter_text": "Table 11 reports per-class support and undefined-draw fractions (for example, 0.012 for the dubosson temporal contrast).",
+        "letter_item_ref": "R14"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R1 / Methodology, card #2] Table 11 reports, for each designated contrast (dubosson temporal and hall held-out, plus any other contrast row it carries), the per-class window support, at least for the directional classes (Round-1 record: 28 falling_fast windows in dubosson temporal; 41 falling_fast and 50 rising_fast in hall held-out), and the undefined bootstrap-draw fraction (dubosson temporal 0.012; zero stated explicitly where none), with values matching confirmation_dubosson.json and confirmation_hall.json. Consistent with the Requirement: the caption or text states how undefined draws are handled, as Table 7's caption does for the main study.",
+        "partially_addressed": "Undefined-draw fractions without per-class support, or the reverse; or values given for one cohort only; or values given in prose but not in Table 11 or a table it references.",
+        "made_worse_discriminator": "Reported values contradict the confirmation records, or undefined draws are silently re-handled so that intervals change without disclosure."
+      },
+      "expected_change_surface": "Table 11 (tab:confirmation) and caption; section 7.7.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R1-W1; DA-m6",
+      "source_reviewer_labels": [
+        "R1",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-26",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "Every interval for a cohort with fewer than about 15 participants names a small-cluster-valid procedure, or no interval is shown and per-participant differences are reported.",
+        "letter_text": "Every interval for a cohort with fewer than about 15 participants names a small-cluster-valid procedure, or no interval is shown and per-participant differences are reported.",
+        "letter_item_ref": "R15"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R1 / Methodology, card #2] For every cohort or component with fewer than about 15 participants (Round-1: dubosson temporal and hall held-out, six clusters each), either (a) each interval shown names a small-cluster-valid procedure (wild cluster bootstrap-t with Rademacher or Webb weights, exact sign-flip randomization over participants, or another procedure with a stated small-cluster validity justification), or (b) no interval is shown and the per-participant paired differences are reported. A percentile pairs-cluster bootstrap interval left on such a cohort without a small-cluster-valid procedure does not satisfy. Consistent with the Requirement: per-participant differences reported in either case.",
+        "partially_addressed": "The procedure is changed for one six-cluster cohort but not the other; or per-participant differences are added while percentile intervals remain; or a procedure is named whose small-cluster validity is not supported (e.g., a relabelled percentile or BCa bootstrap).",
+        "made_worse_discriminator": "Six-cluster intervals become narrower or are used for stronger claims without a valid procedure, or new small-cluster intervals are added with the percentile bootstrap."
+      },
+      "expected_change_surface": "Table 11 intervals; section 7.7; section 6 (inference description); possibly an appendix with per-participant differences.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R1-W2",
+      "source_reviewer_labels": [
+        "R1"
+      ]
+    },
+    {
+      "item_id": "REV-27",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "The abstract, §7.13 and the conclusion name the bundle, not a single factor.",
+        "letter_text": "The abstract, §7.13 and the conclusion name the bundle, not a single factor.",
+        "letter_item_ref": "R16"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R1 / Methodology, card #2] In the abstract, section 7.13 and the conclusion, the round-five result is attributed to the bundled candidate, named as the combination it is (head, cosine learning-rate schedule, validation-chosen kept epoch and seed); no sentence on those three surfaces credits a single factor (the head alone, or head plus schedule as the cause). Consistent with the Requirement: a statement that the factors are not separately identified at the confirmatory read.",
+        "partially_addressed": "The bundle is named on one or two surfaces but the abstract or the conclusion still credits the head (or head and schedule) alone; or the bundle is listed so as to still imply causal credit to one factor.",
+        "made_worse_discriminator": "A new single-factor attribution appears (e.g., contribution list or Discussion), or selection-biased staged validation means are presented as identifying the head's contribution."
+      },
+      "expected_change_surface": "Abstract; section 7.13; section 11 Conclusion.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R1-W4; DA-M3",
+      "source_reviewer_labels": [
+        "R1",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-28",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "The conclusion's take-home names input-range coverage.",
+        "letter_text": "The conclusion's take-home names input-range coverage.",
+        "letter_item_ref": "R17"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R1 / Methodology, card #2] The conclusion's take-home names coverage of the deployment input range (the selection's range relative to the population tail) as the operative variable, e.g., 'cover the deployment input range (randomized selection achieves this in this pool)', and no longer states 'Coverage means covering participants' or otherwise credits participant spread as the operative variable; the take-home is consistent with Table 7's sequential-1,000 row (6 participants, full recovery +0.05 [-0.05, +0.15]) and the clip-only control. Consistent with the Requirement: the section 8.1 rule restated the same way.",
+        "partially_addressed": "Input-range coverage is named but the participant-coverage slogan is kept as a co-equal operative variable; or section 8.1 is restated while the conclusion is unchanged.",
+        "made_worse_discriminator": "The take-home asserts participant coverage more strongly, or contradicts the sequential-1,000 row or the clip-only control."
+      },
+      "expected_change_surface": "Section 11 Conclusion; section 8.1.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R1-W4; DA-M2",
+      "source_reviewer_labels": [
+        "R1",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-34",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "No occurrence of \"label-noise ceiling\" or \"headroom\" remains, and §7.12 defines the quantity as agreement between two labels computed from the same horizon readings.",
+        "letter_text": "No occurrence of \"label-noise ceiling\" or \"headroom\" remains, and §7.12 defines the quantity as agreement between two labels computed from the same horizon readings.",
+        "letter_item_ref": "R18"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R1 / Methodology, card #2] A full-text search finds no 'label-noise ceiling' and no 'headroom'; the round-four quantity is not presented as a ceiling or upper bound on attainable recall in any equivalent wording (the item title and Requirement say drop 'ceiling' and 'headroom' from the contribution list, section 7.12 and the conclusion; mg/dL input-range 'ceiling' is unrelated); AND section 7.12 defines the quantity as agreement between two labels computed from the same horizon readings (g[t..t+3]), e.g., a label-definition stability check. Consistent with the Requirement: a statement that recall attainable from CGM-only inputs is unknown.",
+        "partially_addressed": "The terms are removed in section 7.12 but remain in the contribution list or conclusion (or the reverse); or the terms are removed but section 7.12 lacks the definitional statement; or the definition is added while the ceiling framing remains.",
+        "made_worse_discriminator": "A new upper-bound or attainable-recall claim is derived from the agreement metric, or the definition is misstated (e.g., labels described as computed from different readings)."
+      },
+      "expected_change_surface": "Section 1 contribution list; section 7.12 (round four); section 11 Conclusion.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R1-W10; R2-W3; DA-m10",
+      "source_reviewer_labels": [
+        "R1",
+        "R2",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-35",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "§7.12 and the conclusion claim nothing about where the remaining error lies beyond the tested noise model.",
+        "letter_text": "§7.12 and the conclusion claim nothing about where the remaining error lies beyond the tested noise model.",
+        "letter_item_ref": "R19"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R1 / Methodology, card #2] Section 7.12 and section 11 contain no statement locating the remaining error in the model and data rather than the labels (Round-1 wording: 'not label-noise-limited'; 'places the remaining error in the model and data, not the labels') beyond the tested noise model; any label-robustness sentence that remains names that noise model (independent noise, sigma = 1 and 2 mg/dL) so its scope is checkable (letter D4: the noise-model qualifier applies to any remaining label-robustness sentence). Removing the claim is admissible; the colored-noise rerun is optional. The Requirement's CGM error-model citation and sensor-trace statement are recorded as NS-3, not required here.",
+        "partially_addressed": "The claim is removed or scoped in one of section 7.12 / section 11 but not the other; or a qualifier names the noise model while the sentence still generalizes to label validity in general.",
+        "made_worse_discriminator": "The claim is extended (e.g., to label validity or blood-glucose truth), or new robustness claims are made under untested noise models."
+      },
+      "expected_change_surface": "Section 7.12; section 11 Conclusion (optional re_analysis: colored-noise rerun).",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R1-W10; R2-W3; R3-W3; DA-m10",
+      "source_reviewer_labels": [
+        "R1",
+        "R2",
+        "R3",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-59",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "§7.3, §8.1 and the conclusion state the shared-input-range condition wherever the nulls are generalized, or report the additional test.",
+        "letter_text": "§7.3, §8.1 and the conclusion state the shared-input-range condition wherever the nulls are generalized, or report the additional test.",
+        "letter_item_ref": "R20"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] Either Round-1 route, or a mix that covers every generalizing passage, is admissible. (a) Scope route: wherever section 7.3, section 8.1 or the conclusion generalizes the stratification, budget or observer nulls or the null primary (Round-1 wording includes 'the other knobs were the wrong ones', 'the refinements evaluated here are exhausted', 'calibration design reduces to one rule'), the passage states the shared-input-range condition: in this pool every randomized 200-window selection spans 39-401 mg/dL and receives the same INT8 input range (0-400.8). Consistent with the Requirement: the primary contrast (+0.06 [-0.02, +0.13]) described as uninformative about input-range-aware selection in this pool. (b) Test route: range-aware selection is tested on a cohort where randomized draws under-cover the range (dubosson, hall) and reported, with the generalizations following its result.",
+        "partially_addressed": "The condition is stated on one or two of the three surfaces only; or it is stated in section 7.3 while section 8.1 or the conclusion still generalizes without it; or the extra test is run but the generalizations do not reflect its result.",
+        "made_worse_discriminator": "The nulls are generalized further (e.g., to PTQ calibration in general or to other cohorts), or a new surface (e.g., abstract or novelty statement) turns them into a design rule without the condition."
+      },
+      "expected_change_surface": "Section 7.3; section 8.1; section 11 Conclusion; Table 5 (or re_analysis: range-aware selection on dubosson and hall).",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "DA-M2",
+      "source_reviewer_labels": [
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-60",
+      "obligation_class": "must_fix",
+      "inherited_criterion": {
+        "roadmap_text": "Each summary of the round-five result states its Weinstock gate outcomes and the primary-cohort macro-F1 change.",
+        "letter_text": "Each summary of the round-five result states its Weinstock gate outcomes and the primary-cohort macro-F1 change.",
+        "letter_item_ref": "R21"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] Every summary of the round-five result (Round-1 locations: Abstract, section 11; plus any other summary such as the contribution list) states, beside the +0.20-point gain, that the candidate fails gates 1 and 2 on both Weinstock components, and gives the primary-cohort macro-F1 change (Round-1 record: 0.410 versus 0.427). Consistent with the Requirement, not required here: PEDAP directional recall 0.539 versus 0.541. A surface that no longer summarizes round five has nothing to check.",
+        "partially_addressed": "The costs appear in one summary but not another; or the Weinstock gate outcomes appear without the macro-F1 change (or the reverse).",
+        "made_worse_discriminator": "Costs are misreported (e.g., Weinstock gates described as passed), or new summaries of round five appear without the costs."
+      },
+      "expected_change_surface": "Abstract; section 11 Conclusion; section 1 contribution list; section 7.13; Table 18.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "DA-M3",
+      "source_reviewer_labels": [
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-07",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-07: update Figure 1, §4.3 and Table 1, and add a model-variants table (architecture, parameters, encoding, loss, training data, calibration pool, hash)"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] A model-variants table lists each reported model (Round-1 set: the 2,909-parameter calibration-study TrendCNN, the delta-encoded pair, the round-two winner, and the round-five 50,645-parameter flatten-head model that ships) with architecture, parameter count, input encoding, loss, training data, calibration pool and artifact hash; Figure 1, section 4.3 and the Table 1 row describe the shipped model consistently with that table, or explicitly distinguish the study model from the shipped model."
+      },
+      "expected_change_surface": "Section 4.3; Figure 1; Table 1; new model-variants table.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W6",
+      "source_reviewer_labels": [
+        "EIC"
+      ]
+    },
+    {
+      "item_id": "REV-09",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-09: state the INT8 calibration pool of the shipped model"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] The sweep methods or section 7.13 state the pool from which the shipped model's uniform INT8 calibration set was drawn (Round-1 record: Weinstock train only, protocol_sweep_r5.json) and the selection rule."
+      },
+      "expected_change_surface": "Sweep methods; section 7.13.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W6; R1-W11",
+      "source_reviewer_labels": [
+        "EIC",
+        "R1"
+      ]
+    },
+    {
+      "item_id": "REV-10",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-10: shorten the abstract to about 200 words"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] The abstract is about 200 words (roughly 180-220; Round-1 counts were about 265 to 330) and still conveys question, design, primary and key secondary results with their analysis status, mechanism, deployment cost and scope (EIC-W7 suggested content)."
+      },
+      "expected_change_surface": "Abstract.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W7",
+      "source_reviewer_labels": [
+        "EIC"
+      ]
+    },
+    {
+      "item_id": "REV-11",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-11: label the 13.4-point headline as a prespecified secondary, and state the null primary"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] The abstract and section 1 identify the 13.4-point contrast as a prespecified secondary contrast and state that the pre-registered primary contrast (range coverage versus balanced random at 200 windows) was null (+0.06 [-0.02, +0.13])."
+      },
+      "expected_change_surface": "Abstract; section 1.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W7; R1-W5",
+      "source_reviewer_labels": [
+        "EIC",
+        "R1"
+      ]
+    },
+    {
+      "item_id": "REV-12",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-12: label delta encoding as post-hoc and the anchor variant as held-out-selected; temper \"nearly calibration-proof\""
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] The abstract and section 7.8 label the delta-encoding experiment post hoc (on previously touched held-out data), state that the anchor variant was chosen over the plain variant on held-out data, and replace or qualify 'nearly calibration-proof' so the claim is scoped to the tested adversarial selection and the disclosed ship-gate margin."
+      },
+      "expected_change_surface": "Abstract; section 7.8.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W7; R1-W6; DA-m9",
+      "source_reviewer_labels": [
+        "EIC",
+        "R1",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-16",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-16: write \"of 200 windows\", not \"the same 200 windows\""
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] No sentence (Round-1: section 11) describes the randomized selections as 'the same 200 windows'; the wording is, e.g., 'any randomized selection of 200 windows'."
+      },
+      "expected_change_surface": "Section 11 Conclusion.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W9",
+      "source_reviewer_labels": [
+        "EIC"
+      ]
+    },
+    {
+      "item_id": "REV-19",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-19: update the §6 device-timing sentence and the Limitations item 7 count (per the record, 8 of 110 INT8 artifacts timed and 102 untimed)"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] Section 6 no longer says that none of the new artifacts was device-timed and describes both the historical device observations and the nine-artifact benchmark; Limitations item 7's count matches the record (8 of the 110 study INT8 artifacts timed, 102 untimed; any count that includes confirmation or delta artifacts says so)."
+      },
+      "expected_change_surface": "Section 6; Limitations item 7.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W11; R1-W7",
+      "source_reviewer_labels": [
+        "EIC",
+        "R1"
+      ]
+    },
+    {
+      "item_id": "REV-20",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-20: presentation fixes. Move revision history to a provenance appendix; restore type sizes and merge the sweep confirmatory tables; move the Figure 3 legend off the bars; name each reference model with its precision and split; label the column \"Macro recall\""
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] All five presentation sub-fixes are present: (1) revision-history narration (Round-1: section 10.1 'September revision', section 7.14, Table 20 and similar passages) moved to a provenance appendix with at most a one-sentence pointer in the main text; (2) tables restored to normal reading size and the sweep confirmatory tables (Round-1 Tables 14, 15, 16, 18) merged, or moved together out of the main text under REV-01; (3) the Figure 3 legend no longer overlaps the bars; (4) each reference/champion model named once, with precision and split stated for every quoted champion number; (5) the five-class macro-recall column in Tables 6 and 9 labelled 'Macro recall'."
+      },
+      "expected_change_surface": "Section 10.1; section 7.14; Table 20; Tables 1, 6, 7, 9, 10-19; Figure 3.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W12, W13, W14, W16",
+      "source_reviewer_labels": [
+        "EIC"
+      ]
+    },
+    {
+      "item_id": "REV-22",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-22: report the frozen budget-by-strategy interaction, or state why it was dropped"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] The budget-by-strategy interaction listed among protocol.json's frozen secondary contrasts is reported with point estimate and interval (Table 7, section 6 or section 7.3), or section 6 states that it was dropped and why."
+      },
+      "expected_change_surface": "Section 6; Table 7.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W17; R1-W5; DA-m7",
+      "source_reviewer_labels": [
+        "EIC",
+        "R1",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-23",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-23: version or cite recency_collision.json and the round-four frozen design (spec at commit c8f3de6)"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] recency_collision.json is versioned in the supplementary results directory or its repository path/commit is cited in the manuscript, the round-four frozen design is versioned or cited (e.g., the spec at commit c8f3de6), and the section 10.1 inventory of versioned records reflects both."
+      },
+      "expected_change_surface": "paper/results/calibration-coverage/ (supplementary record); section 10.1; section 7.13.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W18 (narrowed on the record)",
+      "source_reviewer_labels": [
+        "EIC"
+      ]
+    },
+    {
+      "item_id": "REV-24",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-24: state the licence of the distributed weights and add a conventional ethics statement"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] Section 10.2 states the licence under which the distributed model weights are released and how it relates to the source data terms (DiaData CC BY-NC 4.0), and gives a conventional one-sentence ethics statement (no review was sought, and why: public, de-identified data used under the providers' terms)."
+      },
+      "expected_change_surface": "Section 10.2.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "EIC-W19",
+      "source_reviewer_labels": [
+        "EIC"
+      ]
+    },
+    {
+      "item_id": "REV-29",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-29: add a protocol-to-report table covering H1–H4, the primary and every secondary with their status; report seed and draw variation; give an interval for sequential 1,000 vs 200"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R1 / Methodology, card #2] All three parts are present: (1) a protocol-to-report table listing H1-H4, the primary and every frozen secondary contrast, each with its status and report location; (2) model-seed variation and calibration-draw variation reported separately, as the frozen plan required (Round-1 derivable values: per-seed effect SD about 0.47 points, within-seed draw SD about 0.1); (3) the sequential 1,000 versus 200 contrast reported with an interval."
+      },
+      "expected_change_surface": "Section 6; new protocol-to-report table; Table 7.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R1-W5; DA-m7; DA-m8",
+      "source_reviewer_labels": [
+        "R1",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-30",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-30: add a held-out read ledger; disclose in the abstract that rounds 1–3 reused one split and that round one was decided post hoc"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R1 / Methodology, card #2] A held-out read ledger (order or date, analysis, split read, decision taken) covers the main study, the sensitivity tiers, the delta experiment and every sweep round; and the abstract discloses that rounds 1-3 reused one Weinstock split and that round one was decided post hoc."
+      },
+      "expected_change_surface": "New read-ledger table; Abstract; sweep sections.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R1-W6; DA-m1",
+      "source_reviewer_labels": [
+        "R1",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-31",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-31: publish the operator inventory and size for the confirmation and delta artifacts"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R1 / Methodology, card #2] The operator inventory and serialized size are published (supplementary records or a manuscript table) for the confirmation-cohort (dubosson, hall) and delta INT8 artifacts, so the shared-inventory-and-size statement is supported beyond the 110 study artifacts; restricting that statement to the 110 study artifacts is an admissible equivalent."
+      },
+      "expected_change_surface": "confirmation_*.json and delta_inputs_r1.json (supplementary record); Limitations.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R1-W7",
+      "source_reviewer_labels": [
+        "R1"
+      ]
+    },
+    {
+      "item_id": "REV-32",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-32: quote the widest single-tier interval, not a spliced one"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R1 / Methodology, card #2] Section 7.6's sensitivity-tier sentence quotes an interval that belongs to a single tier (the widest single-tier interval), not one spliced from two tiers (Round-1: '[+6.5, +14.7]' joined 6.48 from [6.48, 14.56] and 14.67 from [9.32, 14.67])."
+      },
+      "expected_change_surface": "Section 7.6 sensitivity-tier sentence.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R1-W8",
+      "source_reviewer_labels": [
+        "R1"
+      ]
+    },
+    {
+      "item_id": "REV-33",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-33: report per-class F1 and precision for the round-one comparison"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R1 / Methodology, card #2] Per-class F1 and per-class precision for the round-one winner versus the champion are reported (tab:sweeprecall or an adjacent table), and any statement decomposing the macro-F1 gain by class uses F1 rather than recall."
+      },
+      "expected_change_surface": "tab:sweeprecall (Table 13); round-one sweep section.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R1-W9",
+      "source_reviewer_labels": [
+        "R1"
+      ]
+    },
+    {
+      "item_id": "REV-36",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-36: recomputability. Publish per-artifact hashes, per-participant confusion counts where source terms allow, and the sweep batch size (512 vs the stated 64)"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R1 / Methodology, card #2] Per-artifact hashes are published in the versioned supplement; de-identified per-participant confusion counts are published where the source terms allow, with the limitation stated explicitly where they do not; and the sweeps' training batch size (512) is stated in the manuscript, distinct from the stated 64."
+      },
+      "expected_change_surface": "Supplementary record (paper/results/calibration-coverage/); section 10.1; sweep methods.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R1-W11",
+      "source_reviewer_labels": [
+        "R1"
+      ]
+    },
+    {
+      "item_id": "REV-37",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-37: acknowledge rate-error-grid and time-gain evaluation in §2.3"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R2 / Domain, card #3] Section 2.3 no longer describes forecasting evaluation as RMSE-only and acknowledges, with citations, rate-error-grid evaluation (continuous glucose error-grid analysis, Kovatchev et al. 2004, applied to prediction, e.g., Zanderigo et al. 2007) and time-gain evaluation (the J index, Facchinetti et al. 2011)."
+      },
+      "expected_change_surface": "Section 2.3.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R2-W4; R3-W9",
+      "source_reviewer_labels": [
+        "R2",
+        "R3"
+      ]
+    },
+    {
+      "item_id": "REV-38",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-38: correct the Kistkins et al. quotation"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R2 / Domain, card #3] Section 2.3's quotation of Kistkins et al. 2023 matches the cited article (best-model recalls 0.85-0.98 rather than 0.85-0.96), with the context R2-W5 gives (euglycemia recall 0.59-0.70 at 1 h; 11 participants; 15-minute data, one-step horizon; within-patient splits) or an equally accurate summary."
+      },
+      "expected_change_surface": "Section 2.3.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R2-W5",
+      "source_reviewer_labels": [
+        "R2"
+      ]
+    },
+    {
+      "item_id": "REV-39",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-39: treat 39 and 401 mg/dL as censoring codes; report shares by class and add a sensitivity tier"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R2 / Domain, card #3] Section 4.1 describes 39 and 401 mg/dL as LOW/HIGH censoring codes (encoding confirmed, or stated as assumed), the manuscript reports by class the share of windows with a censored input or endpoint, and a sensitivity tier that excludes censored endpoints or treats their rates as bounds is reported."
+      },
+      "expected_change_surface": "Section 4.1; section 7.4; sensitivity tiers (section 7.6); re-analysis of censored-window shares.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R2-W6; R3-W7; R3-Q2",
+      "source_reviewer_labels": [
+        "R2",
+        "R3"
+      ]
+    },
+    {
+      "item_id": "REV-40",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-40: state what calibration changes inside the INT8 artifact; publish the per-op dtype map; state the CPU backend and thread count"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R2 / Domain, card #3] Section 7.15 states that calibration sets the scale and zero point of the input, intermediate and output activation tensors (graph and size unchanged), not only the input pair; the per-op dtype map of one INT8 artifact, with the placement of QUANTIZE and DEQUANTIZE, is published; and the CPU backend and thread count of the device benchmark are stated."
+      },
+      "expected_change_surface": "Section 7.15; supplement; Table 19.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R2-W7",
+      "source_reviewer_labels": [
+        "R2"
+      ]
+    },
+    {
+      "item_id": "REV-41",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-41: RT-CGM audit. Use a cadence rule that can fail; explain the 96 subjects without windows and the collinear fraction"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R2 / Domain, card #3] Section 7.11 replaces the RT-CGM cadence rule with one that can fail on regridded data (e.g., runs of repeated or exactly collinear values) or reports the rule as uninformative; explains why 96 of the 451 RT-CGM subjects contribute no scored windows; and addresses RT-CGM's collinear fraction (0.305 against 0.125-0.229 for included cohorts)."
+      },
+      "expected_change_surface": "Section 7.11.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R2-W8; R3-N1",
+      "source_reviewer_labels": [
+        "R2",
+        "R3"
+      ]
+    },
+    {
+      "item_id": "REV-42",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-42: cite the sweep methods (focal loss, TCN, cosine schedule, CORN, model soups, ordinal smoothing, distance penalty)"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R2 / Domain, card #3] Each named sweep method (focal loss, TCN, cosine schedule, CORN, model soups, ordinal smoothing, distance penalty) carries a citation at first use, or is stated to be the authors' own where it is original."
+      },
+      "expected_change_surface": "Sections 7.9-7.12; reference list.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R2-W11; R3-W8",
+      "source_reviewer_labels": [
+        "R2",
+        "R3"
+      ]
+    },
+    {
+      "item_id": "REV-43",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-43: frame soup collapse and regression mean-seeking as known results"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R2 / Domain, card #3] Section 7.12 frames the uniform-soup collapse of independently seeded runs and the regression head's mean-seeking as results expected from prior work (linear mode connectivity / model soups; imbalanced regression), with citations, rather than as findings."
+      },
+      "expected_change_surface": "Section 7.12.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R2-W11",
+      "source_reviewer_labels": [
+        "R2"
+      ]
+    },
+    {
+      "item_id": "REV-44",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-44: discuss a fixed input range taken from the sensor's reportable range (the extra arm is optional)"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R2 / Domain, card #3] Section 8.1 discusses fixing the input quantization range from the sensor's reportable range (fixed quantization parameters, independent of calibration data) as a domain-informed alternative, and relates it to delta encoding and the section 8.1 rule; an additional experimental arm is optional."
+      },
+      "expected_change_surface": "Section 8.1 (optional re_analysis: fixed-input-range arm).",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R2-W12; DA-A1",
+      "source_reviewer_labels": [
+        "R2",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-45",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-45: present the null resolution cost as the result 8-bit error analysis predicts"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R2 / Domain, card #3] Section 8.1 presents the absent resolution penalty as the result uniform 8-bit error analysis predicts (step 1.572 mg/dL per code, maximum rounding error about 0.79 and RMS about 0.45 mg/dL, against the roughly 15 mg/dL change that separates classes), with the arithmetic and citations (e.g., Banner et al. 2019; Nagel et al. 2021), rather than as a refuted fear."
+      },
+      "expected_change_surface": "Section 8.1.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R2-W13",
+      "source_reviewer_labels": [
+        "R2"
+      ]
+    },
+    {
+      "item_id": "REV-46",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-46: report both effective resolutions of the delta encoding"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R2 / Domain, card #3] Section 7.8 reports both effective resolutions of the delta encoding: differences at 0.247 mg/dL per code (6.4 times finer) and absolute level via the anchor channel at about 3.95 mg/dL per code (about 2.5 times coarser than 1.572), with the anchor channel's headroom, and scopes '6.4x finer' to the differences."
+      },
+      "expected_change_surface": "Section 7.8.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R2-W14",
+      "source_reviewer_labels": [
+        "R2"
+      ]
+    },
+    {
+      "item_id": "REV-47",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-47: translate the shipped model's error profile. Give a confusion matrix with sensitivity and PPV, direction-reversal shares and level-stratified recall, and extend the §8.2 paragraph. The minimum is the paragraph plus the confusion matrix"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R3 / Cross-disciplinary-Practical, card #4] The inherited criterion's stated minimum is met: section 8.2 is extended with sentences on what a displayed class does and does not mean for a person with diabetes (e.g., frequent movement labels during stable glucose; the direction in which fast classes are over-called), and a five-class confusion matrix for the bundled model is reported with per-class recall labelled sensitivity and per-class precision labelled positive predictive value. Direction-reversal shares and level-stratified recall are part of the full request and strengthen the fix but are not needed for this minimum."
+      },
+      "expected_change_surface": "Section 8.2; new confusion-matrix table (re_analysis from cached predictions).",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R3-W1; R3-N1; DA stakeholders",
+      "source_reviewer_labels": [
+        "R3",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-49",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-49: add a Limitations item on wear and therapy regimes and the feedback loop, the PEDAP population and unrepresented populations; expand RT-CGM at first use"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R3 / Cross-disciplinary-Practical, card #4] The Limitations section contains an item covering wear and therapy regimes across the cohorts (blinded versus real-time wear; MDI, pump and automated insulin delivery) and the feedback loop when users react to the output, the PEDAP population (children aged 2 to under 6 on automated insulin delivery), and unrepresented populations (e.g., type 2 diabetes, pregnancy, inpatient); and RT-CGM is expanded at first use (e.g., the JDRF CGM randomized-trial cohort, labelled RT-CGM in DiaData)."
+      },
+      "expected_change_surface": "Limitations; section 7.13; first use of RT-CGM.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R3-W2",
+      "source_reviewer_labels": [
+        "R3"
+      ]
+    },
+    {
+      "item_id": "REV-50",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-50: terminology. Qualify \"calibration\"; write \"the mean rate over the next 15 minutes\"; expand acronyms at first use; map recall to sensitivity"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R3 / Cross-disciplinary-Practical, card #4] All four terminology fixes are present: (1) 'calibration' is qualified in the title and abstract (e.g., quantization-calibration or calibration-set coverage), and section 1 says it means neither CGM sensor calibration nor probability calibration; (2) the target is described as the mean rate of change over the next 15 minutes; (3) INT8, PTQ, LiteRT, TCN, CORN, macro-F1, zero-shot and T1D are expanded at first use; (4) recall is mapped to sensitivity (and precision to positive predictive value) in text, a footnote or a glossary."
+      },
+      "expected_change_surface": "Title; Abstract; section 1; first uses.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R3-W4; R3-W5; R3-W8",
+      "source_reviewer_labels": [
+        "R3"
+      ]
+    },
+    {
+      "item_id": "REV-51",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-51: state the Weinstock case-control enrichment and what blinded wear implies"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R3 / Cross-disciplinary-Practical, card #4] Section 4.1 and Limitations item 2 state that Weinstock et al. 2016 was a case-control study enriched for severe hypoglycemia and glycemic variability, and what this implies for class prevalence and transfer, plus one sentence on what blinded wear implies for deployment."
+      },
+      "expected_change_surface": "Section 4.1; Limitations item 2.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R3-W6",
+      "source_reviewer_labels": [
+        "R3"
+      ]
+    },
+    {
+      "item_id": "REV-52",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-52: add an intended-use statement and a model card; write \"bundled in the research applications\""
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: R3 / Cross-disciplinary-Practical, card #4] Section 10.2 gives an intended-use statement summarizing a model card (intended use: offline research replay; out-of-scope uses: live decision support, alerts, dosing; input requirements; known failure modes; populations not represented) and points to a repository model card; the abstract and conclusion describe the model as bundled in the research applications rather than shipping."
+      },
+      "expected_change_surface": "Section 10.2; repository model card; Abstract; section 11.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "R3-W10; DA stakeholders",
+      "source_reviewer_labels": [
+        "R3",
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-53",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-53: state that no INT8 latency or size benefit was measured for this model class, and scope \"trade-offs\" accordingly"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] The manuscript states that, for this model class on the tested devices, INT8 was not faster than float on mean latency in any reported measurement and that only a small size saving was measured (about 5 KB for the study model; the shipped pair's sizes reported or stated as unmeasured), so no practically meaningful INT8 benefit was measured; and 'trade-offs' in the title, section 8 and Limitations is scoped accordingly."
+      },
+      "expected_change_surface": "Title; section 8; Limitations; Tables 19-20; section 5.3.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "DA-A2; DA-UP",
+      "source_reviewer_labels": [
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-54",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-54: report PEDAP per-class changes (gains and losses) and discuss the operating-point-shift reading"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] Section 7.13 reports PEDAP per-class changes for candidate versus champion, both gains (falling_fast 0.705 versus 0.638; rising_fast 0.633 versus 0.611) and losses (falling -6.4, rising -3.1 points), and discusses whether the pattern reflects an operating-point shift among the directional classes rather than better discrimination."
+      },
+      "expected_change_surface": "Section 7.13.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "DA-A3",
+      "source_reviewer_labels": [
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-55",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-55: reconcile the §8.1 mechanism statements (the start-high account vs slope erasure; dissent left unresolved)"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] Section 8.1 no longer holds the two statements in unresolved tension (a label depending on differences between readings versus 'cannot see how high the trajectory started'): it either tests the slope-erasure account or presents both the start-high and slope-erasure accounts as candidate explanations consistent with the clipping mechanism, without asserting either as established (letter D5)."
+      },
+      "expected_change_surface": "Section 8.1.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "DA-A4; DA-m14 (dissent with R3-S4, D5)",
+      "source_reviewer_labels": [
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-56",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-56: replace \"add nothing measurable\" with a quantitative bound"
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] 'Add nothing measurable' is replaced, in the section 1 contribution list and wherever else it appears (e.g., section 7.3), by a quantitative bound consistent with Table 7 and aggregate_r1.json (balanced 1,000 versus 200: +0.08 [+0.02, +0.15] points) and with the bound adopted under R10."
+      },
+      "expected_change_surface": "Section 1 contribution list; section 7.3.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "DA-m3 (dissent with R1's reporting judgement, D6)",
+      "source_reviewer_labels": [
+        "DA"
+      ]
+    },
+    {
+      "item_id": "REV-57",
+      "obligation_class": "should_fix",
+      "inherited_criterion": {
+        "roadmap_text": "REV-57: correct the randomized participant range (90–127) and change \"never-read\" to \"never evaluated\""
+      },
+      "operationalization": {
+        "fully_addressed": "[routed: EIC / Journal-Fit Reviewer, card #1] Section 7.2 states that the randomized 200-window sets cover 90-127 participants (selection_coverage: 92 for uniform-200 draw 102, 90 for draw 103); and the abstract and section 1 no longer call RT-CGM 'never-read', using 'never evaluated' or an equally accurate phrase that accommodates the rejected round-three arm trained on RT-CGM labels."
+      },
+      "expected_change_surface": "Section 7.2; Abstract; section 1.",
+      "equivalence_policy": "allowed",
+      "source_reviewer": "DA-m4; DA-m13",
+      "source_reviewer_labels": [
+        "DA"
+      ]
+    }
+  ],
+  "new_standards": [
+    {
+      "new_standard_id": "NS-1",
+      "item_id": "REV-03",
+      "classification": "advisory",
+      "standard_text": "Section 2 should also engage at least one quantized on-device health or wearable time-series classifier (not only on-device glucose prediction), so that the novelty of a quantized on-device health time-series result can be checked.",
+      "why_not_in_round1": "The R3 Acceptance criterion names only on-device glucose-prediction work and the OhioT1DM citation. The R3 Requirement and EIC-W2 (the stated basis of the EIC's D6 block, trigger 'the closest prior on-device, quantized or health time-series work is missing') also ask for a paragraph on quantized on-device health and wearable time-series classifiers, and the R2 Acceptance criterion covers only the calibration-data literature, so no Round-1 acceptance criterion carries this element."
+    },
+    {
+      "new_standard_id": "NS-2",
+      "item_id": "REV-06",
+      "classification": "advisory",
+      "standard_text": "Section 7.7 should label the second-cohort interpretation exploratory and report hall's temporal component (+4.3 [+1.1, +7.3] points) beside the inconclusive designated hall contrast.",
+      "why_not_in_round1": "Both elements are in the R6 Requirement and in the letter's D2 resolution (R1's remedy adopted; EIC's added hall-temporal sentence kept), but the R6 Acceptance criterion requires only the removal of 'held' and 'reproduced' claims, the designated contrasts with intervals, and the hall premise outcome."
+    },
+    {
+      "new_standard_id": "NS-3",
+      "item_id": "REV-35",
+      "classification": "advisory",
+      "standard_text": "Any remaining label-robustness sentence should cite a CGM sensor-error model (e.g., Facchinetti et al. 2014), and section 7.12 should state that the labels are defined on the sensor trace (the future CGM-reported rate, not the blood-glucose rate).",
+      "why_not_in_round1": "Both are in the R19 Requirement and R3-W3, but the R19 Acceptance criterion only limits where the remaining error is claimed to lie."
+    }
+  ],
+  "consider_items": [
+    "REV-48",
+    "REV-58"
+  ]
+}

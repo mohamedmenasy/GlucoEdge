@@ -1,0 +1,897 @@
+{
+ "contract_version": "1.1",
+ "round_id": "glucoedge-rr-2026-10-16",
+ "precommitment_hash": "a2dc8e318221c4e88671f3304f28430135de78df189f0e48bfb03d56a5f8546c",
+ "items": [
+  {
+   "item_id": "REV-01",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Title (revised_main.tex L37-38) \"Quantization-Calibration Coverage and Staged Model Selection in On-Device Glucose Trend Classification\"",
+    "text: Abstract (L50-53) \"This paper asks how quantization-calibration coverage affects directional (minority-class) recall and deployment cost, and which model and data changes improve that recall under one-read-per-round staged sweeps\"",
+    "text: \u00a71 (L109) \"This paper asks two research questions.\"; contribution list (L160-212): calibration-coverage bullets L161-195, \"five staged accuracy sweeps\" bullet L196-211",
+    "text: \u00a712 Conclusion, calibration paragraph (L1894-1912) and (L1914) \"The staged sweeps add a methodological lesson.\"",
+    "text: \u00a76.1 Calibration study protocol (L693-767), incl. (L751) \"Two follow-up experiments reuse this machinery under their own frozen protocols\" (second-cohort and delta-encoding methods, L751-759)",
+    "text: \u00a76.2 Accuracy sweep protocol (L769-863) \"The second research question asks which model and training-data changes raise the directional recall of the bundled INT8 model\"",
+    "text: \u00a79.3 \"What the sweeps show\" (L1632-1663), a sweep Discussion subsection"
+   ],
+   "change_summary": "The revision took route (b): it retitled the paper to name both studies, states two research questions in the Abstract and \u00a71, splits Results into calibration (\u00a77) and sweep (\u00a78) sections, adds a sweep Methods subsection (\u00a76.2) and a sweep Discussion subsection (\u00a79.3), and gives the sweeps their own Conclusion paragraph, whereas the original's sweep methods sat only inside Results.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-02",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a72.4 (L342-353) \"Which samples calibrate the quantizer is itself a studied lever. Standard INT8 recipes set activation ranges from a small calibration set\" [krishnamoorthi2018quantizing, nagel2021whitepaper]; \"range estimators (maximum, entropy, percentile) have been compared across vision, speech, and language networks\" [wu2020integer]; \"In language models, the choice of calibration data alone produces substantial variation in downstream performance after quantization or pruning\" [williams2024calibration]; \"in vision, PTQ accuracy tracks how closely the calibration set's feature statistics match the source data's, more than whether it comes from the same domain\" [yu2021crossdomain]; \"data-free methods synthesize calibration inputs that match a network's batch-normalization statistics\" [cai2020zeroq]",
+    "text: \u00a72.4 (L358-360) \"That calibration data must represent the deployment inputs is therefore established guidance, not a finding of this paper.\"",
+    "text: \u00a71 (L123-131) \"This work measures, with participant-clustered intervals and a clip-only control, how contiguous first-$N$ (dataset-order) selection of overlapping, time-ordered windows violates that guidance, and the class-level consequence: the clipped inputs concentrate in the fast-falling class, whose recall collapses while accuracy rises\"",
+    "text: \u00a79.1 (L1556-1564) \"That calibration data matter in PTQ is known ... What this study adds is a measurement of that departure where it is easy to make: stride-one CGM windows overlap, so 200 contiguous windows sit inside about 17 hours of one or two sensors' readings\"",
+    "dataset: paper/references.bib and paper/main.bbl, keys williams2024calibration (ACL 2024), yu2021crossdomain (CVPRW 2021), cai2020zeroq (CVPR 2020), krishnamoorthi2018quantizing (arXiv 1806.08342), nagel2021whitepaper (arXiv 2106.08295), wu2020integer (arXiv 2004.09602): all present in both; characterizations consistent with the bib titles"
+   ],
+   "change_summary": "\u00a72.4 gained a calibration-data-selection paragraph that characterizes the six named works and calls representativeness established guidance, and the \u00a71 and \u00a78.1 (now \u00a79.1) novelty statements were rewritten around overlapping, time-ordered windows and the falling_fast clipping consequence, replacing the original's 'nominal sample count said nothing' as the sharpest observation.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-03",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "table: tab:relatedwork, Zhu et al. row (revised_main.tex L275), Device evidence \"Wearable system-on-chip\"; Li et al. row with \"Android timing\" retained (L274)",
+    "table: tab:relatedwork, Mirshekarian et al. and Martinsson et al. rows (L272-273) \"OhioT1DM \\cite{marling2020ohiot1dm}\"",
+    "text: \u00a72.4 (L326-331) \"Li et al. timed a convolutional--recurrent forecaster on Android \\cite{li2020crnn}, and Zhu et al. embedded a recurrent predictor in a wearable whose low-power system-on-chip performs real-time glucose prediction and hypoglycemia detection \\cite{zhu2023iomt}. Both forecast values, not trend classes\"",
+    "dataset: paper/references.bib and paper/main.bbl, zhu2023iomt (IEEE Internet of Things Journal 10(5):3706-3719, 2023, doi 10.1109/JIOT.2022.3143375, i.e. the 2022 early-access paper the Requirement names) and marling2020ohiot1dm (Marling and Bunescu, KDH 2020, CEUR 2675)"
+   ],
+   "change_summary": "Table 1 gained a Zhu et al. row with 'Wearable system-on-chip' device evidence (the Li et al. row is kept), \u00a72.4 now discusses both device-run glucose predictors, and both OhioT1DM rows cite Marling and Bunescu 2020, with matching bib and bbl entries.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-04",
+   "verdict": "PARTIALLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Abstract (L70-73) \"a seed-4 flatten-head artifact (cosine schedule, validation-chosen epoch) passed all gates on a never-evaluated 2008 trial cohort ($+0.20$ points [$+0.11$, $+0.29$] vs.\\ round three's 1.1-point seed spread)\"",
+    "text: \u00a71 contribution list (L203-211) \"which passed all gates on never-evaluated RT-CGM by $+0.20$ points (CI $+0.11$ to $+0.29$), about a fifth of the 1.1-point float spread of round three's five seeds on Weinstock held-out\" ... \"Its four changed factors are not separately identified\"",
+    "table: tab:sweep, round-5 RT-CGM row (L1324) \"$+0.20$ [$+0.11$, $+0.29$]\", caption (L1295-1296) \"for scale, round three's five candidate seeds spanned 1.1 points of float held-out directional recall\"",
+    "text: \u00a78.6 (L1522-1525) \"All three gates passed (Table~\\ref{tab:sweep}): the candidate's INT8 model beat the champion's by $+0.20$ directional-recall points [$+0.11$, $+0.29$], held stable recall within 0.2 points (0.605 against 0.607) and sat 0.25 points under its own float.\" (no spread in this or the next sentence; the spread follows at L1529-1532 \"the result is a choice between two artifacts, not evidence for a design: the $+0.20$ points is a fifth of the 1.1-point float spread\")",
+    "text: \u00a79.3 (L1654-1662) \"Round five showed that one artifact passed the pre-registered gates ... by $+0.20$ points against the 1.1-point float spread of round three's five seeds ... It did not show that a flatten head, a cosine schedule or validation-chosen epochs improve this task\"",
+    "text: \u00a712 (L1925-1935) \"Round five was a choice between two artifacts: the seed-4 flatten-head artifact ... by $+0.20$ points, about a fifth of the 1.1-point float spread\"; Limitations item 5 (L1728-1733) \"Round five is an artifact-level ship decision between two artifacts\"",
+    "dataset: paper/results/calibration-coverage/accuracy_sweep_r5.json components.rtcgm_primary.gates.contrast_int8_vs_champion delta 0.00202, ci95 [0.00113, 0.00293]; accuracy_sweep_r3.json components.held_out.per_seed_directional[0-4].float 0.5195-0.5306 (1.1-point spread)"
+   ],
+   "change_summary": "Round five is now described on every summary surface as a choice between the seed-4 flatten-head artifact and the champion artifact, head and schedule credit was removed (with explicit disclaimers in \u00a79.3 and Limitations item 5), and the 1.1-point five-seed spread now accompanies the +0.20 gain in the Abstract, \u00a71, the tab:sweep caption, \u00a78.6 (second mention), \u00a79.3 and \u00a712, but not in the \u00a78.6 gate-result sentence.",
+   "residual_gap": {
+    "text": "The \u00a78.6 gate-result sentence (L1522-1525) gives the +0.20-point gain [+0.11, +0.29] without the 1.1-point seed spread in the same or adjacent sentence; the clipping sentence (L1525-1528) separates it from the spread at L1530-1532. Every other occurrence complies and no head or schedule credit remains, so moving the spread into or next to that sentence closes the item.",
+    "residual_obligation_class": "consider"
+   },
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-05",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Abstract (L56) \"In a prespecified secondary contrast, contiguous first-$N$ selection\"",
+    "text: \u00a71 (L126-128) \"contiguous first-$N$ (dataset-order) selection of overlapping, time-ordered windows violates that guidance\"; (L142) \"(sequential, the contiguous first-$N$ selection; ...)\"",
+    "text: \u00a75.2 (L631-635) \"\\emph{Sequential} is contiguous first-$N$ (dataset-order) selection: the first $N$ windows in deterministic (participant, segment, time) order, as the project's original conversion script took them; the guidance this pipeline cites asks for random selection\"",
+    "text: \u00a77.8 (L1228-1229) \"Under contiguous first-$N$ selection, which costs the absolute-input model 13.4 points\"; \u00a712 (L1897) \"Contiguous first-$N$ selection, whose 200 windows span two participants\"",
+    "text: \u00a79.1 (L1558-1561) \"the converter guidance quoted in Section~\\ref{sec:ptqrelated} asks for samples ``randomly chosen, in no particular order'' \\cite{googleRepresentativeData}, and the sequential arm contravenes it by taking contiguous windows in stored order\"",
+    "text: \u00a72.4 (L353-358) \"the representative dataset is ``a small subset of a few hundred samples randomly chosen, in no particular order, from the training or evaluation dataset'' \\cite{googleRepresentativeData}, and the LiteRT (formerly TensorFlow Lite) guide asks for around 100--500 training or validation samples \\cite{googleLiteRTQuantization}\"",
+    "absence: grep of revised_main.tex finds no 'toolchain' and no 'default' applied to the sequential arm (the only 'default' is L674, the app's float artifact)"
+   ],
+   "change_summary": "All six 'toolchain-default' passages (Abstract, \u00a71, \u00a75.2, \u00a77.8, \u00a78.1, \u00a711) now say 'contiguous first-N (dataset-order) selection' or 'sequential', \u00a72.4 quotes the RepresentativeDataset 'randomly chosen, in no particular order' instruction and the LiteRT sample-count guidance, and \u00a78.1 (now \u00a79.1) quotes the instruction with its citation and states that the sequential arm contravenes it.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-06",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Abstract (L64) \"Two small cohorts did not confirm the frozen predictions\"; \u00a71 (L189-192) \"the frozen predictions were not confirmed (Dubosson $+2.0$ points, exact sign-flip $p=0.094$; Hall inconclusive, its premise failed\"",
+    "text: \u00a77.7 (L1133-1134) \"Both designated contrasts' frozen percentile intervals include zero\"; (L1143-1147) Dubosson \"positive, $+1.98$ points ... the sign-flip test gives $p=0.094$: the point estimate has the predicted sign, and the data do not separate it from zero\"",
+    "text: \u00a77.7 (L1148-1154) Hall \"$+1.31$ points ($p=0.25$ ...), is inconclusive ... The premise behind the Hall prediction failed: it reasoned from the share of readings above 240~\\mgdl, the historical ceiling, but the sequential-200 set reached only 165.0~\\mgdl. Hall's 50-participant temporal component shows $+4.31$ $[+1.14, +7.34]$ points.\"; (L1156) \"The following reading is exploratory.\"",
+    "table: tab:confirmation caption (L1185-1188) \"their frozen percentile intervals, which are superseded: Dubosson temporal $[-0.00, +3.05]$ (1.2\\% undefined draws), Hall held-out $[-0.14, +3.30]$\"; designated rows L1201 and L1203",
+    "text: Limitations item 3 (L1711-1715) \"The second-cohort evidence is exploratory: neither designated six-participant contrast is significant at the 5\\% level\"; \u00a712 (L1941-1946) \"On two small further cohorts the frozen predictions were not confirmed\"",
+    "dataset: paper/results/calibration-coverage/confirmation_dubosson.json contrast_uniform200_vs_sequential200.temporal delta 0.01981, ci95 [-3.38e-05, 0.03054], undefined_fraction 0.012; confirmation_hall.json held_out 0.01307 [-0.00144, 0.03303], temporal 0.04313 [0.01137, 0.07336], mechanism.sequential_input_ceiling_mg_dl 165.0; panel_revision_r1.json confirmation.dubosson.temporal.sign_flip_test.p_two_sided 0.09375, confirmation.hall.held_out 0.25"
+   ],
+   "change_summary": "All four Round-1 confirmation claims were removed (the Abstract, \u00a77.7, Limitations and Conclusion now say the predictions were not confirmed); \u00a77.7 reports each designated contrast's point estimate with its frozen percentile interval (in the table caption, lower bound kept at -0.00) plus a post-hoc exact sign-flip test, states that the Hall premise failed at the 165.0 mg/dL ceiling, reports Hall temporal +4.31 [+1.14, +7.34], and labels the interpretation exploratory.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-08",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "table: tab:cohorts (Appendix B, revised_main.tex L2093-2125), rows Weinstock, Dubosson, Hall, CITY, DCLP3 (DiaData: DLCP3), REPLACE-BG (DiaData: RBG), SENCE, WISDM, PEDAP, RT-CGM, each with a Role and a 'CGM; wear' entry (Dexcom G4; Medtronic iPro2; Dexcom G4; Dexcom G5; Dexcom G6; Dexcom G4 Platinum 505; G4 Platinum run-in then G5; Dexcom G5; Dexcom G6)",
+    "table: tab:cohorts, RT-CGM row (L2122) \"DexCom SEVEN, MiniMed Paradigm or FreeStyle Navigator per DiaData audit, per subject not recoverable\"",
+    "text: \u00a78.4 (L1398-1405) \"RT-CGM, DiaData's copy of the JDRF CGM randomized trial ... the cohort name denotes this trial, not current real-time CGM\"; \u00a711.2 (L1859-1862) \"RT-CGM, the JDRF CGM randomized trial, whose DexCom SEVEN, MiniMed Paradigm and FreeStyle Navigator sensors ... cannot be assigned to subjects\"",
+    "table: tab:relatedwork, GlucoEdge row (L278) \"Training on Weinstock or five DiaData cohorts; Weinstock held-out and temporal, RT-CGM and PEDAP zero-shot\"",
+    "dataset: paper/results/diadata_audit_r1.json cohorts[].sensor: CITY Dexcom G5, DLCP3 Dexcom G6, PEDAP Dexcom G6, RBG Dexcom G4 505, SENCE Dexcom G5, WISDM Dexcom G5, D1NAMO Medtronic iPro2, RT-CGM 'mixed (DexCom SEVEN / Paradigm / FreeStyle Navigator)', 'per-subject sensor not recoverable'"
+   ],
+   "change_summary": "A new cohort table (tab:cohorts, Appendix B, referenced from \u00a71, \u00a72.2 and \u00a76.2) gives role, source, n, age, diabetes and therapy, CGM model and wear, years and range for all ten cohorts used, matches the DiaData audit's sensors and marks RT-CGM's per-subject device as not recoverable, and \u00a78.4 and \u00a711.2 now identify RT-CGM as the JDRF trial with its three device families rather than current real-time CGM.",
+   "verified_by": "EIC",
+   "applied_criterion": "dissented:DIS-1"
+  },
+  {
+   "item_id": "REV-13",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Abstract (revised_main.tex L67-69) \"A macro-averaged F1 (macro-F1) winner passed every gate but was rejected post hoc as directional recall fell (0.517 to 0.438)\"",
+    "text: \u00a71 contribution list, fifth bullet (L200-202) \"a winner on macro-averaged F1 (macro-F1) that passed every gate but was rejected post hoc because directional recall fell from 0.517 to 0.438\"",
+    "table: tab:sweeprecall (Appendix, Round one per-class metrics; former Table 13), Recall column (L2566-2574): falling_fast 0.503/0.572, falling 0.432/0.552, stable 0.688/0.475, rising 0.365/0.334, rising_fast 0.454/0.612, Directional mean 0.438/0.517 -- recall values unchanged from the original",
+    "dataset: paper/results/calibration-coverage/panel_revision_r1.json, round_one_f1.held_out.{winner_int8,champion_int8}.{recall_sensitivity,precision_ppv,f1} -- every recall, precision and F1 cell of tab:sweeprecall reproduces to 3 dp; recomputed directional means 0.4383/0.5174 and macro-F1 0.4253/0.3684",
+    "absence: no 'only on the majority class' or 'majority-class only' wording anywhere in revised_main.tex (grep 'majority' hits only L106, the generic intro sentence)"
+   ],
+   "change_summary": "The abstract's 'gained only on the majority class' and the contribution list's 'majority-class only' were deleted and both surfaces now ground the post-hoc rejection in the directional-recall drop 0.517 to 0.438, with no per-class claim left to contradict Table 13, which moved to the appendix with its recall values unchanged and record-matching precision/F1 columns added.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-14",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Abstract (L65-67) \"Four of five sweep rounds spent one pre-registered read (round four none), three on reused Weinstock test components\"",
+    "text: \u00a71 contribution list, fifth bullet (L196-199) \"five staged accuracy sweeps ..., of which four spent one pre-registered confirmatory read each and round four, whose candidate converted to the champion's own artifacts, spent none\"",
+    "text: \u00a712 Conclusion (L1914-1916) \"Four rounds spent one pre-registered confirmatory read each; round four, whose candidate converted to the champion's own artifacts, spent none.\"",
+    "text: \u00a78.4 (former \u00a77.12; L1485-1490) \"A contrast would have compared the model with itself, so no confirmatory read was spent\"",
+    "table: tab:sweepfour caption (former Table 17; L2586-2592) \"No read was spent.\"; tab:sweep row 4 (L1322) \"no read: the candidate converts to SHA-256-identical copies of the champion's artifacts\"",
+    "text: \u00a76.2 (L802, L811) \"A round spends at most one confirmatory read\" ... \"so four rounds spent one read each and round four none\" -- defines the abstract's L53 descriptor 'one-read-per-round staged sweeps' as the at-most-one rule, not a count"
+   ],
+   "change_summary": "The abstract's 'each judged by one pre-registered read' and the conclusion's 'Each round spent one pre-registered confirmatory read' were replaced on all three surfaces by the four-reads-plus-round-four-none count matching \u00a78.4 and the round-four table caption; the only remaining per-round phrase is the abstract's protocol descriptor 'one-read-per-round staged sweeps' (L53), which names the cap and is immediately followed in the same abstract by the correct count, so no surface asserts that every round spent a read.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-15",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Abstract (L60-62) \"with every randomized selection covering the full input range, stratification, budget and observer choice moved recall by at most about a tenth of a point\"",
+    "text: \u00a71 contribution list, second bullet (L172-175) \"Where every randomized selection covers the full input range, as in this pool, stratification, a five-fold budget, and the observer choice move recall by at most about a tenth of a point\"",
+    "text: \u00a712 Conclusion (L1905-1907) \"once it was covered, stratification, budget, and observer choice moved recall by at most about a tenth of a point\"",
+    "text: \u00a77.3 (L950-960) \"changes recall by at most +0.08 points (only the balanced-random interval, [+0.02, +0.15], excludes zero)\" ... \"the min--max observer moves seed-mean recall by at most 0.12 points\"",
+    "dataset: paper/results/calibration-coverage/aggregate_r1.json, contrasts + components -- largest null-knob contrasts: observer held-out range_coverage_200_d101 seed-mean 0.48653 -> 0.48771 (+0.118 pts); budget held-out participant_balanced_random_1000_vs_200 +0.082 pts; stratification held-out primary_range200_vs_balanced200 +0.061 pts; all at or below 'about a tenth of a point', the bound the criterion names as admissible"
+   ],
+   "change_summary": "The conclusion's 'at most eight hundredths of a point' (which the 0.118-point observer contrast exceeded) became 'at most about a tenth of a point' on the abstract, contribution list and conclusion, each now conditioned on the randomized selections covering the full input range, and \u00a77.3 reports the budget (+0.08) and observer (0.12) maxima separately.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-17",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a77.7 (L1159-1161) \"Weinstock's sequential-200 ceiling of 250.9 mg/dL clips 27.8% of held-out windows against none under uniform calibration, and costs 13.4 points\"",
+    "text: \u00a77.7 (L1151-1153) \"it reasoned from the share of readings above 240 mg/dL, the historical ceiling, but the sequential-200 set reached only 165.0 mg/dL\" -- the only ~240 figure left in \u00a77.7 is attributed to the historical artifact",
+    "table: tab:coverage (former Table 5; L916) \"Sequential & 2 & 224 & 251 & 0--250.9\" -- unchanged",
+    "table: tab:provenance (former Table 4, now Appendix; L2270-2271) \"INT8 input range 0--239.9 mg/dL\" -- historical artifact only",
+    "absence: no '239.9' in \u00a77.7 and no Weinstock mg/dL gap figure in \u00a77.7 (grep '239.9' hits only L883 \u00a77.1 historical audit, L2228-2244 historical figure, L2271 tab:provenance)",
+    "dataset: paper/results/calibration-coverage/panel_revision_r1.json, confirmation.weinstock_comparison.held_out.clipping.by_cell.sequential_200_d0.input_ceiling_mgdl = 250.9"
+   ],
+   "change_summary": "\u00a77.7's 'Weinstock's ceiling of 239.9 against a 401 maximum cost 13.4 points' was rewritten to pair the 13.4-point contrast with the corrected sequential-200 ceiling of 250.9 mg/dL, the mg/dL gap comparison was dropped, and 239.9/240 now appears only for the historical artifact.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-18",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "table: tab:confirmation (former Table 11; L1178-1206), columns 'Clipped, all' and 'Clipped, ff' (sequential-200 / uniform-200): Weinstock held-out 27.8/0.0% and 60.9/0.0%; Dubosson temporal 15.2/10.9% and 75.0/42.9%; Dubosson held-out 0.0/0.0%; Hall held-out 3.4/0.5% and 26.8/9.8%; Hall temporal 4.1/1.0% and 61.8/41.2%",
+    "text: \u00a77.7 (L1156-1167) \"The mechanism predicts the effect from the share of windows a sequential ceiling clips beyond those uniform calibration clips, not from the distance in mg/dL ... Among the three components with excess clipping the shares do not order the effects (Dubosson temporal has the largest excess, 4.3 percentage points, but a smaller effect than Hall temporal, excess 3.1), so no finer dose-response is claimed.\"",
+    "dataset: paper/results/calibration-coverage/panel_revision_r1.json, confirmation.{dubosson,hall,weinstock_comparison}.{temporal,held_out}.clipping.{by_cell,uniform_200_mean_over_draws,sequential_minus_uniform_200} -- every tabulated share reproduces (e.g. Dubosson temporal 0.1517/0.1086, excess 0.0431; Hall temporal 0.0408/0.0102, excess 0.0306; Hall held-out 0.0336/0.0049); uniform ceilings 352.7-354.5 (Dubosson) and 189.9-233.9 (Hall), sequential Hall 165.0, all as quoted in \u00a77.7",
+    "dataset: paper/results/calibration-coverage/confirmation_dubosson.json, confirmation_hall.json, components -- recomputed Float/Seq./Unif. levels and deltas (Dubosson temporal 0.489/0.458/0.478, +1.98; held-out 0.481/0.472/0.475, +0.27; Hall held-out 0.393/0.375/0.388, +1.31; temporal 0.428/0.378/0.421, +4.31) match tab:confirmation",
+    "absence: no 'tracks', 'dose-response' assertion or 'deficit' claim elsewhere in revised_main.tex (grep hits only L349, a related-work sentence, and L1167, the withdrawal)"
+   ],
+   "change_summary": "The original's mg/dL-gap dose-response argument ('the effect tracks the gap between the sequential calibration ceiling and the population range') and the conclusion's 'tracking the calibration-coverage deficit' were removed; tab:confirmation now reports sequential/uniform clipped-window shares for every small-cohort component plus the Weinstock comparison row, and \u00a77.7 bases its only ordering statement on those shares and explicitly withdraws a finer dose-response claim because the shares do not order the small-cohort effects (the criterion's admissible qualify-while-reporting route); the share definition is the rounded-code rule of \u00a77.4 (L1069-1074), which the caption paraphrases as 'an input above the INT8 range'.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-21",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "absence: full-text search of revised_main.tex (single source file: abstract, body, captions, tables, appendices; no \\input/\\include) finds no 'clinical threshold(s)' and no 'clinical-shape'; remaining 'clinical' hits are disclaimers (L289, L1629, L1783, L1880) and a related-work table cell describing a cited study's data (L275)",
+    "text: \u00a78.4 (former \u00a77.12; L1445-1446) \"both use the trend-arrow rate bands (\u00b11 and \u00b12 mg/dL/min)\"; (L1472-1473) \"A Huber regression head on the rate, decoded at the same rate bands\"",
+    "text: \u00a79.2 (former \u00a78.2; L1613) \"The sequential-arm INT8 model is a worse directional classifier with better accuracy (0.570 vs. 0.507)\""
+   ],
+   "change_summary": "Both \u00a77.12 uses ('the unchanged clinical thresholds', 'at the clinical thresholds') became 'the trend-arrow rate bands (\u00b11 and \u00b12 mg/dL/min)' / 'the same rate bands' in what is now \u00a78.4, and \u00a78.2's 'clinical-shape classifier' became 'directional classifier' in \u00a79.2, with no new clinically loaded wording introduced.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-59",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a77.3 (L939-951) \"but it could not test H1 ... as posed: both arms reach the pool's 39--401 mg/dL span and receive the same 0--400.8 mg/dL input range (Table~\\ref{tab:coverage}), so they quantize every input identically\" ... \"Within this shared-range regime, raising a randomized strategy's budget ...\"",
+    "text: \u00a79.1 (former \u00a78.1; L1572-1583) \"every randomized 200-window set reaches 39--401 mg/dL and receives the same 0--400.8 mg/dL input range. That shared range also limits what the null contrasts show ... not that range-aware selection is useless. It was not tested where uniform draws under-cover the range, as in Dubosson and Hall\"",
+    "text: \u00a712 Conclusion (L1903-1910) \"What mattered was covering the deployment input range, which any randomized selection did in this pool; once it was covered, ... These nulls, the null primary contrast among them, are scoped to that saturated regime: range-aware selection was not tested where random draws under-cover the range\"",
+    "text: Abstract (L60-62) and \u00a71 contribution list (L169-175) \"could not probe range coverage, because both arms received the same input range. Where every randomized selection covers the full input range, as in this pool, ...\"; \u00a710 Limitations (L1704-1710) \"The range-stratification and budget nulls hold in a saturated regime ... not PTQ in general\"",
+    "table: tab:protocolmap H1/H2 rows (L2319-2329) \"Untestable as posed\"; tab:coverage (L914-919) randomized rows 0--400.8",
+    "absence: Round-1 generalizations 'the other knobs were the wrong ones', 'the refinements evaluated here are exhausted', 'calibration design reduces to one rule' no longer occur (grep)",
+    "dataset: paper/results/calibration-coverage/panel_revision_r1.json, weinstock.facts.int8_input_ceiling_mgdl_by_cell -- every randomized cell 400.8"
+   ],
+   "change_summary": "Via the scope route, \u00a77.3, \u00a78.1 (now \u00a79.1) and the conclusion replaced the Round-1 design-rule generalizations of the nulls with explicit statements that every randomized 200-window selection spans 39-401 mg/dL and receives the same 0-400.8 input range, that the primary contrast could not probe range coverage, and that range-aware selection was untested where draws under-cover (Dubosson, Hall); the abstract, contribution list and Limitations carry the same condition, and no surface generalizes the nulls further.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-60",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Abstract (L70-75) \"passed all gates on a never-evaluated 2008 trial cohort (+0.20 points [+0.11, +0.29] ...) but lowered macro-F1 there (0.410 vs. 0.427), failed two gates on both Weinstock components\"",
+    "text: \u00a71 contribution list, fifth bullet (L203-211) \"passed all gates on never-evaluated RT-CGM by +0.20 points ... while failing two gates on both Weinstock components and lowering RT-CGM macro-F1 (0.410 against 0.427); PEDAP is a near-tie (0.539 against 0.541)\"",
+    "text: \u00a712 Conclusion (L1925-1934) \"while failing gates 1 and 2 on both Weinstock components and lowering RT-CGM macro-F1 (0.410 against 0.427); on the pediatric PEDAP cohort, directional recall was a near-tie (0.539 against 0.541)\"",
+    "text: \u00a79.3 (L1654-1659) and \u00a78.5 (L1535-1540) carry the same gate outcomes and macro-F1 change",
+    "table: tab:sweep (former Table 18, merged; L1324-1327) round-5 rows: held-out -0.32 [-0.75, +0.15] '(gates 1, 2 fail)', temporal +0.33 [-0.58, +1.24] '(gates 1, 2 fail)', PEDAP 0.539/0.541; caption 0.410/0.427 (round five, RT-CGM)",
+    "dataset: paper/results/calibration-coverage/accuracy_sweep_r5.json -- components.held_out.contrast and components.temporal.contrast have gate1_beats_champion=false and gate2_stable_floor=false; rtcgm_primary macro_f1 0.4105/0.4270; held-out 0.3417/0.3635 and temporal 0.3351/0.3557 also lower; pedap_zero_shot directional 0.5392/0.5407"
+   ],
+   "change_summary": "Where the original abstract and conclusion reported only the +0.20-point gain (the conclusion saying merely 'reported with its costs'), every round-five summary (abstract, contribution list, \u00a78.5, \u00a79.3, conclusion) now states the Weinstock gate failures (gates 1 and 2 on both components, given in the abstract and contribution list as 'two gates') and the RT-CGM macro-F1 drop 0.410 vs 0.427, all of which match accuracy_sweep_r5.json.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-25",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "table: tab:confirmation (revised_main.tex L1178-1207), Support column: Dubosson temporal 28/58/68/57, Dubosson held-out 19/106/115/15, Hall held-out 41/261/303/50, Hall temporal 34/463/411/118, Weinstock held-out 1,590/4,599/4,239/2,233",
+    "table: tab:confirmation caption (L1185-1190) \"Dubosson temporal $[-0.00, +3.05]$ (1.2\\% undefined draws), Hall held-out $[-0.14, +3.30]$; no other component had undefined draws\"",
+    "text: Section 6.1 (L736-738) \"Draws with an undefined endpoint are dropped before the percentile step, and if more than 5\\% of draws are undefined, the interval is omitted.\"",
+    "dataset: paper/results/calibration-coverage/confirmation_dubosson.json, contrast_uniform200_vs_sequential200.temporal.undefined_fraction = 0.012; components.temporal.*.support = [28, 58, 857, 68, 57]",
+    "dataset: paper/results/calibration-coverage/confirmation_hall.json, contrast_uniform200_vs_sequential200.held_out/temporal.undefined_fraction = 0.0; components.held_out.*.support = [41, 261, 8068, 303, 50]",
+    "dataset: paper/results/calibration-coverage/aggregate_r1.json, class_support.held_out = {1590, 4599, 33715, 4239, 2233}; contrasts.held_out.uniform200_vs_sequential200.undefined_fraction = 0.0"
+   ],
+   "change_summary": "Table 11, which originally gave only Float/Seq./Unif./Delta [95% CI], now carries a per-class directional Support column for every component, clipped-window shares, and a caption giving the Dubosson temporal undefined-draw fraction (1.2%) and stating that no other component had undefined draws, with the drop-before-percentile / omit-above-5% rule stated in Section 6.1; every support count, level and undefined fraction matches the confirmation records and aggregate_r1.json.",
+   "verified_by": "R1",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-26",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Section 7.7 (L1133-1141) \"with six clusters cluster-based inference tends to over-reject \\cite{cameron2008bootstrap}, so Table~\\ref{tab:confirmation} replaces them, in revision, with an exact sign-flip test over participants ... sign flipped in all $2^6=64$ patterns, so the smallest attainable two-sided $p$ is 0.031\"",
+    "text: Section 7.7 (L1143-1150) \"one participant contributes $+1.62$ of it (the other five $-0.04$ to $+0.16$) and the sign-flip test gives $p=0.094$ ... $+1.31$ points ($p=0.25$; one participant contributes $+1.08$, the other five $-0.09$ to $+0.21$)\"",
+    "table: tab:confirmation, Inference column: Dubosson temporal (6) \"$p=0.094$\"; Hall held-out (6) \"$p=0.25$\"; Dubosson held-out (1) \"descriptive\" (L1201-1203)",
+    "text: Limitations item 4 (L1717-1722) \"six-participant components get an exact sign-flip test instead of a valid interval\"",
+    "dataset: paper/results/calibration-coverage/panel_revision_r1.json, confirmation.dubosson.temporal.per_participant_mean_contribution_pts (6 values, sum 1.98087 = published delta) and sign_flip_test.p_two_sided 0.09375; confirmation.hall.held_out (sum 1.30680) p_two_sided 0.25 - both recomputed by exact enumeration of 64 sign patterns (6/64 and 16/64)"
+   ],
+   "change_summary": "The percentile pairs-cluster bootstrap intervals on the two six-participant designated components were replaced as the reported inference by an exact two-sided sign-flip randomization test over participants (p = 0.094 and 0.25, both reproduced from the published per-participant contributions), per-participant contributions are reported (largest and range in text, all six in panel_revision_r1.json), the single-participant Dubosson held-out stays descriptive, and the frozen percentile intervals survive only in the Table 11 caption explicitly labelled superseded - a disclosure the criterion's failure clause (a percentile interval left without a small-cluster-valid procedure) does not reach.",
+   "verified_by": "R1",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-27",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Abstract (L70-75) \"a seed-4 flatten-head artifact (cosine schedule, validation-chosen epoch) passed all gates on a never-evaluated 2008 trial cohort\"",
+    "text: Section 7.13 (L1513-1516) \"The candidate differs from the champion in head, learning-rate schedule, kept epoch and seed at once\"; (L1529-1535) \"the result is a choice between two artifacts, not evidence for a design ... The four changed factors are not separately identified.\"",
+    "text: Section 11 Conclusion (L1925-1935) \"Round five was a choice between two artifacts: the seed-4 flatten-head artifact (cosine schedule, validation-chosen epoch) ... Its head, schedule, kept epoch, and seed changed together and are not separately identified.\"",
+    "text: Section 8.3 (L1659-1662) \"It did not show that a flatten head, a cosine schedule or validation-chosen epochs improve this task: the four factors changed together, one seed per side was compared\""
+   ],
+   "change_summary": "The original abstract's 'a position-preserving flatten head passed all gates' and the conclusion's 'two changes were promoted ... a position-preserving head with a cosine schedule' are replaced on all three surfaces (and in the contribution list) by the seed-4 artifact named with head, cosine schedule and validation-chosen epoch, plus explicit statements that the four factors are not separately identified; the staged validation means (0.535 vs 0.532, 0.538 vs 0.535, recomputed from accuracy_sweep_r5.json) are labelled selection-biased and no new single-factor attribution appears.",
+   "verified_by": "R1",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-28",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Section 11 Conclusion (L1904-1910) \"What mattered was covering the deployment input range, which any randomized selection did in this pool; once it was covered, stratification, budget, and observer choice moved recall by at most about a tenth of a point.\"",
+    "text: Section 8.1 (L1568-1575) \"Sample count did not predict the loss: the 1,000-window sequential set recovers fully with 6 participants because it reaches the full range. The rule this evidence supports is to cover the deployment input range, which any randomized selection does in this pool\"",
+    "absence: \"Coverage means covering participants\" in revised_main.tex (full-text search)",
+    "table: tab:contrasts, row \"Uniform random vs. sequential, 1,000\" $+0.05$ $[-0.05, +0.15]$ (L1009), matching aggregate_r1.json uniform1000_vs_sequential1000 0.000485 [-0.000507, 0.001484]"
+   ],
+   "change_summary": "The conclusion's slogan 'Coverage means covering participants; the other knobs were the wrong ones' is replaced by input-range coverage as the operative variable (randomized selection achieving it in this pool), and Section 8.1 restates the rule the same way, citing the 6-participant sequential-1,000 full recovery and the clip-only attribution, consistent with Table 7's sequential-1,000 row.",
+   "verified_by": "R1",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-34",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "absence: \"label-noise ceiling\" and \"headroom\" in revised_main.tex (full-text search; the remaining 'ceiling' hits at L886, L1152-1169, L2242 are mg/dL input-range ceilings)",
+    "text: Section 7.12 heading (L1431) \"Round four: a label-definition stability check and an identity outcome\"",
+    "text: Section 7.12 (L1442-1454) \"an alternative label classifies the least-squares slope over the four readings $g_t,\\ldots,g_{t+15}$ ... This is a label-definition stability check. Both labels are functions of the same future readings, so their agreement bounds nothing that a model seeing only the 12 past readings can reach, and the recall attainable from CGM-only inputs remains unknown.\"",
+    "text: Section 1 contribution list (L203) \"a label-definition stability check\"",
+    "text: Section 11 Conclusion (L1922-1925) \"Round four's label-definition stability check compares two labels computed from the same future readings, so it bounds nothing that a model of past readings can reach; the recall attainable from CGM history is unknown.\"",
+    "dataset: paper/results/calibration-coverage/exp0_sweep_r4.json, 0.9541 directional / 0.9948 stable, sigma_1 0.9146, sigma_2 0.8598, champion_val_directional 0.5330 (match the 0.954/0.995/0.915/0.860/0.533 quoted in Section 7.12)"
+   ],
+   "change_summary": "The original 'measured label-noise ceiling', 'headroom' and 'a measured ceiling' wording is gone from the contribution list, Section 7.12 and the conclusion; Section 7.12 now defines the quantity as agreement between two labels computed from the same horizon readings g_t..g_{t+15}, states it bounds nothing a past-only model can reach, and says attainable CGM-only recall is unknown.",
+   "verified_by": "R1",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-35",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "absence: \"not label-noise-limited\" and \"places the remaining error in the model and data, not the labels\" in revised_main.tex (full-text search)",
+    "text: Section 7.12 (L1448-1457) \"recomputing the endpoint label after adding independent Gaussian noise of $\\sigma=1$ or 2~\\mgdl\\ to the readings gives 0.915 and 0.860 ... White noise of this size is also gentler than published CGM error models, which add blood-to-interstitial lag, sensor-calibration drift and autoregressive noise \\cite{facchinetti2014sensor}, and the labels are defined on the sensor trace, which itself lags blood glucose.\"",
+    "text: Section 11 Conclusion (L1914-1936), no statement locating the remaining error in the model, data or labels",
+    "text: Limitations item 7 (L1746-1753) \"Round four checked only label-definition stability, also under independent Gaussian noise of $\\sigma=1$ and 2~\\mgdl, a gentler perturbation than published autoregressive sensor-error models\""
+   ],
+   "change_summary": "Both original claims about where the remaining error lies ('not label-noise-limited' in round four and 'places the remaining error in the model and data, not the labels' in the conclusion) are removed; the one remaining label-robustness sentence names the tested noise model (independent Gaussian, sigma 1 and 2 mg/dL; confirmed in experiments/accuracy_sweep_r4.py stage_exp0) and flags it as gentler than CGM error models, which also meets advisory NS-3 (Facchinetti 2014 cited; labels defined on the sensor trace).",
+   "verified_by": "R1",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-07",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "table: tab:variants (Appendix B, revised_main.tex lines 2127-2152), rows 'Calibration-study TrendCNN, seed 0' (2,909), 'Delta-encoded pair (anchor variant), seed 0' (2,909), 'Round-two winner, seed 1' (42,725), 'Round-five winner, seed 4' (50,645), columns Architecture / Params / Input / Loss / Training data and recipe / INT8 calibration / SHA-256 / Status; caption 'every INT8 calibration selection comes from the 27,109 eligible Weinstock validation windows' (lines 2132-2133)",
+    "figure: fig:pipeline, node 'TrendCNN\\\\2,909--50,645\\\\parameters' and caption 'The calibration study uses Weinstock data and the 2,909-parameter TrendCNN; the accuracy sweeps add DiaData cohorts and wider variants' (revised_main.tex lines 585, 594-596)",
+    "text: section 4.3 \"Table~\\ref{tab:variants} (Appendix~\\ref{app:cohorts}) lists every bundled variant with its architecture, encoding, loss, training data, quantization-calibration pool, and artifact hash\" (revised_main.tex lines 547-550)",
+    "table: tab:relatedwork, row '\\project (this work)': 'Training on Weinstock or five DiaData cohorts; Weinstock held-out and temporal, RT-CGM and PEDAP zero-shot' (revised_main.tex line 278)",
+    "dataset: paper/results/calibration-coverage/artifact_hashes_r1.json, study_r1.sha256.seed0_float.tflite (5a0f0744...), seed0_int8_uniform_random_200_d101.tflite (9f2f26f5...), delta_r1.sha256.anchor_seed0_* (c30560f7.../8590a3d2...); protocol_sweep_r5.json champion_sha256 (96eef43c.../a887ea4e...)"
+   ],
+   "change_summary": "Original Figure 1, section 4.3 and the Table 1 row described only the 2,909-parameter Weinstock TrendCNN; the revision adds a four-row model-variants table with every required attribute (parameter counts 2,909/2,909/42,725/50,645 recomputed from the stated layer shapes; three of four hash pairs match the versioned records, the round-five pair's hashes are not in paper/results but are stated in section 11.1), widens Figure 1 to 2,909-50,645 parameters with a caption separating study and sweep models, and updates section 4.3 and the Table 1 row.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-09",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: section 6.2 \"Each candidate was converted as in Section~\\ref{sec:design} with two of the study's calibration selections, rebuilt on delta-encoded inputs from the study's pool (the 27,109 eligible Weinstock validation windows) and index lists: sequential-200 (diagnostic) and uniform-200, draw 101 (the candidate artifact).\" (revised_main.tex lines 849-853)",
+    "text: section 8.5 \"its INT8 artifact is calibrated with uniform-200 from the Weinstock validation pool, a cohort it never trained on\" (revised_main.tex lines 1514-1516)",
+    "text: Appendix D.1 \"The round-five protocol file describes the INT8 calibration pool as Weinstock training windows; the code and the pool hash show the validation pool.\" (revised_main.tex lines 2534-2536)",
+    "dataset: experiments/accuracy_sweep_r2.py stage_calib, 'pool = build_pool(ds[\"val\"], _eligible(ds[\"val\"], owner, ngf, \"val\"))', reused by accuracy_sweep_r4.py and accuracy_sweep_r5.py stage_calib; panel_revision_r1.json sweep_settings.rounds.r5.int8_calibration (uniform_random_200_d101, same_pool_as_main_study true)"
+   ],
+   "change_summary": "The original stated no pool for the shipped model's INT8 calibration; the revision states it in the sweep methods and in round five (uniform-200, draw 101, from the 27,109 eligible Weinstock validation windows) and reconciles it with the protocol file's 'weinstock train only' wording, and the sweep code confirms the validation pool (so the stated pool is correct even though it differs from the Round-1 record wording the Phase-1 parenthetical cites).",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-10",
+   "verdict": "NOT_ADDRESSED",
+   "evidence_anchor": [
+    "text: Abstract, revised_main.tex lines 47-76, from \"\\project, an Android/iOS research prototype, maps 12 five-minute\" to \"\\project is not a medical device.\": 277 whitespace tokens (279 words after stripping LaTeX), against 265 (266) for the original abstract by the same counts"
+   ],
+   "change_summary": "The abstract was rewritten to add analysis status (prespecified secondary, null primary, post-hoc delta result, read reuse, post-hoc round-one rejection) but was not shortened: it grew from about 265 to about 278 words, against a target of roughly 180-220; the length change is small and comes with the analysis-status content the same criterion asks for, so it is recorded as not addressed rather than made worse.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-11",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Abstract \"In a prespecified secondary contrast, contiguous first-$N$ selection, spanning two participants and capping the input range at 250.9~\\mgdl, cost 13.4 points of held-out directional recall (95\\% CI 10.3--16.9) against equal-size uniform random selection while accuracy rose. The primary contrast (range stratification) was null\" (revised_main.tex lines 56-61)",
+    "text: section 1 contribution list \"in a prespecified secondary contrast, contiguous first-$N$ selection lost 13.4 points ... The prespecified primary contrast, range coverage versus participant-balanced random, was null ($+0.06$ points, CI $-0.02$ to $+0.13$)\" (revised_main.tex lines 165-171)",
+    "dataset: paper/results/calibration-coverage/aggregate_r1.json, contrasts.held_out.primary_range200_vs_balanced200 delta 0.00061, ci95 [-0.00016, 0.00132]; uniform200_vs_sequential200 delta 0.1338, ci95 [0.1029, 0.1688]"
+   ],
+   "change_summary": "The original abstract and section 1 presented the 13.4-point contrast without its status and did not mention the primary; the revision labels it a prespecified secondary on both surfaces and states the primary was null, with the +0.06 [-0.02, +0.13] interval (which matches aggregate_r1.json) given in section 1 and the null stated without the interval in the abstract.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-12",
+   "verdict": "PARTIALLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Abstract \"post hoc, difference-encoded inputs shrank the effect to 0.5 points\" (revised_main.tex lines 64-65)",
+    "text: section 7.8 \"This post-hoc experiment on previously touched held-out data had gates frozen beforehand.\" (revised_main.tex lines 1213-1214)",
+    "text: section 7.8 \"The frozen rule advanced the higher-scoring variant, so the anchor variant was chosen on held-out data (0.5088 against 0.4969), and its margin over the absolute model is selection-affected.\" (revised_main.tex lines 1221-1223)",
+    "text: section 7.8 \"the encoding makes INT8 far less sensitive to calibration selection, not insensitive. The frozen ship criterion (sequential-INT8 within 0.5 points of float) passes at 0.4955 points, a margin of less than five thousandths of a point, while the interval above straddles the threshold.\" (revised_main.tex lines 1236-1240)",
+    "absence: Abstract (revised_main.tex lines 47-76) - expected a statement that the anchor variant was chosen over the plain-difference variant on held-out data; checked the full abstract, which mentions neither variant"
+   ],
+   "change_summary": "'Nearly calibration-proof' is gone from the abstract, which now labels the delta result post hoc and gives it as a 0.5-point residual of the contiguous-versus-uniform effect; section 7.8 adds the explicit held-out selection of the anchor variant and the 'far less sensitive, not insensitive' scoping next to the already disclosed ship-gate margin, but the abstract does not say that the variant behind the quoted 0.5 points was selected on held-out data.",
+   "residual_gap": {
+    "text": "The abstract still lacks the held-out-selection disclosure for the anchor variant whose result it quotes (\"post hoc, difference-encoded inputs shrank the effect to 0.5 points\"); a clause such as 'the anchor variant, chosen on held-out data' would close it. Section 7.8 is complete.",
+    "residual_obligation_class": "consider"
+   },
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-16",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: section 12 Conclusion \"Any randomized selection of 200 windows restored float-level directional recall\" (revised_main.tex lines 1901-1902)",
+    "absence: revised_main.tex - the string 'same 200' occurs nowhere (whole-file search); the original had it at line 1757"
+   ],
+   "change_summary": "The conclusion's 'any randomized selection of the same 200 windows' now reads 'any randomized selection of 200 windows', and no other sentence uses the 'same 200 windows' wording.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-19",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: section 6.1 \"A prespecified iPhone benchmark times nine artifacts, the seed-0 float artifact and 8 of the 110 study INT8 artifacts; the other 102 study INT8 artifacts and all second-cohort and delta-encoded artifacts were not timed.\" (revised_main.tex lines 761-764)",
+    "text: Limitations item 9 (Round-1 item 7) \"Of the 110 study INT8 artifacts, 8 (with one float artifact) were timed on one iPhone; the other 102, and the 60 INT8 artifacts of the second-cohort and delta-encoding runs, were not device-timed, though all 170 share one byte size and one operator inventory.\" (revised_main.tex lines 1768-1772)",
+    "text: Appendix A.3 'Historical device observations and parity runs' with table tab:deployment (revised_main.tex lines 2022-2084), and Appendix C 'Device benchmark' with table tab:devicebench pointing to it (lines 2440-2490, pointer at 2456-2458)",
+    "dataset: paper/results/calibration-coverage/panel_revision_r1.json, artifacts.study_r1 (int8_artifacts 110, device_timed_int8 8, device_timed_float 1, untimed_int8 102); artifacts.confirmation_dubosson/confirmation_hall/delta_r1 int8_artifacts 20 each"
+   ],
+   "change_summary": "The stale section 6 sentence ('none of the 110 new artifacts has been device-timed') is replaced by an accurate account of the nine-artifact benchmark (8 of 110 study INT8 plus one float), the historical device observations moved to Appendix A.3 (equivalent surface, linked from the benchmark appendix), and the Limitations count changes from a mixed '101' to 8 timed and 102 untimed study INT8 artifacts, with the 60 second-cohort and delta INT8 artifacts counted separately; all counts match the record.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-20",
+   "verdict": "PARTIALLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Appendix A 'Provenance and Revision History' (revised_main.tex lines 1985-2084), holding the bundled-artifact history, the September/July/October revisions (A.2) and historical device observations with tab:deployment (A.3)",
+    "table: tab:sweep, one merged confirmatory-read table for rounds 1-5 (labels tab:sweep, tab:sweeptwo, tab:sweepthree, tab:sweepfive; revised_main.tex lines 1287-1330), set in \\footnotesize; no \\resizebox or \\tiny remains anywhere in revised_main.tex",
+    "figure: fig:recall, legend style 'at={(0.5,1.03)}, anchor=south' (above the axes; revised_main.tex lines 1039-1041), against the original 'at={(0.02,0.98)}, anchor=north west' inside the plot",
+    "table: tab:calibmain header 'Model & Accuracy & Macro recall & Directional' (line 974) and tab:baselines header 'Model & Accuracy & Macro recall & Directional' (line 2289)",
+    "table: tab:variants names each reference model once (lines 2127-2152); text: section 6.2 champion definition (lines 792-794)",
+    "text: Abstract \"rejected post hoc as directional recall fell (0.517 to 0.438)\" (line 69); section 1 \"directional recall fell from 0.517 to 0.438\" (lines 201-202); section 12 \"directional recall fell from 0.517 to 0.438\" (line 1918); section 9.3 \"Held-out stable recall therefore drifted from 0.475 to 0.459 to 0.436\" (line 1642) - champion numbers quoted without the precision (INT8), and on three surfaces without the split"
+   ],
+   "change_summary": "Four of five sub-fixes are present: revision history, section 7.14 and Table 20 moved to Appendix A; \\resizebox, \\tiny and \\scriptsize table type removed and the four sweep confirmatory tables merged into tab:sweep; the Figure 3 legend moved above the axes; 'Macro' relabelled 'Macro recall'. Sub-fix (4) is only partly met: a variants table now names each reference model once, but the abstract, introduction and conclusion still quote the champion's 0.517 without precision or split.",
+   "residual_gap": {
+    "text": "Sub-fix (4): state precision and split for the champion's 0.517 (held-out, INT8) in the abstract (line 69), section 1 (lines 201-202) and section 12 (line 1918), and the precision for the stable-recall drift in section 9.3 (line 1642). Secondary: besides the section 1 pointer, the main text keeps several one-sentence revision pointers (section 4.2 lines 494-497, section 5.3 lines 668-669, section 11.1 lines 1815-1816) and adds new 'in revision' narration in section 7.7 (line 1137), more than the single pointer the criterion allows.",
+    "residual_obligation_class": "consider"
+   },
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-22",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "table: tab:contrasts, rows 'Interaction: uniform random vs. sequential' -13.33 [-16.76, -10.29] / -12.43 [-14.46, -10.26]; 'Interaction: range coverage vs. balanced random' -0.05 [-0.16, +0.07]; 'Interaction: range coverage vs. uniform random' +0.02 [-0.12, +0.16]; 'Interaction: balanced random vs. uniform random' +0.06 [-0.04, +0.18] (revised_main.tex lines 1016-1019)",
+    "text: section 7.3 \"the budget-by-strategy interactions among the three randomized strategies lie between $-0.05$ and $+0.06$ points (temporal: up to $+0.07$), every interval including zero.\" (revised_main.tex lines 954-956)",
+    "text: section 6.1 \"\\texttt{protocol.json} names the interaction without a formula, so Section~\\ref{sec:maineffects} reports the difference between two strategies' 1,000-versus-200 effects, a definition fixed after the primary analysis was published.\" (revised_main.tex lines 723-726)",
+    "dataset: paper/results/calibration-coverage/panel_revision_r1.json, weinstock.interaction.held_out and .temporal (all eight points and ci95 match the table at two decimals); protocol.json secondary_contrasts includes 'budget-by-strategy interaction' with no formula"
+   ],
+   "change_summary": "The frozen budget-by-strategy interaction, missing from the original, is now reported for all four strategy pairs on both components with paired-bootstrap intervals, and the post-hoc fixing of its definition is disclosed; every number matches the record.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-23",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: section 11.1 \"its design and pre-registered abort rule are in the round-four specification (commit \\texttt{c8f3de6}). The synthetic diagnostic that motivated round five, \\path{recency_collision.json}, is versioned with its reproduction script in \\path{paper/analysis/accuracy-review-2026-10-13/}.\" (revised_main.tex lines 1842-1846)",
+    "text: section 8.5 \"(\\path{recency_collision.json}, Section~\\ref{sec:repro})\" (revised_main.tex lines 1500-1501)",
+    "dataset: paper/analysis/accuracy-review-2026-10-13/recency_collision.json and reproduce_recency_collision.py (both present)"
+   ],
+   "change_summary": "The section 11.1 (Round-1 section 10.1) record inventory now cites recency_collision.json at its versioned repository path, together with its reproduction script, and cites the round-four design by commit c8f3de6; the file is present at that path.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-24",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: section 11.2 \"The bundled weights were trained on DiaData cohorts released under CC BY-NC 4.0, and their INT8 quantization parameters were calibrated on Weinstock validation windows; the weights are released for non-commercial research use only.\" (revised_main.tex lines 1869-1872)",
+    "text: section 11.2 \"This secondary analysis used only public, de-identified data under the providers' terms; no participants were recruited, and no ethics review was sought.\" (revised_main.tex lines 1888-1890)",
+    "text: Declarations \"The code is released under the MIT License and the bundled model weights under CC BY-NC 4.0.\" (revised_main.tex lines 1953-1955)"
+   ],
+   "change_summary": "The original disclaimer 'We do not claim an institutional ethics determination' is replaced by a conventional one-sentence ethics statement (public, de-identified data under the providers' terms; no ethics review sought), and section 11.2 now states that the weights are released for non-commercial research use only, tied to the DiaData CC BY-NC 4.0 terms, with the Declarations naming CC BY-NC 4.0 as the weights licence.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-29",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "table: tab:protocolmap (Appendix C.3, revised_main.tex lines 2304-2365): rows H1-H4, 'Primary: range coverage vs. balanced random, 200', 'Range coverage vs. uniform random', '1,000 vs. 200 within each strategy', 'Budget-by-strategy interaction (no formula frozen)', 'Uniform vs. sequential, each budget (amendment)', 'Min--max observer arm (amendment)', 'Sensitivity tiers', each with Outcome, Status and Where",
+    "text: section 7.3 \"The effect appears at every training seed (13.05 to 14.14 points, standard deviation (SD) 0.47 across seeds), while the float model's own directional recall has an across-seed SD of 1.34 points and the three uniform draws within a seed an SD of 0.02 to 0.21 points.\" (revised_main.tex lines 947-950)",
+    "table: tab:contrasts, row 'Sequential: 1,000 vs. 200' +13.35 [+10.35, +16.77] held-out, +12.40 [+10.23, +14.43] temporal (revised_main.tex line 1014)",
+    "dataset: paper/results/calibration-coverage/panel_revision_r1.json, weinstock.seed_draw_variation.held_out (effect_across_seed_sd_pts 0.473, effect_range_pts [13.05, 14.14], float_across_seed_sd_pts 1.341, uniform200_within_seed_draw_sd_pts 0.024-0.213) and weinstock.sequential_1000_vs_200 (13.350 [10.349, 16.772]); protocol.json secondary_contrasts (four entries, all mapped)"
+   ],
+   "change_summary": "Added a protocol-to-report table covering H1-H4, the primary and all four frozen secondary contrasts in protocol.json (plus the observer arm and the sensitivity tiers), each with status and location; reported per-seed effect variation (SD 0.47) separately from within-seed draw variation (SD 0.02-0.21); and gave the sequential 1,000-versus-200 contrast with an interval. All values match panel_revision_r1.json.",
+   "verified_by": "R1",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-30",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "table: tab:readledger (Appendix B, revised_main.tex lines 2154-2183), columns Date / Analysis / Labels read / Decision taken, rows for the historical protocol, calibration-study primary analysis, sensitivity tiers, second-cohort run, delta-encoded inputs, rounds one to five (round four 'None (identity outcome)'), the round-four motivation read, the external offset scan, and this revision's re-analyses",
+    "text: Abstract \"Four of five sweep rounds spent one pre-registered read (round four none), three on reused Weinstock test components. A macro-averaged F1 (macro-F1) winner passed every gate but was rejected post hoc as directional recall fell (0.517 to 0.438)\" (revised_main.tex lines 65-69)",
+    "text: section 6.2 \"Table~\\ref{tab:readledger} lists every read of held-out, temporal and RT-CGM labels in this work.\" (revised_main.tex lines 812-813)"
+   ],
+   "change_summary": "A dated held-out read ledger now covers the main study, the sensitivity tiers, the delta experiment and every sweep round, with the split read and decision taken; the abstract's 'each judged by one pre-registered read' is replaced by a statement that three reads reused Weinstock test components and that the round-one winner was rejected post hoc (ledger dates and hashes were not checked against git history, which is outside the permitted inputs).",
+   "verified_by": "R1",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-31",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: section 7.9 \"the 40 second-cohort and 20 delta-encoded INT8 artifacts have the same size and operator inventory (\\texttt{artifacts} in \\texttt{panel\\_revision\\_r1.json})\" (revised_main.tex lines 1252-1255)",
+    "dataset: paper/results/calibration-coverage/panel_revision_r1.json, artifacts.confirmation_dubosson / artifacts.confirmation_hall / artifacts.delta_r1: int8_artifacts 20 each, int8_sizes_bytes [11976], int8_distinct_operator_inventories 1, int8_operator_inventories [ADD, CONV_2D, DEPTHWISE_CONV_2D, DEQUANTIZE, FULLY_CONNECTED, MUL, QUANTIZE, RESHAPE, SUM, TRANSPOSE], identical to artifacts_summary.json int8_operator_inventory for the 110 study artifacts"
+   ],
+   "change_summary": "Serialized sizes and operator inventories of the confirmation-cohort (Dubosson, Hall) and delta INT8 artifacts are now published in the versioned supplement and cited from section 7.9, so the shared-size-and-inventory statement is supported for all 170 INT8 artifacts.",
+   "verified_by": "R1",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-32",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: section 7.6 \"(widest single-tier intervals: held-out gap-filled inputs $+11.44$ $[+6.56, +15.90]$; temporal gap-filled endpoint $+10.53$ $[+6.48, +14.56]$)\" (revised_main.tex lines 1113-1116)",
+    "dataset: paper/results/calibration-coverage/sensitivity_tiers_r1.json, tiers.held_out.gap_filled_inputs.contrasts.uniform200_vs_sequential200 ci95 [0.0656, 0.1590] (widest held-out, 9.34 points) and tiers.temporal.gap_filled_endpoint ci95 [0.0648, 0.1456] (widest temporal, 8.08 points); point range across the six tier-components 10.53-13.16"
+   ],
+   "change_summary": "The spliced '[+6.5, +14.7]' (joining the endpoints of two temporal tiers) is replaced by the widest single-tier interval on each component, each quoted with its own point estimate, and both match sensitivity_tiers_r1.json.",
+   "verified_by": "R1",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-33",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "table: tab:sweeprecall (Appendix D.2, revised_main.tex lines 2556-2578), columns Recall / Precision / F1, candidate/champion INT8 per class, with directional mean 0.438/0.517 and macro-F1 0.425/0.368",
+    "text: Appendix D.2 \"F1 rose in every class, but \\texttt{stable} contributed $+14.1$ points, half of the summed per-class gain. Precision rose in all four directional classes while recall fell in three of them\" (revised_main.tex lines 2548-2551)",
+    "text: section 8.1 \"F1 rose in every class, half of the summed gain from \\texttt{stable}, while recall fell in three of the four directional classes\" (revised_main.tex lines 1362-1364)",
+    "dataset: paper/results/calibration-coverage/panel_revision_r1.json, round_one_f1.held_out (winner_int8 and champion_int8 recall/precision/F1 match the table at three decimals; f1_change_pts.stable 14.13 of a 28.42 sum; macro_f1 0.4253/0.3684)"
+   ],
+   "change_summary": "The recall-only round-one table becomes a recall/precision/F1 table for candidate and champion, and the original recall-based decomposition ('+0.21 recall' on stable) becomes an F1-based one (stable +14.1 of about 28.4 summed F1 points); all values match panel_revision_r1.json.",
+   "verified_by": "R1",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-36",
+   "verdict": "PARTIALLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: section 11.1 \"the SHA-256 hashes of all 190 study, second-cohort, and delta-encoding artifacts (\\texttt{artifact\\_hashes\\_r1.json})\" (revised_main.tex lines 1827-1828)",
+    "dataset: paper/results/calibration-coverage/artifact_hashes_r1.json, 190 sha256 entries across study_r1, confirmation_dubosson, confirmation_hall, delta_r1",
+    "text: section 6.2 \"Round one trained with batch size 64 on the CPU, as the calibration study did; rounds two to five trained with batch size 512 on an Apple-silicon graphics processor through Metal Performance Shaders (MPS), chosen by a smoke run\" (revised_main.tex lines 840-844)",
+    "dataset: panel_revision_r1.json sweep_settings.rounds (r1 batch 64, r2-r5 batch 512); experiments/accuracy_sweep.py line 196 train_model(...) without batch_size, so the default of 64 applies; protocol_sweep_r5.json smoke frozen_batch 512",
+    "text: section 11.1 \"Checkpoints, window keys, per-window predictions, per-participant confusion counts, and run reports stay local because they derive from participant-level data distributed under the providers' terms, so a third party must regenerate them with the committed runners before recomputing any interval.\" (revised_main.tex lines 1830-1834)"
+   ],
+   "change_summary": "Per-artifact SHA-256 hashes (190) are now versioned, the sweep batch size is stated per round (64 for round one, 512 for rounds two to five, confirmed by code and records), and the non-publication of per-participant confusion counts is now stated; but no de-identified per-participant confusion counts are published for any cohort, under a blanket 'providers' terms' rationale that names no restricting term.",
+   "residual_gap": {
+    "text": "Per-participant confusion counts are withheld for every cohort, and the rationale names no term that forbids publishing de-identified aggregate counts. The same revision publishes anonymized per-participant contributions for the GlucoBench Dubosson and Hall cohorts (panel_revision_r1.json confirmation.*.per_participant_mean_contribution_pts), and the manuscript states that the DiaData cohorts are CC BY-NC 4.0. So either publish de-identified per-participant confusion counts for the cohorts whose terms allow it (which would make the cluster-bootstrap intervals recomputable without retraining), or name the specific term that prevents it for each cohort.",
+    "residual_obligation_class": "consider"
+   },
+   "verified_by": "R1",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-37",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a72.3 \"Continuous glucose-error grid analysis (CG-EGA) pairs a point-accuracy grid with a rate-error grid \\cite{kovatchev2004cgega} and has been applied to glucose predictors \\cite{zanderigo2007prediction}; the J index combines a forecast's regularity with its time gain \\cite{facchinetti2011index}\" (revised_main.tex lines 303-309)",
+    "text: \u00a72.3 \"Per-class recall counts every misclassification alike: it does not distinguish an adjacent rate band from a reversed direction, weight errors by glucose level, or grade timing, all of which CG-EGA and the J index address.\" (lines 312-315)",
+    "dataset: paper/main.bbl, entries kovatchev2004cgega, zanderigo2007prediction, facchinetti2011index (all resolve)"
+   ],
+   "change_summary": "The RMSE-only sentence in \u00a72.3 was removed and replaced by a paragraph citing CG-EGA's rate-error grid (Kovatchev 2004), its application to glucose predictors (Zanderigo 2007), the J index's time gain (Facchinetti 2011) and coherence penalties, and stating what per-class recall does not capture.",
+   "verified_by": "R2",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-38",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a72.3 \"predicts three glucose \\emph{level} bands (hypo-, eu- and hyperglycemia) for 11 participants whose data were recorded every 15 minutes, so its 15-minute horizon is one step ahead; its best models reach recalls of 0.85--0.98, with euglycemia recall of 0.59--0.70 at 1~h, under within-patient splits\" (revised_main.tex lines 293-298)"
+   ],
+   "change_summary": "The Kistkins et al. quotation changed from 'recalls of 0.85--0.96 at 15-minute and 1-hour horizons' to best-model recalls 0.85--0.98 with 1-h euglycemia recall 0.59--0.70, 11 participants, 15-minute data (one-step horizon) and within-patient splits.",
+   "verified_by": "R2",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-39",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a74.1 \"Dexcom G4 systems report 40 to 400~\\mgdl\\ and display LOW or HIGH outside that range ... The two values are therefore consistent with stored LOW and HIGH codes (the source data dictionary was not checked).\" (revised_main.tex lines 432-438)",
+    "text: \u00a74.1 \"by true class, the share with a coded input runs from 3.3\\% (\\texttt{falling}) to 9.8\\% (\\texttt{falling\\_fast}), and coded endpoints concentrate in \\texttt{stable} (5.4\\%, against 0.7--1.7\\% in the directional classes)\" (lines 440-445)",
+    "text: \u00a77.6 \"Without windows whose anchor or label endpoint is a 39 or 401~\\mgdl\\ code, the held-out contrast stays at $+13.27$ $[+10.25, +16.75]$ points.\" (lines 1117-1119)",
+    "table: tab:sensitivity, row \"No coded value\" $+13.27$ $[+10.25, +16.75]$, n=44,112 (lines 2391-2407)",
+    "dataset: paper/results/calibration-coverage/panel_revision_r1.json, weinstock.censoring (shares.held_out inputs 0.0664 / endpoint 0.0417; by_true_class inputs 0.033-0.098, endpoint stable 0.0535 vs 0.0074-0.0166; excluding_coded_anchor_or_endpoint 13.27 [10.25, 16.75], n_excluded 2264)"
+   ],
+   "change_summary": "\u00a74.1 now identifies 39/401 mg/dL as consistent with Dexcom G4 LOW/HIGH codes (encoding stated as not checked), reports overall and by-class coded-input and coded-endpoint shares, and a check excluding coded anchors or endpoints was added to \u00a77.6 and tab:sensitivity; every value matches panel_revision_r1.json.",
+   "verified_by": "R2",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-40",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a77.9 \"Inside the artifact, calibration changes more than the input pair. Between the sequential-200 and uniform-200 artifacts of one checkpoint, 12 of 41 graph tensors differ: the graph input, the three activation tensors re-quantized between operators, the output, and the int32 bias of the final layer, whose scale follows its input's, plus six layout-operator copies of those parameters; the three int8 weight tensors are identical.\" (revised_main.tex lines 1262-1267)",
+    "text: \u00a77.9 \"All 110 study INT8 artifacts serialize to exactly 11,976 bytes regardless of strategy, budget or observer ... and share a single operator inventory\" (lines 1249-1253)",
+    "text: \u00a77.9 \"both convolutions, their bias additions, and the average pool run in float32 on dequantized tensors, and only the final fully connected layer runs in int8 (per-operator types in the same file)\" (lines 1268-1271)",
+    "text: \u00a75.3 \"on real devices both use its CPU accelerator, which executes the graph through the XNNPACK delegate, with no further options; neither sets a thread count.\" (lines 677-679)",
+    "dataset: paper/results/calibration-coverage/panel_revision_r1.json, artifacts.study_int8_dtype_map (23 ops in order with input/output dtypes, QUANTIZE and DEQUANTIZE placement) and artifacts.calibration_changes_inside_int8 (n_tensors 41, n_changed 12, int8_constants_identical true)"
+   ],
+   "change_summary": "The sentence that calibration 'changes nothing the device sees except the two quantization parameters' was replaced by a tensor-level account (12 of 41 tensors, int8 weights identical), the float32/int8 op placement with a per-op dtype map versioned in panel_revision_r1.json, and a \u00a75.3 statement of the CPU accelerator/XNNPACK backend with the thread count left at the runtime default (not set).",
+   "verified_by": "R2",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-41",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Appendix B \"A re-audit admitted all 451 subjects (modal within-segment interval 300\\,s and $\\geq$95\\% of intervals within 270--330\\,s; \\path{diadata_audit_r2.json}), but that rule could not fail: DiaData rounds timestamps to a five-minute grid \\cite{cinar2026diadata} and segments split at gaps over 330\\,s, so every within-segment interval is 300\\,s by construction.\" (revised_main.tex lines 2195-2200)",
+    "text: Appendix B \"The 96 admitted subjects without a scored window contain no run of 15 consecutive five-minute readings; the other 355 supply the 12.67M windows used in round five.\" (lines 2200-2203)",
+    "text: Appendix B \"The first audit's collinear fraction ... is 0.305 for RT-CGM against at most 0.229 for the admitted cohorts\" (lines 2203-2206)",
+    "text: \u00a78.3 \"Appendix~\\ref{app:cohorts} gives its sensors, the cadence re-audit that admitted it, and the 355 of its 451 subjects with scored windows.\" (lines 1403-1405)",
+    "dataset: paper/results/diadata_audit_r2.json (451 admitted, all 15,284,371 intervals in [270, 330] s); paper/results/diadata_audit_r1.json (RT-CGM collinear_fraction 0.3049; included cohorts 0.1252-0.2294); paper/results/calibration-coverage/accuracy_sweep_r5.json (participants 355)"
+   ],
+   "change_summary": "The round-three cadence audit is now reported as unable to fail on gridded data, the 96 RT-CGM subjects without windows are explained by the 15-reading window rule, and the 0.305 collinear fraction is set against at most 0.229 for admitted cohorts with an explanation offered (whose record support is logged separately as NEW-1).",
+   "verified_by": "R2",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-42",
+   "verdict": "PARTIALLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a78.1 \"A distance-penalized CE, a formulation introduced here, which adds $\\lambda \\sum_j p_j\\,|j-y|$ with $\\lambda=0.5$ ... ordinal label smoothing (also introduced here, moving 0.15 of the target mass to the adjacent classes; 0.390) and focal loss with $\\gamma=2$ \\cite{lin2017focal}\" (revised_main.tex lines 1338-1344)",
+    "text: \u00a78.3 \"a causal dilated temporal convolutional network (TCN) \\cite{bai2018tcn}\" (lines 1410-1411)",
+    "text: \u00a76.2 \"decays the learning rate to zero on a cosine schedule over the 20 epochs \\cite{loshchilov2017sgdr}\" (lines 844-846)",
+    "text: \u00a78.4 \"A head for conditional ordinal regression (CORN) \\cite{shi2023corn} reached 0.470\" (lines 1476-1477)",
+    "text: \u00a78.4 \"weight soups average models fine-tuned from one pre-trained start \\cite{wortsman2022soups}\" (lines 1481-1482)",
+    "text: \u00a74.3 \"(round three also tried a temporal convolutional network)\" (line 542-543, uncited first mention)"
+   ],
+   "change_summary": "Citations were added for focal loss, the TCN, the cosine schedule, CORN and model soups, while ordinal label smoothing and the distance-penalized cross-entropy, uncited in the original, are now declared 'introduced here'.",
+   "residual_gap": {
+    "text": "The criterion admits self-attribution only 'where it is original'. Ordinal label smoothing with a fixed 0.15 of target mass moved to adjacent classes is an instance of soft ordinal labels / label-distribution learning (e.g., Diaz and Marathe, Soft Labels for Ordinal Regression, CVPR 2019), and adding lambda times the expected class distance to cross-entropy belongs to the known family of expected-cost or class-distance-aware CE penalties; neither is credibly 'introduced here'. Cite the prior families or describe both as variants. Minor: the first mentions of the temporal convolutional network (\u00a74.3, lines 542-543) and of the cosine schedule (\u00a71, line 204) carry no citation, which appears only at the later method descriptions.",
+    "residual_obligation_class": "should_fix"
+   },
+   "verified_by": "R2",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-43",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a78.4 \"A Huber regression head on the rate, decoded at the same rate bands, collapsed toward \\texttt{stable} (0.200 directional, 0.950 stable), the pull toward the dense region of the target that regression on imbalanced targets is known to suffer \\cite{yang2021imbalanced}.\" (revised_main.tex lines 1472-1476)",
+    "text: \u00a78.4 \"A uniform average of the five seeds' weights collapsed (0.238 directional, 0.003 stable), the expected outcome: weight soups average models fine-tuned from one pre-trained start \\cite{wortsman2022soups}, and independently initialized runs need not share a linearly connected basin \\cite{frankle2020linear}.\" (lines 1479-1483)",
+    "text: \u00a79.3 \"round four's arms all lost on validation, two in ways prior work predicts\" (lines 1653-1654)"
+   ],
+   "change_summary": "Round four's regression-head collapse and uniform-soup collapse are now framed as outcomes expected from imbalanced regression (Yang et al. 2021) and from model soups / linear mode connectivity (Wortsman et al. 2022; Frankle et al. 2020), replacing the original's uncited explanations ('mean-sought the stable-dominated rate distribution'; 'independently seeded runs do not share a loss basin').",
+   "verified_by": "R2",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-44",
+   "verdict": "PARTIALLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a79.1 \"A more direct remedy would remove the input's dependence on calibration data by fixing its range from the sensor's reporting limits (here 39--401~\\mgdl, codes included). The PT2E API offers fixed quantization parameters (torchao's \\texttt{FixedQParamsQuantizationSpec}), but LiteRT Torch applies them only to sigmoid and softmax outputs, so the input would need a custom annotation, a route untested here.\" (revised_main.tex lines 1584-1589)",
+    "text: \u00a79.1 \"The rule this evidence supports is to cover the deployment input range, which any randomized selection does in this pool\" (lines 1572-1573)"
+   ],
+   "change_summary": "A new \u00a79.1 paragraph presents fixing the input range from the sensor's reporting limits via fixed quantization parameters as a more direct remedy than the coverage rule, with its toolchain constraint, and no experimental arm (optional) was added.",
+   "residual_gap": {
+    "text": "The fixed-input-range alternative is not related to delta encoding (\u00a77.8), as the criterion requires: e.g., that difference encoding reduced but did not remove calibration dependence (+0.54 [+0.38, +0.72] points), whereas fixed input parameters would make the input independent of the calibration set.",
+    "residual_obligation_class": "consider"
+   },
+   "verified_by": "R2",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-45",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a79.1 \"The absent resolution cost is what 8-bit error analysis predicts \\cite{banner2019ptq,nagel2021whitepaper}. Spreading 0--400.8~\\mgdl\\ over 255 steps gives a step of 1.572~\\mgdl, a maximum rounding error of 0.79~\\mgdl, and a root-mean-square error of about 0.45~\\mgdl\\ (the step over $\\sqrt{12}$), small against the 15~\\mgdl\\ change over 15 minutes that separates \\texttt{stable} from \\texttt{falling} or \\texttt{rising}\" (revised_main.tex lines 1591-1597)"
+   ],
+   "change_summary": "'The feared resolution trade-off ... costs nothing measurable' was replaced by the uniform 8-bit error arithmetic (400.8/255 = 1.572, max 0.79, RMS 0.45 mg/dL, all recomputed) against the 15 mg/dL class-separating change, citing Banner et al. 2019 and Nagel et al. 2021.",
+   "verified_by": "R2",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-46",
+   "verdict": "PARTIALLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a77.8 \"Because activations, the input included, are quantized per tensor, the anchor model's differences and level channel share one input step of 0.247 per code: 0.247~\\mgdl\\ for the differences, 6.4 times finer than the absolute model's 1.572~\\mgdl, and $0.247\\times16\\approx3.95$~\\mgdl\\ for the level channel, 2.5 times coarser.\" (revised_main.tex lines 1225-1229)",
+    "dataset: paper/results/calibration-coverage/delta_inputs_r1.json, input_grid.anchor_int8_input_scale 0.2469 and absolute_int8_input_scale_r1 1.5719 (ratio 6.37; 0.2469 x 16 = 3.95; 3.95/1.572 = 2.51)"
+   ],
+   "change_summary": "\u00a77.8 now reports both effective resolutions (differences 0.247 mg/dL per code, 6.4x finer; level channel about 3.95 mg/dL, 2.5x coarser) and scopes '6.4x finer' to the differences.",
+   "residual_gap": {
+    "text": "The anchor channel's headroom is not reported (anchor = last reading/16, at most 401/16 = 25.1 units, against an INT8 input range about 63 units wide at 0.247 per code); only the qualitative 'placing a coarse level channel inside the delta range' (line 1217, already in the original) remains.",
+    "residual_obligation_class": "consider"
+   },
+   "verified_by": "R2",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-47",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a79.3 \"A displayed class is the model's estimate of the rate band that the sensor-reported glucose will average over the next 15 minutes, neither a measurement of the current rate nor a reading of blood glucose. On both evaluated cohorts ..., 63\\% of displayed movement classes were followed by a mean rate within $\\pm1$~\\mgdl/min\" (revised_main.tex lines 1665-1671)",
+    "text: \u00a79.3 \"Every movement class is predicted 1.7 to 5.2 times as often as it occurs: \\texttt{falling\\_fast}, the most over-called, pairs the highest recall with the lowest precision (0.706 at 0.136 held-out, 0.673 at 0.214 on RT-CGM)\" (lines 1675-1678)",
+    "table: tab:shippederrors, caption \"Recall = sensitivity; precision = positive predictive value\", per-class recall/precision, reversal and anchor-band rows (lines 2633-2670)",
+    "table: tab:shippedconfusion, row-normalized five-class confusion matrices, held-out and RT-CGM (lines 2672-2699)",
+    "dataset: paper/results/calibration-coverage/panel_revision_r1.json, shipped_model.{held_out,rtcgm}.confusion and level_stratified (recomputed: displayed-movement-to-stable 0.627/0.630, stable PPV 0.916/0.943, predicted/true ratios 1.70-5.19, reversal 0.138/0.151 and 0.086/0.088, adjacent 0.640/0.812, <70 band 0/1 and 2/96 falling_fast)"
+   ],
+   "change_summary": "The original had no error profile for the bundled model; the revision adds a \u00a79.3 paragraph on what a displayed class does and does not mean (false movement labels during stable glucose, fast-class over-calling, reversals, the <70 mg/dL band) and Appendix D tables with sensitivity/PPV-labelled per-class metrics, confusion matrices, reversal shares and anchor-band recall, all matching panel_revision_r1.json.",
+   "verified_by": "R3",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-49",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a710 item 7 \"Wear and therapy regimes differ across cohorts. Weinstock participants wore blinded CGM; most DiaData cohorts mix masked run-in and real-time wear, which DiaData does not separate, and DCLP3 and PEDAP include closed-loop insulin delivery (Table~\\ref{tab:cohorts}). ... a deployed trend display would itself change the wearer's behaviour and so the trajectories it predicts. PEDAP randomized preschool children to automated insulin delivery or standard care \\cite{wadwa2023pedap}. Every cohort behind the bundled model has type-1 diabetes; no type-2 diabetes, pregnancy, or inpatient data entered its training or evaluation.\" (revised_main.tex lines 1757-1767)",
+    "table: tab:cohorts, PEDAP row \"2 to $<$6\", \"T1D; closed loop vs pump or injections\"; WISDM \"pump or injections\" (lines 2117-2121)",
+    "text: \u00a71 \"round five on RT-CGM, a randomized-trial cohort that no round had evaluated\" (line 157) and \u00a72.2 \"RT-CGM, the Juvenile Diabetes Research Foundation (JDRF) CGM randomized trial \\cite{jdrf2008cgm}\" (lines 248-249)"
+   ],
+   "change_summary": "A new Limitations item 7 covers wear regimes (blinded, masked run-in, real-time), therapy regimes including closed-loop delivery, the feedback loop of a deployed display, PEDAP's preschool automated-insulin-delivery population and the absence of type-2, pregnancy and inpatient data; RT-CGM is glossed as a randomized-trial cohort at first use and expanded as the JDRF CGM randomized trial in \u00a72.2.",
+   "verified_by": "R3",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-50",
+   "verdict": "PARTIALLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Title \"\\project: Quantization-Calibration Coverage and Staged Model Selection in On-Device Glucose Trend Classification\" (revised_main.tex lines 37-38)",
+    "text: Abstract \"to one of five classes of the mean rate of change over the next 15 minutes. This paper asks how quantization-calibration coverage affects\" (lines 49-51)",
+    "text: \u00a71 \"Unqualified, calibration here means this quantization step, neither CGM sensor calibration against blood glucose nor calibration of predicted probabilities.\" (lines 115-117)",
+    "text: Abstract \"quantized to 8-bit integers (INT8)\" (line 54-55); Abstract \"A macro-averaged F1 (macro-F1)\" (lines 67-68); \u00a71 \"post-training quantization (PTQ)\" (line 112); \u00a72.2 \"evaluate zero-shot, with models that never trained on them\" (line 246); \u00a72.4 \"LiteRT (formerly TensorFlow Lite)\" (line 357); \u00a76.2 \"type~1 diabetes (T1D)\" (line 823); \u00a78.3 \"temporal convolutional network (TCN)\" (lines 1410-1411); \u00a78.4 \"conditional ordinal regression (CORN)\" (lines 1476-1477)",
+    "text: \u00a71 \"the mean recall (sensitivity) of the four non-stable classes\" (line 118); table: tab:shippederrors caption \"Recall = sensitivity; precision = positive predictive value\" (lines 2638-2639)",
+    "table: tab:relatedwork, Zhu et al. row \"47 T1D participants\" (line 275, unexpanded first use)"
+   ],
+   "change_summary": "The title and abstract now qualify calibration as quantization-calibration, \u00a71 excludes sensor and probability calibration, the target is 'the mean rate of change over the next 15 minutes', the listed acronyms are expanded in running text, and recall/precision are mapped to sensitivity/PPV.",
+   "residual_gap": {
+    "text": "T1D is first used unexpanded in Table 1 (Zhu et al. row, '47 T1D participants', line 275, a row added in this revision); its expansion appears only in \u00a76.2 (line 823), so one of the eight listed terms is not expanded at first use.",
+    "residual_obligation_class": "consider"
+   },
+   "verified_by": "R3",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-51",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a74.1 \"The source study was a case-control study of severe hypoglycemia in adults aged 60 or older with type-1 diabetes for at least 20 years: 101 cases had at least one severe hypoglycemic event in the prior year, 100 age-matched controls had none in the prior three years, and cases showed greater glucose variability \\cite{weinstock2016risk}. The cohort is therefore enriched for hypoglycemia and variability relative to older adults with type-1 diabetes in general, which can shift the class prevalences below and limits how far the results transfer.\" (revised_main.tex lines 399-407)",
+    "text: \u00a74.1 \"CGM data were collected blinded, so participants could not react to their readings: the trajectories lack the corrections that a real-time display or closed-loop control would prompt, and deployed use may see different dynamics.\" (lines 407-410)",
+    "text: \u00a710 item 2 \"a case-control sample of older adults with long-standing type-1 diabetes, about half of whom had a severe hypoglycemic event in the prior year, recorded with blinded CGM \\cite{weinstock2016risk}\" (lines 1701-1704)"
+   ],
+   "change_summary": "\u00a74.1 now states the Weinstock case-control design, its enrichment for hypoglycemia and variability and the consequences for class prevalence and transfer, and what blinded wear implies for deployed dynamics, and Limitations item 2 restates the case-control, blinded sample.",
+   "verified_by": "R3",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-52",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a711.2 \"The repository's \\texttt{MODEL\\_CARD.md}, structured after Mitchell et al.\\ \\cite{mitchell2019modelcards}, states the bundled model's intended use (offline research replay), out-of-scope uses (live decision support, alerts, dosing, and any clinical use), input requirements, evaluation results, and known failure modes, among them frequent movement labels during stable glucose and over-calling of the fast classes, together with the populations its data do not represent.\" (revised_main.tex lines 1877-1883)",
+    "text: Abstract \"and is bundled in the research applications\" (lines 74-75)",
+    "text: \u00a712 Conclusion \"That artifact is bundled in the research applications.\" (lines 1935-1936)"
+   ],
+   "change_summary": "'now ships in both applications' became 'is bundled in the research applications' in the abstract and conclusion, and \u00a711.2 now summarizes a repository model card (MODEL_CARD.md, present in the repository) covering intended use, out-of-scope uses, input requirements, failure modes and unrepresented populations.",
+   "verified_by": "R3",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-53",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: Title \"Quantization-Calibration Coverage and Staged Model Selection\" (revised_main.tex lines 37-38; 'Quantization Trade-offs' removed)",
+    "text: \u00a71 \"INT8 showed no mean-latency advantage over float in any measurement and saves 31\\% of file size for the study model and 70\\% for the bundled one\" (lines 185-188)",
+    "text: \u00a77.9 \"All 110 study INT8 artifacts serialize to exactly 11,976 bytes ... (float: 17,352 bytes, a 31.0\\% reduction) ... The bundled 50,645-parameter pair serializes to 208,560 (float) and 61,936 bytes (INT8), a 70.3\\% reduction\" (lines 1249-1257)",
+    "text: \u00a710 item 8 \"INT8 showed no mean-latency advantage over float in any measurement; its size saving is 31\\% (5,376 bytes) for the 2,909-parameter study model and 70\\% (146,624 bytes) for the 50,645-parameter bundled model. The quantization trade-off studied here is an accuracy risk against a size saving, with no measured speed benefit.\" (lines 1775-1780)",
+    "table: tab:devicebench, float mean 2.78 us vs INT8 3.42-3.47 us (lines 2465-2490); table: tab:deployment, Android 0.334 vs 0.484 ms (lines 2060-2084)"
+   ],
+   "change_summary": "'Quantization Trade-offs' was removed from the title, and \u00a71, \u00a77.9, Limitations item 8 and the Conclusion now state that INT8 had no mean-latency advantage in any measurement, report the size saving in bytes for the study model (5,376) and the newly reported bundled pair (146,624), and scope the trade-off to accuracy risk against a size saving with no speed benefit (the 'trade-off' wording no longer appears in \u00a79).",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-54",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a78.5 \"PEDAP's per-class changes show where the predictions moved: \\texttt{falling\\_fast} recall rose 6.7 points and \\texttt{rising\\_fast} 2.3, while \\texttt{falling} fell 6.5, \\texttt{rising} 3.1 and \\texttt{stable} 0.3; the candidate labels 16.0\\% of PEDAP windows \\texttt{falling\\_fast} against the champion's 12.3\\%, and its \\texttt{falling\\_fast} precision drops from 0.284 to 0.242, consistent with an operating-point shift from the slow to the fast classes rather than better discrimination.\" (revised_main.tex lines 1541-1548)",
+    "dataset: paper/results/calibration-coverage/panel_revision_r1.json, pedap_per_class (recall_change_pts ff +6.69, f -6.45, s -0.27, r -3.08, rf +2.26; winner ff 0.705 vs champion 0.638; rf 0.633 vs 0.611; predicted_share ff 0.160 vs 0.123; precision ff 0.242 vs 0.284)"
+   ],
+   "change_summary": "Where the original reported only PEDAP's falling (-6.4) and rising (-3.1) losses, \u00a78.5 now reports all five per-class recall changes (gains and losses), the falling_fast predicted share and precision, and reads the pattern as an operating-point shift rather than better discrimination.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-55",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a79.1 \"Two accounts of the class asymmetry fit the mechanism controls (Section~\\ref{sec:mechanism}), which localize the sequential-arm error at the input edge, and the study does not separate them. In one, fast falls start high ... and a model that cannot see how high a trajectory started loses a cue that a steep fall is coming. In the other, clipping maps every reading above 250.9~\\mgdl\\ to one code, flattening the clipped part of a high fast fall into a plateau and erasing its slope as well as its level\" (revised_main.tex lines 1599-1609)"
+   ],
+   "change_summary": "The original's assertion that 'a model that cannot see how high the trajectory started cannot recognize a fast fall' was replaced by two candidate accounts (start-high and slope erasure), both stated as consistent with the clipping controls and explicitly not separated by the study.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-56",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a71 contribution list \"Where every randomized selection covers the full input range, as in this pool, stratification, a five-fold budget, and the observer choice move recall by at most about a tenth of a point\" (revised_main.tex lines 172-175)",
+    "text: \u00a77.3 \"raising a randomized strategy's budget from 200 to 1,000 changes recall by at most $+0.08$ points (only the balanced-random interval, $[+0.02, +0.15]$, excludes zero)\" (lines 951-953)",
+    "table: tab:contrasts, row \"Balanced random: 1,000 vs.\\ 200\" $+0.08$ $[+0.02, +0.15]$ (line 1012)",
+    "dataset: paper/results/calibration-coverage/aggregate_r1.json, contrasts.held_out.participant_balanced_random_1000_vs_200 delta 0.00082, ci95 [0.00016, 0.00150]; panel_revision_r1.json weinstock.facts.observer max_abs_seed_mean_pts 0.118"
+   ],
+   "change_summary": "'add nothing measurable' no longer appears; \u00a71 (and the abstract and conclusion) now bound the null knobs at 'about a tenth of a point', consistent with the 0.118-point observer maximum, and \u00a77.3 gives the +0.08 [+0.02, +0.15] balanced-random budget effect explicitly.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-57",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a77.2 \"every randomized 200-window set covers 90--127 participants\" (revised_main.tex lines 896-897)",
+    "text: Abstract \"passed all gates on a never-evaluated 2008 trial cohort\" (lines 70-71)",
+    "text: \u00a71 \"round five on RT-CGM, a randomized-trial cohort that no round had evaluated\" (lines 157-158) and \"passed all gates on never-evaluated RT-CGM\" (lines 204-205)",
+    "text: \u00a78.5 \"Round three had trained a rejected arm on this cohort, but neither model under comparison trained on it\" (lines 1519-1521)",
+    "dataset: paper/results/calibration-coverage/aggregate_r1.json selection_coverage (uniform_random_200 d101 96, d102 92, d103 90; balanced and range-coverage 127)"
+   ],
+   "change_summary": "\u00a77.2's participant range changed from 96--127 to 90--127 (matching selection_coverage), and 'never-read' was replaced in the abstract and \u00a71 by 'never-evaluated' / 'no round had evaluated', with the rejected round-three RT-CGM training arm disclosed in \u00a78.5.",
+   "verified_by": "EIC",
+   "applied_criterion": "precommitted"
+  },
+  {
+   "item_id": "REV-48",
+   "verdict": "CANNOT_VERIFY",
+   "cannot_verify_reason": "The roadmap row designates the response letter (surface_id: response_letter) as the channel for answers to R3-Q1, Q4, Q5 and Q6, and the letter is withheld in Phase 2A. The revised manuscript is not the answer channel and carries at most fragments (for Q1, the Dexcom G4 sensor per GlucoBench in \u00a74.1; no persistence framing of the recent-slope baseline for Q4, no statement on the >250 mg/dL band for Q5, no statement on whether the app shows current glucose beside the class for Q6).",
+   "change_summary": "No manuscript change is designated for this item; its answers belong to the withheld response letter.",
+   "verified_by": "EIC",
+   "applied_criterion": "not_precommitted"
+  },
+  {
+   "item_id": "REV-58",
+   "verdict": "FULLY_ADDRESSED",
+   "evidence_anchor": [
+    "text: \u00a76.2 \"No protocol stated when a gate-passing candidate may be overridden. The two cases that arose fit one rule: override only if the candidate loses directional recall on the primary component (round one), not for losses on components the protocol declared non-gating (round five).\" (revised_main.tex lines 813-817)"
+   ],
+   "change_summary": "The sweep protocol section now discloses that no protocol stated an override rule and states the retrospective rule that both override decisions fit.",
+   "verified_by": "EIC",
+   "applied_criterion": "not_precommitted"
+  }
+ ],
+ "new_issues": [
+  {
+   "new_issue_id": "NEW-1",
+   "description": "Table 1's new Zhu et al. row, added as the closest prior device-run glucose predictor, gives '---' for Horizon and Inputs, and the caption defines '---' as 'not stated in the cited work's abstract'. The row was therefore filled in from the abstract alone and cannot be compared with the other rows on horizon or inputs.",
+   "location_anchor": "table: tab:relatedwork, Zhu et al. row (revised_main.tex L275) and caption (L264) \"--- = not stated in the cited work's abstract.\"",
+   "severity": "minor",
+   "found_by": "EIC",
+   "confidence": 3,
+   "competence_basis": "EIC card focus on related-work positioning and table fidelity. The defect is visible in the revised table and caption themselves. Whether the full paper states horizon and inputs was not checked (no web access), so confidence is moderate.",
+   "attribution": "regression",
+   "attribution_evidence": "diff_original_to_revised.patch adds both the Zhu row (patch L381) and the caption legend (patch L363); the original Table 1 (original_main.tex L196-214) had neither.",
+   "nearest_roadmap_item": "REV-03",
+   "non_match_rationale": "REV-03's criterion requires a prior on-device glucose row with device evidence plus the OhioT1DM citation, and both are satisfied. The completeness of the row's Horizon and Inputs cells, and sourcing it from the abstract only, lie outside that criterion.",
+   "issue_id": "NEW-1",
+   "shard_local_id": "A:NEW-1"
+  },
+  {
+   "new_issue_id": "NEW-2",
+   "description": "The cohort table gives RT-CGM's range as 'device-dependent; 14--654' mg/dL, and \u00a78.6 cites the 654 mg/dL anchor maximum, without noting that the observed extremes lie outside the reportable range of every listed sensor. To this reviewer's knowledge those ranges are about 40-400 mg/dL for DexCom SEVEN and MiniMed Paradigm and 20-500 mg/dL for FreeStyle Navigator. The record shows 0.24% of RT-CGM anchors below 40 and 0.42% above 400. These may be non-sensor or artifact values in round five's primary endpoint, and the paper neither flags them nor checks without them (it does both for the 39/401 codes in Weinstock).",
+   "location_anchor": "table: tab:cohorts, RT-CGM row Range cell (revised_main.tex L2122) \"device-de\\-pen\\-dent; 14--654\"; also text \u00a78.6 (L1526-1528) \"RT-CGM anchors reach 654~\\mgdl\"",
+   "severity": "minor",
+   "found_by": "EIC",
+   "confidence": 3,
+   "competence_basis": "Checked against panel_revision_r1.json shipped_model.rtcgm (anchor_range_mgdl [14.0, 654.0], anchor_fraction_below_40 0.00245, anchor_fraction_above_400 0.00421). The device reportable ranges come from general CGM knowledge, not from an allowed record, and CGM-device detail is a stated EIC blind spot, so confidence is moderate.",
+   "attribution": "regression",
+   "attribution_evidence": "The range cell and the 654 mg/dL sentence are revision text (patch L2686; original_main.tex contains no '654' and gave no RT-CGM range). The underlying values were in Round 1's round-five data but were not described then, so the characterization that omits the out-of-range flag was introduced by the revision.",
+   "nearest_roadmap_item": "REV-41",
+   "non_match_rationale": "REV-41 covers the RT-CGM cadence rule, the 96 subjects without windows and the collinear fraction. REV-08 covers role and sensor generation, and REV-39 covers the Weinstock 39/401 codes. None covers RT-CGM glucose values outside the listed devices' reportable ranges.",
+   "issue_id": "NEW-2",
+   "shard_local_id": "A:NEW-2"
+  },
+  {
+   "new_issue_id": "NEW-3",
+   "description": "The new held-out read ledger (Table tab:readledger) claims to list 'every analysis that read held-out, temporal or RT-CGM labels' with 'the commit that published each result', but (a) its round-three row lists only 'Weinstock held-out, temporal; PEDAP' although round three's rejected D_rtcgm arm trained on RT-CGM labels (accuracy_sweep_r3.json deviations: 12,674,509 RT-CGM windows, 22.1% of the arm's pool), the label exposure that Sections 7.13 and Limitations item 5 disclose in prose; and (b) its round-one row cites e490ceb for 'Round one confirmatory read (frozen) and per-class read (post hoc)', but e490ceb only adds the post_hoc_descriptive_recall block (45 lines) to accuracy_sweep_r1.json, which was first published at aa6127f (git ls-tree/diff: absent in aa6127f^1, present in aa6127f, an ancestor of e490ceb). Merging the confirmatory read and the decision-driving post-hoc read under the later commit hides the very separation the ledger exists to show. Minor and fixable: add RT-CGM (training, round three) to the round-three row and split round one into two rows (aa6127f confirmatory; e490ceb post-hoc per-class read).",
+   "location_anchor": "table: tab:readledger (revised_main.tex L2154-2183), rows \"2026-10-11 \\texttt{e490ceb}\" and \"2026-10-12 \\texttt{a84b237}\"",
+   "severity": "minor",
+   "found_by": "R1",
+   "confidence": 3,
+   "competence_basis": "R1 card focus 2-3 (confirmatory discipline, reuse of held-out data, and whether protocols were committed before reads, via git history); checked with read-only git ls-tree/diff over paper/results file contents (no commit messages or log output) and against accuracy_sweep_r3.json.",
+   "attribution": "regression",
+   "attribution_evidence": "The read ledger is new in the revision: original_main.tex contains no readledger table or read ledger (grep count 0), and the diff adds Table tab:readledger in the appendix; the rows in question exist only in revised_main.tex.",
+   "nearest_roadmap_item": "REV-30",
+   "non_match_rationale": "REV-30 asks that a ledger exist and cover the main study, sensitivity tiers, delta experiment and every sweep round for held-out reads; it says nothing on RT-CGM training exposure or on which commit a row cites. This defect sits inside the delivered ledger, outside what REV-30's criterion checks, so REV-30 can be FULLY_ADDRESSED while this remains.",
+   "issue_id": "NEW-3",
+   "shard_local_id": "C:NEW-1"
+  },
+  {
+   "new_issue_id": "NEW-4",
+   "description": "Appendix B attributes RT-CGM's excess collinear fraction (0.305 against at most 0.229 for admitted cohorts) 'mainly' to runs of identical readings, but no versioned record decomposes the statistic into flat and sloped triples (diadata_audit_r1.json reports only the aggregate fraction, and experiments/audit_diadata.py computes only the aggregate), and the sentence does not consider that runs of identical readings on a five-minute grid can themselves be a resampling (sample-and-hold) signature for devices of a different native cadence, which would bias rate labels toward stable in round five's primary-endpoint cohort.",
+   "location_anchor": "text: Appendix B \"the excess comes mainly from runs of identical readings, which the statistic cannot tell apart from linear interpolation\" (revised_main.tex lines 2206-2208)",
+   "severity": "minor",
+   "found_by": "R2",
+   "confidence": 3,
+   "competence_basis": "R2 card #3 (on-device ML for wearable sensing; CGM forecasting benchmarks; dataset descriptions for DiaData cohorts and RT-CGM). Checked against paper/results/diadata_audit_r1.json, paper/results/diadata_audit_r2.json, experiments/audit_diadata.py (collinear_fraction counts any triple with |g[t-1]+g[t+1]-2g[t]| < 1e-6, so flat triples are included) and experiments/audit_rtcgm.py; no allowed record supports the 'mainly identical runs' decomposition.",
+   "attribution": "regression",
+   "attribution_evidence": "The sentence is absent from original_main.tex (no occurrence of 'collinear' in the original) and enters with the new Appendix B RT-CGM paragraph in diff_original_to_revised.patch; the supporting decomposition is not in any versioned record.",
+   "nearest_roadmap_item": "REV-41",
+   "non_match_rationale": "REV-41's pre-committed criterion requires only that the collinear fraction be addressed, which the revision does; it does not cover the evidentiary support or completeness of the specific causal explanation the revision introduces, so the unsupported claim is a separate defect.",
+   "issue_id": "NEW-4",
+   "shard_local_id": "D2:NEW-1"
+  }
+ ],
+ "dissents": [
+  {
+   "dissent_id": "DIS-1",
+   "item_id": "REV-08",
+   "criterion_hash": "fcb4df9d41eb795039b319a923f30de156ce2db644947a3098505f2ff2758980",
+   "reason_code": "criterion_ambiguous",
+   "original_operationalization": "[routed: EIC / Journal-Fit Reviewer, card #1] A cohort table exists, and every cohort named in the abstract, sections 7.10-7.13 or Table 1 has a row stating its role (e.g., training, calibration pool, held-out, confirmatory, probe) and its CGM sensor model/generation, with mixed or unrecoverable devices marked as such (Round-1 audit record: RT-CGM = JDRF CGM RCT with DexCom SEVEN, MiniMed Paradigm and FreeStyle Navigator, per-subject sensor not recoverable). Round-1 known names to check include Weinstock, CITY, DLCP3, REPLACE-BG, SENCE, WISDM, RT-CGM, PEDAP, dubosson and hall, plus any other cohort named on those surfaces. Check by enumerating cohort names on the four surfaces and matching rows. The Requirement's further columns (source trial and citation, n, age range, diabetes type, therapy, blinded or real-time wear, collection years, reportable range) and an RT-CGM device/era description in sections 7.11 and 10.2 are consistent with, but not required by, this criterion.",
+   "replacement_operationalization": "Identical to the original, except that 'every cohort named in ... Table 1' is read as every cohort this work itself uses that is named in Table 1 (the GlucoEdge row, plus any cohort the manuscript trains, calibrates, selects or evaluates on). A dataset named in Table 1 only as a prior study's evaluation scope (OhioT1DM in the Mirshekarian and Martinsson rows; Zhu et al.'s 'three clinical datasets') needs no cohort-table row. All other conditions apply unchanged: role and CGM sensor model/generation per row, mixed or unrecoverable devices marked, and RT-CGM consistent with the Round-1 audit record.",
+   "evidence": "A literal reading would require a cohort-table row for OhioT1DM. The revised Table 1 names it (L272-273), as the original did (original_main.tex L206-207), only as the evaluation scope of Mirshekarian et al. and Martinsson et al.; this work never uses it. The Round-1 Requirement for this item asks for 'a cohort table for every GlucoBench and DiaData cohort used', and its problem statement concerns the cohorts behind the shipped model. Phase 1's own list of known names (Weinstock, CITY, DLCP3, REPLACE-BG, SENCE, WISDM, RT-CGM, PEDAP, dubosson, hall) leaves out OhioT1DM even though it appeared in Round-1 Table 1, which indicates that prior-work rows were not meant to count.",
+   "decision_impact_note": "Under the original literal criterion the verdict would be PARTIALLY_ADDRESSED, with one gap: no cohort-table row for OhioT1DM, a residual this seat would grade consider. Under the replacement it is FULLY_ADDRESSED, because every cohort this work uses that is named in the Abstract, Round-1 \u00a77.10-\u00a77.13 (now \u00a78.3-\u00a78.6) or Table 1 has a row with role and sensor generation. Because this dissent is on a must_fix item, it trips the independent-adjudication bound."
+  }
+ ],
+ "escalation_exceptions": []
+}

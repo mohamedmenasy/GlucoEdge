@@ -1,0 +1,12 @@
+{"note":"Informal manifest. NOT input_manifest 1.1: author_adjudication, revision_evidence_bundle, revision_patches, apply_reports absent (revision made outside ARS). A contract run would abort at G0 manifest_incomplete.","original_commit":"2439f39","revised":"main e48a3c7 + PR #33 (e7e4fe1)","files":{
+"round1/config_cards.md":"3a0dadb6e4f2b8e86bff58496530f9301c16a1f1567f089d751c8fbc36bbfdf3",
+"round1/decision_letter.md":"cc96bec02db39e8d523f98d71526d20aebe4710fc7148908022c86a169bdf470",
+"round1/finding_da.md":"79bd1c9e1e19613bba50bb7d81320676118f93b0d6a3e1e47c90b82235194fb4",
+"round1/finding_domain.md":"efc700c9481f4822cdfa74f14ad22d6143beab09e2c14013d97d0a2bafee4104",
+"round1/finding_eic.md":"42922bead686da6023b51c93d4fcd6bc4f32c26b1a7f50fe077b63b87d728dc5",
+"round1/finding_methodology.md":"9bf3b962400c5803f62882e8b630e04e64a07312d673ac1d84e444f0a6146e24",
+"round1/finding_perspective.md":"aac18b7a78253741764dbcb0108c7ad529d61c5b1649fc4744fb531303f01f01",
+"round1/roadmap.md":"ac1bb5e860aa796d64c1b56252f0170acb1d50f949dfa456c2eacb183321e2b0",
+"manuscripts/diff_original_to_revised.patch":"07ff9d55905babd0a3305d2dbf4eb78315ec18c54d8b0f43847fdc4d8f73aaf8",
+"manuscripts/original_main.tex":"53af70cc613d057c8bff66c8ea04a8630b505f057cadfe012ae1e2179c9eae1f",
+"manuscripts/revised_main.tex":"69b8b1d33cd5a38cdd9f2711aa740394a84ddb58a8e157db30e88951eae250a8","response_to_reviewers.md (withheld until 2B)":"900a12f0ba0778a26d495f29a30440bb57752982941cf343a29cc25bde945d7e"}}
