@@ -7,8 +7,9 @@ from experiments.analyze_calibration_coverage import (
     confusion_counts, minority_macro_recall, paired_cluster_bootstrap)
 from experiments.panel_revision import (
     censor_shares, cluster_bootstrap_stat, confusion_summary,
-    level_stratified_recall, mean_contributions, participant_contributions,
-    sign_flip_test)
+    level_stratified_recall, levels_from_deltas, mean_contributions,
+    participant_contributions, sign_flip_test)
+from training.deltas import delta_windows
 
 
 def _mmr(y, p):
@@ -121,3 +122,8 @@ def test_level_bands():
     assert list(out) == ["<70", "70-180", "180-250", ">=250"]
     assert [b["n_windows"] for b in out.values()] == [1, 1, 1, 1]
     assert out["<70"]["support"][0] == 1 and out[">=250"]["support"][4] == 1
+
+
+def test_levels_from_deltas_inverts_delta_windows():
+    levels = np.array([[39.0, 40, 52, 401, 380, 120], [100, 98, 98, 98, 101, 654]])
+    np.testing.assert_array_equal(levels_from_deltas(delta_windows(levels, anchor=True)), levels)

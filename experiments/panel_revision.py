@@ -181,6 +181,15 @@ def level_stratified_recall(y_true, y_pred, anchor_mgdl, edges=(70, 180, 250)):
     return out
 
 
+def levels_from_deltas(w, anchor_scale=16.0):
+    """Inverse of training.deltas.delta_windows(anchor=True): (N, L) deltas
+    plus last level / anchor_scale -> (N, L) absolute mg/dL."""
+    w = np.asarray(w, dtype=np.float32)
+    last = w[:, -1:] * np.float32(anchor_scale)
+    back = np.cumsum(w[:, -2::-1], axis=1)[:, ::-1]  # sum of deltas after each step
+    return np.concatenate([last - back, last], axis=1)
+
+
 # --- runner (local caches only; not unit-tested) ------------------------------
 
 
@@ -492,7 +501,8 @@ def _confirmation(cohort):
 
 
 def _shipped_model(rebuilt):
-    from experiments.accuracy_sweep_r5 import RTCGM_CACHE, _sha256
+    from experiments.accuracy_sweep_r5 import (BOOT_SEED_R5, RTCGM_CACHE, _champion_paths,
+                                            _sha256)
     r5 = RESULTS / "sweep-r5"
     best = _read(r5 / "selection" / "S.json")["best_seed"]
     art = r5 / "artifacts" / f"winner_seed{best}_int8_uniform_random_200_d101.tflite"
@@ -518,6 +528,20 @@ def _shipped_model(rebuilt):
     if not (np.array_equal(cache["y"], y) and np.array_equal(cache["pids"], meta["pids"])):
         raise SystemExit("REFUSED: RT-CGM hours cache no longer aligns with the round-five read")
     anchor = cache["w"][:, -1] * np.float32(16.0)  # delta-anchor channel = g_t / 16, exact
+    levels = levels_from_deltas(cache["w"])
+    keep = ((levels >= 40) & (levels <= 400)).all(axis=1)
+    champ = np.load(r5 / "eval" / "rtcgm" / "champion_int8_preds.npy")
+    without = paired_cluster_bootstrap(y[keep], meta["pids"][keep], [(pred[keep], champ[keep])],
+                                       n_boot=2000, seed=BOOT_SEED_R5)
+    clipping = {}
+    for name, path in (("winner_int8", art), ("champion_int8", _champion_paths()["int8"])):
+        q = _input_qparams(path)
+        lo, hi = q["range"]
+        clipping[name] = {"input_qparams": q,
+                          "window_fraction_any_channel_outside": float(
+                              ((cache["w"] < lo) | (cache["w"] > hi)).any(axis=1).mean()),
+                          "anchor_fraction_above_level_ceiling": float(
+                              (anchor > q["level_ceiling_mgdl"]).mean())}
     rtcgm = {"identity": identity, "confusion": confusion_summary(y, pred),
              "level_stratified": {
                  "bands": level_stratified_recall(y, pred, anchor),
@@ -526,7 +550,16 @@ def _shipped_model(rebuilt):
              "anchor_range_mgdl": [float(anchor.min()), float(anchor.max())],
              "anchor_fraction_below_40": float((anchor < 40).mean()),
              "anchor_fraction_above_400": float((anchor > 400).mean()),
-             "sources": ["results/calibration-coverage/sweep-r5/eval/rtcgm/{meta.npz,winner_int8_preds.npy}",
+             "input_clipping": clipping,
+             "readings_outside_40_400": {
+                 "window_fraction": float((~keep).mean()),
+                 "participants_affected": int(len(np.unique(meta["pids"][~keep]))),
+                 "gate1_contrast_without": _pts(without),
+                 "note": "round five's gate-1 contrast (winner INT8 - champion INT8, directional recall) "
+                         "recomputed on the windows whose 12 input readings all lie in 40-400 mg/dL; "
+                         "draws and seed as in the read (BOOT_SEED_R5)"},
+             "sources": ["results/calibration-coverage/sweep-r5/eval/rtcgm/"
+                         "{meta.npz,winner_int8_preds.npy,champion_int8_preds.npy}",
                          _rel(RTCGM_CACHE)]}
     return {"held_out": held_out, "rtcgm": rtcgm}
 
@@ -603,6 +636,17 @@ def _interpreter(path):
         OpResolverType.BUILTIN_WITHOUT_DEFAULT_DELEGATES))
     it.allocate_tensors()
     return it
+
+
+def _input_qparams(path):
+    """INT8 input tensor's scale, zero point and representable float range;
+    for a delta+anchor model, level_ceiling_mgdl = range max x ANCHOR_SCALE."""
+    t = _interpreter(path).get_input_details()[0]
+    scale, zp = t["quantization"]
+    lo, hi = (-128 - zp) * scale, (127 - zp) * scale
+    return {"scale": round(float(scale), 4), "zero_point": int(zp),
+            "range": [round(float(lo), 2), round(float(hi), 2)],
+            "level_ceiling_mgdl": round(float(hi) * 16.0, 1)}
 
 
 def _ops(path):
@@ -689,6 +733,10 @@ def _artifacts():
         "confirmation_dubosson": _artifact_group(RESULTS / "conf-dubosson" / "artifacts"),
         "confirmation_hall": _artifact_group(RESULTS / "conf-hall" / "artifacts"),
         "delta_r1": _artifact_group(RESULTS / "delta-r1" / "artifacts"),
+        "delta_r1_anchor_input_qparams": {
+            cell: [_input_qparams(RESULTS / "delta-r1" / "artifacts" / f"anchor_seed{s}_int8_{cell}.tflite")
+                   for s in TRAINING_SEEDS]
+            for cell in ["sequential_200_d0"] + [f"uniform_random_200_d{d}" for d in DRAWS]},
         "study_int8_dtype_map": {"artifact": _rel(probe), "ops": _dtype_map(probe),
                                  "sources": [_rel(probe)]},
         "calibration_changes_inside_int8": _calibration_diff(

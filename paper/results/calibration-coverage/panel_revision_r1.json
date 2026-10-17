@@ -1416,8 +1416,52 @@
       ],
       "anchor_fraction_below_40": 0.002449404548925722,
       "anchor_fraction_above_400": 0.004208052556513234,
+      "input_clipping": {
+        "winner_int8": {
+          "input_qparams": {
+            "scale": 0.2313,
+            "zero_point": -11,
+            "range": [
+              -27.06,
+              31.91
+            ],
+            "level_ceiling_mgdl": 510.6
+          },
+          "window_fraction_any_channel_outside": 0.027846443597933458,
+          "anchor_fraction_above_level_ceiling": 0.0004129548529256636
+        },
+        "champion_int8": {
+          "input_qparams": {
+            "scale": 0.2313,
+            "zero_point": -11,
+            "range": [
+              -27.06,
+              31.91
+            ],
+            "level_ceiling_mgdl": 510.6
+          },
+          "window_fraction_any_channel_outside": 0.027846443597933458,
+          "anchor_fraction_above_level_ceiling": 0.0004129548529256636
+        }
+      },
+      "readings_outside_40_400": {
+        "window_fraction": 0.011799115847406791,
+        "participants_affected": 348,
+        "gate1_contrast_without": {
+          "point": 0.29225328518462934,
+          "ci95": [
+            0.20683207462836167,
+            0.37879190959950726
+          ],
+          "undefined_fraction": 0.0,
+          "n_boot": 2000,
+          "seed": 20261015,
+          "units": "recall points (x100)"
+        },
+        "note": "round five's gate-1 contrast (winner INT8 - champion INT8, directional recall) recomputed on the windows whose 12 input readings all lie in 40-400 mg/dL; draws and seed as in the read (BOOT_SEED_R5)"
+      },
       "sources": [
-        "results/calibration-coverage/sweep-r5/eval/rtcgm/{meta.npz,winner_int8_preds.npy}",
+        "results/calibration-coverage/sweep-r5/eval/rtcgm/{meta.npz,winner_int8_preds.npy,champion_int8_preds.npy}",
         "results/diadata_cache/hours/RT_CGM.npz"
       ]
     }
@@ -1733,6 +1777,196 @@
       ],
       "sources": [
         "results/calibration-coverage/delta-r1/artifacts/*.tflite"
+      ]
+    },
+    "delta_r1_anchor_input_qparams": {
+      "sequential_200_d0": [
+        {
+          "scale": 0.2469,
+          "zero_point": 46,
+          "range": [
+            -42.97,
+            20.0
+          ],
+          "level_ceiling_mgdl": 320.0
+        },
+        {
+          "scale": 0.2469,
+          "zero_point": 46,
+          "range": [
+            -42.97,
+            20.0
+          ],
+          "level_ceiling_mgdl": 320.0
+        },
+        {
+          "scale": 0.2469,
+          "zero_point": 46,
+          "range": [
+            -42.97,
+            20.0
+          ],
+          "level_ceiling_mgdl": 320.0
+        },
+        {
+          "scale": 0.2469,
+          "zero_point": 46,
+          "range": [
+            -42.97,
+            20.0
+          ],
+          "level_ceiling_mgdl": 320.0
+        },
+        {
+          "scale": 0.2469,
+          "zero_point": 46,
+          "range": [
+            -42.97,
+            20.0
+          ],
+          "level_ceiling_mgdl": 320.0
+        }
+      ],
+      "uniform_random_200_d101": [
+        {
+          "scale": 0.2313,
+          "zero_point": -11,
+          "range": [
+            -27.06,
+            31.91
+          ],
+          "level_ceiling_mgdl": 510.6
+        },
+        {
+          "scale": 0.2313,
+          "zero_point": -11,
+          "range": [
+            -27.06,
+            31.91
+          ],
+          "level_ceiling_mgdl": 510.6
+        },
+        {
+          "scale": 0.2313,
+          "zero_point": -11,
+          "range": [
+            -27.06,
+            31.91
+          ],
+          "level_ceiling_mgdl": 510.6
+        },
+        {
+          "scale": 0.2313,
+          "zero_point": -11,
+          "range": [
+            -27.06,
+            31.91
+          ],
+          "level_ceiling_mgdl": 510.6
+        },
+        {
+          "scale": 0.2313,
+          "zero_point": -11,
+          "range": [
+            -27.06,
+            31.91
+          ],
+          "level_ceiling_mgdl": 510.6
+        }
+      ],
+      "uniform_random_200_d102": [
+        {
+          "scale": 0.7134,
+          "zero_point": 54,
+          "range": [
+            -129.83,
+            52.08
+          ],
+          "level_ceiling_mgdl": 833.2
+        },
+        {
+          "scale": 0.7134,
+          "zero_point": 54,
+          "range": [
+            -129.83,
+            52.08
+          ],
+          "level_ceiling_mgdl": 833.2
+        },
+        {
+          "scale": 0.7134,
+          "zero_point": 54,
+          "range": [
+            -129.83,
+            52.08
+          ],
+          "level_ceiling_mgdl": 833.2
+        },
+        {
+          "scale": 0.7134,
+          "zero_point": 54,
+          "range": [
+            -129.83,
+            52.08
+          ],
+          "level_ceiling_mgdl": 833.2
+        },
+        {
+          "scale": 0.7134,
+          "zero_point": 54,
+          "range": [
+            -129.83,
+            52.08
+          ],
+          "level_ceiling_mgdl": 833.2
+        }
+      ],
+      "uniform_random_200_d103": [
+        {
+          "scale": 1.0544,
+          "zero_point": 81,
+          "range": [
+            -220.37,
+            48.5
+          ],
+          "level_ceiling_mgdl": 776.0
+        },
+        {
+          "scale": 1.0544,
+          "zero_point": 81,
+          "range": [
+            -220.37,
+            48.5
+          ],
+          "level_ceiling_mgdl": 776.0
+        },
+        {
+          "scale": 1.0544,
+          "zero_point": 81,
+          "range": [
+            -220.37,
+            48.5
+          ],
+          "level_ceiling_mgdl": 776.0
+        },
+        {
+          "scale": 1.0544,
+          "zero_point": 81,
+          "range": [
+            -220.37,
+            48.5
+          ],
+          "level_ceiling_mgdl": 776.0
+        },
+        {
+          "scale": 1.0544,
+          "zero_point": 81,
+          "range": [
+            -220.37,
+            48.5
+          ],
+          "level_ceiling_mgdl": 776.0
+        }
       ]
     },
     "study_int8_dtype_map": {

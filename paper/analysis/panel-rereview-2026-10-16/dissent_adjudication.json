@@ -1,0 +1,11 @@
+{
+  "dissent_id": "DIS-1",
+  "item_id": "REV-08",
+  "transport_ref": "R7",
+  "adjudicated_by": "user (author), at the re-review checkpoint, 2026-10-16",
+  "path": "user (cross-model verification not active; must_fix dissent trips the adjudication bound)",
+  "outcome": "replacement_approved",
+  "effect": "The Phase 2A verdict FULLY_ADDRESSED, made under the replacement criterion, stands. No adjustment record.",
+  "question_asked": "For R7, should 'every cohort named in Table 1' count only the cohorts this paper actually uses, or every dataset in Table 1, including OhioT1DM, which appears there only as earlier studies' test data?",
+  "answer": "Cohorts this paper uses"
+}

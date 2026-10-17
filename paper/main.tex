@@ -45,34 +45,28 @@ Independent Researcher\\
 \maketitle
 
 \begin{abstract}
-\project, an Android/iOS research prototype, maps 12 five-minute
-continuous glucose monitor (CGM) readings to one of five classes of the
-mean rate of change over the next 15 minutes. This paper asks how
+\project, an Android/iOS research prototype, classifies 12 five-minute
+continuous glucose monitor (CGM) readings into five classes of the mean
+rate of change over the next 15 minutes. We ask how
 quantization-calibration coverage affects directional (minority-class)
-recall and deployment cost, and which model and data changes improve that
-recall under one-read-per-round staged sweeps. A 2,909-parameter
-convolutional network trained on Weinstock data was quantized to 8-bit
-integers (INT8) with four calibration-selection strategies at two budgets.
-In a prespecified secondary contrast, contiguous first-$N$ selection,
-spanning two participants and capping the input range at
+recall, and which changes improve it in staged, pre-registered sweeps.
+For a 2,909-parameter convolutional network in 8-bit integers (INT8), range stratification, the primary contrast, was null; random
+selections already covered the input range. In a prespecified secondary
+contrast, contiguous first-$N$ selection, capping inputs at
 250.9~\mgdl, cost 13.4 points of held-out directional recall (95\% CI
-10.3--16.9) against equal-size uniform random selection while accuracy
-rose. The primary contrast (range stratification) was null: with every
-randomized selection covering the full input range, stratification, budget
-and observer choice moved recall by at most about a tenth of a point. A
-clip-only control attributes the loss to clipping; the fix is free to
-deploy. Two small cohorts did not confirm the frozen predictions; post
-hoc, difference-encoded inputs shrank the effect to 0.5 points. Four of
-five sweep rounds spent one pre-registered read (round four none), three
-on reused Weinstock test components. A macro-averaged F1
-(macro-F1) winner passed every gate but was rejected post hoc as
-directional recall fell (0.517 to 0.438); training only on DiaData
-cohorts passed its gates; a seed-4 flatten-head artifact (cosine schedule,
-validation-chosen epoch) passed all gates on a never-evaluated 2008 trial
-cohort ($+0.20$ points [$+0.11$, $+0.29$] vs.\ round three's 1.1-point
-seed spread) but lowered macro-F1 there (0.410 vs.\ 0.427), failed two
-gates on both Weinstock components, and is bundled in the research
-applications. \project is not a medical device.
+10.3--16.9) against uniform random selection; a clip-only control
+attributes the loss to clipping; the fix is free to deploy. Two small
+cohorts did not confirm frozen predictions; post hoc,
+difference-encoded inputs (variant chosen on held-out data) cut the
+effect to 0.5 points. Rounds one to three reused one Weinstock test
+split. Round one's macro-averaged F1 (macro-F1) winner passed every gate
+but was rejected post hoc: held-out INT8 directional recall fell (0.517
+to 0.438). Round five's seed-4 artifact (flatten head, cosine schedule,
+validation-chosen epoch), now bundled in the research applications,
+passed all gates on a never-evaluated 2008 trial cohort by $+0.20$
+points [$+0.11$, $+0.29$], against round three's 1.1-point seed spread,
+but lowered macro-F1 there (0.410 vs.\ 0.427) and failed two gates on
+both Weinstock components. \project is not a medical device.
 \end{abstract}
 
 \section{Introduction}
@@ -194,21 +188,21 @@ paper reports:
     difference to $+0.5$ points (Table~\ref{tab:delta},
     Appendix~\ref{app:calibdetails}); and
     \item five staged accuracy sweeps (Sections~\ref{sec:sweepresults}
-    and~\ref{sec:sweepdiscussion}), of which four spent one pre-registered
-    confirmatory read each and round
-    four, whose candidate converted to the champion's own artifacts, spent
-    none: a winner on macro-averaged F1 (macro-F1) that passed every gate
-    but was rejected post hoc because directional recall fell from 0.517 to
-    0.438; DiaData-only training, bundled after round two; a
-    label-definition stability check; and the seed-4 flatten-head artifact
-    (cosine schedule, validation-chosen epoch), which passed all gates on
-    never-evaluated RT-CGM by $+0.20$ points (CI $+0.11$ to $+0.29$), about
-    a fifth of the 1.1-point float spread of round three's five seeds on
-    Weinstock held-out (round five's own seed spread on RT-CGM was not
-    measured), while failing two gates on both Weinstock components and
-    lowering RT-CGM macro-F1 (0.410 against 0.427); PEDAP is a near-tie
-    (0.539 against 0.541). Its four changed factors are not separately identified; it is
-    bundled in the research applications.
+    and~\ref{sec:sweepdiscussion}); four spent one pre-registered
+    confirmatory read each and round four, whose candidate converted to the
+    champion's own artifacts, none: a macro-averaged F1 (macro-F1) winner
+    that passed every gate but was rejected post hoc because held-out INT8
+    directional recall fell from 0.517 to 0.438; DiaData-only training,
+    bundled after round two; a label-definition stability check; and the
+    seed-4 flatten-head artifact (cosine schedule
+    \cite{loshchilov2017sgdr}, validation-chosen epoch), now bundled in the
+    research applications, which passed all gates on never-evaluated RT-CGM
+    by $+0.20$ points (CI $+0.11$ to $+0.29$), a fifth of round three's
+    1.1-point float seed spread on Weinstock held-out (its own RT-CGM seed
+    spread was not measured), but failed two gates on both Weinstock
+    components and lowered RT-CGM macro-F1 (0.410 against 0.427); PEDAP is
+    a near-tie (0.539 against 0.541), and its four changed factors are not
+    separately identified.
 \end{itemize}
 
 Source code, tests, synthetic replay data, and the bundled model artifacts
@@ -260,8 +254,7 @@ their participant, temporal, and dataset boundaries.
 \begin{table*}[t]
 \centering
 \caption{Representative CGM forecasting studies and evaluation scope. Metrics
-are not compared across rows because datasets and protocols differ.
---- = not stated in the cited work's abstract.}
+are not compared across rows because datasets and protocols differ.}
 \label{tab:relatedwork}
 \small\setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lp{1.9cm}lp{2.3cm}p{4.6cm}p{2.3cm}@{}}
@@ -272,7 +265,7 @@ Reifman et al. \cite{reifman2007predictive} & Value & 30 min & CGM & 9 participa
 Mirshekarian et al. \cite{mirshekarian2019lstm} & Value & 30/60 min & CGM + context & OhioT1DM \cite{marling2020ohiot1dm}/synthetic & None reported \\
 Martinsson et al. \cite{martinsson2020variance} & \raggedright Value + variance & 30/60 min & CGM & OhioT1DM \cite{marling2020ohiot1dm} & None reported \\
 Li et al. \cite{li2020crnn} & Value & 30/60 min & \raggedright CGM, insulin, meals & 10 real + 10 simulated & Android timing \\
-Zhu et al. \cite{zhu2023iomt} & \raggedright Value + hypoglycemia & --- & --- & \raggedright Three clinical datasets; 47 T1D participants (+ in silico trial) & \raggedright Wearable system-on-chip \tabularnewline
+Zhu et al. \cite{zhu2023iomt} & \raggedright Value + hypoglycemia & 30/60 min & \raggedright CGM + time of day & \raggedright OhioT1DM \cite{marling2020ohiot1dm} + two private datasets (47 participants); in silico trial & \raggedright Wearable system-on-chip \tabularnewline
 GlucoBench \cite{sergazinov2024glucobench} & \raggedright Value trajectory & 60 min & \raggedright Dataset-dependent & Five public datasets & None reported \\
 Ghimire et al. \cite{ghimire2024generalize} & Value & 30/60 min & CGM & Four datasets & None reported \\
 \project (this work) & Trend class & 15 min & CGM & \raggedright Training on Weinstock or five DiaData cohorts; Weinstock held-out and temporal, RT-CGM and PEDAP zero-shot & \raggedright Android/iOS replay timing \tabularnewline
@@ -540,7 +533,7 @@ from 24 to 36 channels (both with kernel size 3, stride 1, and padding 1),
 a rectified linear unit (ReLU) after each, adaptive average pooling over
 time, and a 36-to-5 linear head, 2,909 trainable parameters in all. Later
 experiments mostly keep this family (round three also tried a temporal
-convolutional network) and vary its input encoding, width, pooling head,
+convolutional network \cite{bai2018tcn}) and vary its input encoding, width, pooling head,
 loss, and training data; the models bundled in the applications over
 the project's history range from 2,909 to 50,645 parameters and were
 trained on Weinstock or on DiaData cohorts \cite{cinar2026diadata}.
@@ -665,8 +658,7 @@ precision and round exact half-way values to the even integer --- Python
 with \texttt{numpy.round}, Kotlin with \texttt{kotlin.math.round}, Swift
 with \texttt{rounded(.toNearestOrEven)}
 \cite{numpyRound,kotlinRound,swiftRounding} --- so they produce identical
-integer inputs for any glucose value (Appendix~\ref{app:history} notes an
-earlier Kotlin rounding rule).
+integer inputs for any glucose value.
 
 The Kotlin/Jetpack Compose application and its SwiftUI iOS mirror replay a
 bundled synthetic trace through a 12-reading ring buffer that resets after
@@ -1134,7 +1126,7 @@ temporal (50) secondary. Both designated contrasts' frozen percentile
 intervals include zero, and with six clusters cluster-based inference
 tends to over-reject \cite{cameron2008bootstrap}, so
 Table~\ref{tab:confirmation}
-replaces them, in revision, with an exact sign-flip test over
+replaces them with an exact sign-flip test over
 participants: each participant's additive contribution to the pooled
 difference (mean over seeds and draws; the contributions sum to the
 difference) has its sign flipped in all $2^6=64$ patterns, so the smallest
@@ -1223,10 +1215,13 @@ on held-out data (0.5088 against 0.4969), and its margin over the absolute
 model is selection-affected.
 
 Because activations, the input included, are quantized per tensor, the
-anchor model's differences and level channel share one input step of 0.247
-per code: 0.247~\mgdl\ for the differences, 6.4 times finer than the
-absolute model's 1.572~\mgdl, and $0.247\times16\approx3.95$~\mgdl\ for
-the level channel, 2.5 times coarser. Under contiguous first-$N$
+anchor model's differences and level channel share one input step, set by
+the calibration windows: 0.247 per code under contiguous first-$N$
+selection (0.247~\mgdl\ for differences, $16\times$ that for the level,
+which saturates at 320~\mgdl) and 0.231, 0.713 and 1.054 under the three
+uniform-200 draws (level ceilings 511, 833 and 776~\mgdl), against the
+absolute model's 1.572~\mgdl\ under uniform selection
+(\path{panel_revision_r1.json}). Under contiguous first-$N$
 selection, which costs the absolute-input model 13.4 points, the delta
 model loses half a point against its own float ($+0.50$
 $[+0.33, +0.67]$), and uniform minus sequential is $+0.54$
@@ -1336,11 +1331,12 @@ Round one asked whether loss design, capacity, window length, pooling
 across cohorts or seed ensembling improves the delta-encoded classifier
 (\path{protocol_sweep_r1.json}). Stage~A compared four losses at the
 study architecture (validation macro-F1, three-seed means). A
-distance-penalized CE, a formulation introduced here, which adds
-$\lambda \sum_j p_j\,|j-y|$ with $\lambda=0.5$ to the weighted CE,
+distance-penalized CE, which adds the expected class distance
+$\lambda \sum_j p_j\,|j-y|$ with $\lambda=0.5$ to the weighted CE (a
+variant of class-distance-weighted CE \cite{polat2022cdwce}),
 scored 0.427, ahead of weighted CE (0.381), ordinal label smoothing
-(also introduced here, moving 0.15 of the target mass to the
-adjacent classes; 0.390) and focal loss with $\gamma=2$
+(soft ordinal labels \cite{diaz2019softlabels}, here moving 0.15 of the
+target mass to the adjacent classes; 0.390) and focal loss with $\gamma=2$
 \cite{lin2017focal} (0.380). Stage~B crossed channel widths with window
 length under that loss: (96,144) channels (42,725 parameters) reached
 0.439, and a 2-hour window gained at most 0.04 points at any width.
@@ -1521,17 +1517,21 @@ windows. Round three had trained a rejected arm on this cohort, but
 neither model under comparison trained on it, so the comparison is
 zero-shot for both. All three gates passed (Table~\ref{tab:sweep}): the
 candidate's INT8 model beat the champion's by $+0.20$ directional-recall
-points [$+0.11$, $+0.29$], held stable recall within 0.2 points (0.605
-against 0.607) and sat 0.25 points under its own float. That gap includes
-any cost of input clipping: RT-CGM anchors reach 654~\mgdl\
-(Table~\ref{tab:cohorts}), above the 401~\mgdl\ maximum of the Weinstock
-windows that calibrated both artifacts' INT8 input ranges. The candidate
-replaced the round-two pair under the rule fixed before the read, but the
-result is a choice between two artifacts, not evidence for a design: the
-$+0.20$ points is a fifth of the 1.1-point float spread of round three's
-five seeds on Weinstock held-out, round three's chosen-seed effect ($+0.77$) shrank to $+0.05$ at
+points [$+0.11$, $+0.29$], a fifth of the 1.1-point float spread of round
+three's five seeds on Weinstock held-out, held stable recall within 0.2
+points (0.605 against 0.607) and sat 0.25 points under its own float.
+That gap includes any cost of input clipping: both artifacts share one
+INT8 input range, which 2.8\% of RT-CGM windows exceed (the level channel
+saturates at 511~\mgdl). RT-CGM readings span 14--654~\mgdl\
+(Table~\ref{tab:cohorts}); DiaData does not record the source of values
+outside the 40--400~\mgdl\ span the Dexcom cohorts' codes bound, and
+without the 1.2\% of windows holding one the gain is $+0.29$ points
+[$+0.21$, $+0.38$] (\path{panel_revision_r1.json}).
+The candidate replaced the round-two pair under the rule fixed before the
+read, but the result is a choice between two artifacts, not evidence for
+a design: round three's chosen-seed effect ($+0.77$) shrank to $+0.05$ at
 the five-seed mean, and the five-seed RT-CGM comparison of the two
-recipes, which would measure that variation here, was not run. The four
+recipes, which would measure seed variation here, was not run. The four
 changed factors are not separately identified. The
 non-gating secondaries carry costs: on both Weinstock components the
 candidate fails gates~1 and~2 (held-out $-0.32$ points with stable
@@ -1586,7 +1586,9 @@ data by fixing its range from the sensor's reporting limits (here
 39--401~\mgdl, codes included). The PT2E API offers fixed quantization
 parameters (torchao's \texttt{FixedQParamsQuantizationSpec}), but LiteRT
 Torch applies them only to sigmoid and softmax outputs, so the input would
-need a custom annotation, a route untested here.
+need a custom annotation, a route untested here. Unlike difference
+encoding, which left a $+0.54$-point dependence
+(Section~\ref{sec:deltainputs}), fixed parameters would remove it.
 
 The absent resolution cost is what 8-bit error analysis predicts
 \cite{banner2019ptq,nagel2021whitepaper}. Spreading 0--400.8~\mgdl\ over
@@ -1638,7 +1640,7 @@ in every class while directional recall, the quantity the bundled models
 had been selected on, fell by 7.9 points; pre-registration fixed how the endpoint was
 analyzed, not whether it was the right endpoint. From round two on, the
 gates encode that quantity, directional recall under a stable-recall
-floor, but the floor is relative to each round's champion. Held-out
+floor, but the floor is relative to each round's champion. Held-out INT8
 stable recall therefore drifted from 0.475 to 0.459 to 0.436 across the
 two promotions, the second gated on another cohort; a floor anchored to
 a fixed reference would prevent that drift.
@@ -1812,8 +1814,7 @@ these records are not a complete environment lock. PyTorch seed 0 and the
 formatter's split seed 0 control separate randomization steps; neither
 guarantees bitwise retraining across platforms. The batch sizes of
 Section~\ref{sec:sweepprotocol} are recorded as \texttt{sweep\_settings}
-in \texttt{panel\_revision\_r1.json}. Earlier revisions of this work, and
-what each one reran, are listed in Appendix~\ref{app:history}; the
+in \texttt{panel\_revision\_r1.json}. The
 provenance audit's aggregate output, including the GlucoBench commit and a
 SHA-256 hash of the Weinstock data file, is versioned as
 \texttt{paper/results/split\_audit.json}.
@@ -1825,9 +1826,9 @@ PyTorch 2.12.1, NumPy 2.5.3, reconciling the previously recorded
 drift), the eligibility audit, the complete aggregate results with all
 100 planned cells (\texttt{aggregate\_r1.json}), the artifact summary,
 and the SHA-256 hashes of all 190 study, second-cohort, and delta-encoding
-artifacts (\texttt{artifact\_hashes\_r1.json}). The re-analyses added in
-this revision use cached results only (\texttt{panel\_revision\_r1.json},
-written by \texttt{experiments/panel\_revision.py}). Checkpoints, window
+artifacts (\texttt{artifact\_hashes\_r1.json}). Re-analyses of cached
+results are in \texttt{panel\_revision\_r1.json}
+(\texttt{experiments/panel\_revision.py}). Checkpoints, window
 keys, per-window predictions, per-participant confusion counts, and run
 reports stay local because they derive from participant-level data
 distributed under the providers' terms, so a third party must regenerate
@@ -1915,7 +1916,8 @@ The staged sweeps add a methodological lesson. Four rounds spent one
 pre-registered confirmatory read each; round four, whose candidate
 converted to the champion's own artifacts, spent none. Gates alone were
 not enough: round one's macro-F1 winner passed every gate while
-directional recall fell from 0.517 to 0.438, and its post-hoc rejection
+held-out INT8 directional recall fell from 0.517 to 0.438, and its
+post-hoc rejection
 made a directional endpoint and a stable-recall floor part of every later
 protocol. Under those rules, DiaData-only training passed round two's
 gates, with an interval that includes zero, and was bundled; no
@@ -1924,27 +1926,24 @@ label-definition stability check compares two labels computed from the
 same future readings, so it bounds nothing that a model of past readings
 can reach; the recall attainable from CGM history is unknown. Round five
 was a choice between two artifacts: the seed-4 flatten-head artifact
-(cosine schedule, validation-chosen epoch) passed all gates on
-never-evaluated RT-CGM by $+0.20$ points, about a fifth of the 1.1-point
-float spread of round three's five seeds on Weinstock held-out (round
-five's own seed spread on RT-CGM was not measured), while failing gates~1
-and~2 on both Weinstock
-components and lowering RT-CGM macro-F1 (0.410 against 0.427); on the
-pediatric PEDAP cohort, directional recall was a near-tie (0.539 against
-0.541). Its head, schedule, kept epoch, and seed changed together and are
-not separately identified. That artifact is bundled in the research
-applications.
+(cosine schedule, validation-chosen epoch), now bundled in the research
+applications, passed all gates on never-evaluated RT-CGM by $+0.20$
+points, a fifth of round three's 1.1-point float seed spread on Weinstock
+held-out (its own RT-CGM seed spread was not measured), but failed
+gates~1 and~2 on both Weinstock components and lowered RT-CGM macro-F1
+(0.410 against 0.427); pediatric PEDAP directional recall was a near-tie
+(0.539 against 0.541). Its head, schedule, kept epoch, and seed changed
+together and are not separately identified.
 
-The calibration conclusions are scoped to one primary cohort, one
-architecture, and one quantizer, on a reanalysis of previously touched
+The calibration conclusions cover one primary cohort, architecture and
+quantizer, on a reanalysis of previously touched
 data; both headline findings hold in every frozen sensitivity tier. On
 two small further
 cohorts the frozen predictions were not confirmed: Dubosson's designated
-difference was $+2.0$ points with an exact sign-flip $p=0.094$, and
-Hall's, $+1.3$ points ($p=0.25$), was inconclusive, its premise having
-failed when the contiguous selection reached only 165~\mgdl. That
-evidence is exploratory. \project remains a research prototype, not a
-medical device.
+difference was $+2.0$ points (exact sign-flip $p=0.094$), and Hall's
+$+1.3$ points ($p=0.25$) was inconclusive, its premise failing when the
+contiguous selection reached only 165~\mgdl. That evidence is
+exploratory. \project is a research prototype, not a medical device.
 
 \section*{Declarations}
 
@@ -2170,14 +2169,16 @@ Date & Analysis & Labels read & Decision taken \\
 2026-10-10 \texttt{9a725c8} & Sensitivity tiers (frozen tiers, run after the primary analysis) & Weinstock held-out, temporal (windows outside the primary mask) & None \\
 2026-10-10 \texttt{bdeebf0}, \texttt{88655f0} & Second-cohort run (frozen per-cohort protocols) & Dubosson and Hall, held-out and temporal & None; outcomes reported \\
 2026-10-10 \texttt{207b7a1} & Delta-encoded inputs (frozen gates; post hoc on previously read data) & Weinstock held-out, temporal & Anchor variant chosen on held-out float recall; bundled \\
-2026-10-11 \texttt{e490ceb} & Round one confirmatory read (frozen) and per-class read (post hoc) & Weinstock held-out, temporal & Gates passed; not bundled, decided post hoc on directional recall; later endpoints changed \\
+2026-10-11 \texttt{aa6127f} & Round one confirmatory read (frozen) & Weinstock held-out, temporal & Gates passed \\
+2026-10-11 \texttt{e490ceb} & Round one per-class read of the cached confirmatory predictions (post hoc) & Weinstock held-out, temporal & Not bundled, decided on directional recall; later endpoints changed \\
 2026-10-12 \texttt{eff6eac} & Round two confirmatory read (frozen) & Weinstock held-out, temporal; PEDAP & All gates passed; bundled \\
-2026-10-12 \texttt{a84b237} & Round three confirmatory read (frozen) & Weinstock held-out, temporal; PEDAP & Gate 2 failed; rejected \\
+2026-10-12 \texttt{a84b237} & Round three confirmatory read (frozen) & Weinstock held-out, temporal; PEDAP; RT-CGM training labels (rejected arm) & Gate 2 failed; rejected \\
 2026-10-13 \texttt{c8f3de6} & Round-four motivation: error structure of round three's saved predictions (descriptive) & Weinstock held-out & Arm choice only \\
 2026-10-14 \texttt{cdd26ea} & Round four & None (identity outcome) & Champion retained \\
 2026-10-14 \texttt{3755d55} & External review: stable-logit offset scan of cached round-two and round-three predictions (exploratory) & Weinstock held-out, temporal & None \\
 2026-10-15 \texttt{3278363} & Round five confirmatory read (frozen) & RT-CGM (primary); Weinstock held-out, temporal and PEDAP (non-gating) & All gates passed on RT-CGM; gates 1 and 2 would fail on both Weinstock components; bundled \\
 2026-10-16 \texttt{c739c76} & This revision: descriptive re-analyses of cached predictions & Weinstock held-out, temporal; Dubosson; Hall; RT-CGM; PEDAP & None \\
+2026-10-16 \texttt{cca2fda} & Re-review follow-up: round-five RT-CGM contrast without windows holding readings outside 40--400~\mgdl\ (descriptive, cached predictions) & RT-CGM & None \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -2203,9 +2204,12 @@ five-minute readings; the
 other 355 supply the 12.67M windows used in round five. The first audit's
 collinear fraction, the share of consecutive same-segment reading triples
 whose middle reading is the exact mean of its neighbours, is 0.305 for
-RT-CGM against at most 0.229 for the admitted cohorts; the excess comes
-mainly from runs of identical readings, which the statistic cannot tell
-apart from linear interpolation.
+RT-CGM against at most 0.229 for the admitted cohorts. The audit does not
+split that excess between runs of identical readings, which the statistic
+also counts, and linear interpolation. Runs of identical readings on a
+five-minute grid could also come from resampling a device with a
+different native interval (sample and hold), which would distort the rate
+labels of round five's primary cohort.
 
 
 \section{Additional Calibration-Study Details}
@@ -2608,27 +2612,6 @@ W & best single seed (candidate) & \textbf{0.539} & 0.539 \\
 \end{tabular}
 \end{table}
 
-\subsection{Error profile of the bundled model}
-
-Tables~\ref{tab:shippederrors} and~\ref{tab:shippedconfusion} describe the
-bundled INT8 model's errors on the Weinstock held-out component and on
-RT-CGM, computed from the cached confirmatory-read predictions. Every
-movement class is predicted 1.7 to 5.2 times as often as it occurs;
-\texttt{falling\_fast}, the most over-called, pairs the highest recall
-with the lowest precision (0.706 at 0.136 held-out, 0.673 at 0.214 on
-RT-CGM), and \texttt{rising\_fast} has the lowest RT-CGM recall (0.483). Of
-the windows the model labels with a moving class, 63\% on both cohorts
-have a mean rate within $\pm1$~\mgdl/min over the next 15 minutes, while
-a displayed \texttt{stable} is right in 92\% (held-out) and 94\% (RT-CGM)
-of windows. Most errors fall in an adjacent class (64\% and 81\%), but
-14--15\% of truly falling or rising held-out windows are labelled in the
-opposite direction (9\% on RT-CGM). Directional recall is lowest when the
-last reading is below 70~\mgdl\ (0.33 held-out, 0.36 RT-CGM; 0.50--0.56
-in the other bands), although that band holds only 1 held-out and 96
-RT-CGM \texttt{falling\_fast} windows, of which the model recalls 0 and
-2; without that class the $\geq$250~\mgdl\ band is lowest. Source:
-\path{panel_revision_r1.json}.
-
 % Side by side so the last page uses both columns.
 \begin{table*}[!tp]
 \begin{minipage}[t]{\dimexpr(\textwidth-\columnsep)/2\relax}
@@ -2698,5 +2681,27 @@ True class & ff & f & s & r & rf \\
 \end{tabular}
 \end{minipage}
 \end{table*}
+
+\subsection{Error profile of the bundled model}
+
+Tables~\ref{tab:shippederrors} and~\ref{tab:shippedconfusion} describe the
+bundled INT8 model's errors on the Weinstock held-out component and on
+RT-CGM, computed from the cached confirmatory-read predictions. Every
+movement class is predicted 1.7 to 5.2 times as often as it occurs;
+\texttt{falling\_fast}, the most over-called, pairs the highest recall
+with the lowest precision (0.706 at 0.136 held-out, 0.673 at 0.214 on
+RT-CGM), and \texttt{rising\_fast} has the lowest RT-CGM recall (0.483). Of
+the windows the model labels with a moving class, 63\% on both cohorts
+have a mean rate within $\pm1$~\mgdl/min over the next 15 minutes, while
+a displayed \texttt{stable} is right in 92\% (held-out) and 94\% (RT-CGM)
+of windows. Most errors fall in an adjacent class (64\% and 81\%), but
+14--15\% of truly falling or rising held-out windows are labelled in the
+opposite direction (9\% on RT-CGM). Directional recall is lowest when the
+last reading is below 70~\mgdl\ (0.33 held-out, 0.36 RT-CGM; 0.50--0.56
+in the other bands), although that band holds only 1 held-out and 96
+RT-CGM \texttt{falling\_fast} windows, of which the model recalls 0 and
+2; without that class the $\geq$250~\mgdl\ band is lowest. Source:
+\path{panel_revision_r1.json}.
+
 
 \end{document}

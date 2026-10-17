@@ -123,6 +123,16 @@ numbers come only from cached predictions and committed records, via
 hashes are in `results/calibration-coverage/artifact_hashes_r1.json`. No
 model was retrained or re-evaluated on new data.
 
+A verification re-review of that revision
+(`analysis/panel-rereview-2026-10-16/report.md`, Minor Revision) left a
+short list of residual items, fixed in a follow-up pass: a 220-word
+abstract, citations for the two sweep losses, the Zhu et al. row of
+Table 1, the read ledger's round-one and round-three rows, the delta
+artifacts' input ranges, the round-five seed spread beside its gate
+sentence, and the round-five RT-CGM contrast without windows holding
+readings outside 40-400 mg/dL. The new numbers come from the same script
+and cached predictions.
+
 ## Build
 
 ```bash
@@ -146,13 +156,13 @@ pdfLaTeX).
 - **Author:** Mohamed Menasy
 - **Primary category:** `cs.LG`
 - **Possible cross-lists:** `eess.SP`, `q-bio.QM`
-- **Comments:** 28 pages (18-page body plus appendices), 3 figures, 23 tables. Source code and model artifacts are
+- **Comments:** 29 pages (18-page body plus references and appendices), 3 figures, 23 tables. Source code and model artifacts are
   available at <https://github.com/mohamedmenasy/GlucoEdge>.
-- **Abstract** (plain text for the form, 1,915 characters against arXiv's
+- **Abstract** (plain text for the form, 1,541 characters against arXiv's
   1,920 limit; regenerate it if the LaTeX abstract changes):
 
   ```text
-  GlucoEdge, an Android/iOS research prototype, maps 12 five-minute continuous glucose monitor (CGM) readings to one of five classes of the mean rate of change over the next 15 minutes. This paper asks how quantization-calibration coverage affects directional (minority-class) recall and deployment cost, and which model and data changes improve that recall under one-read-per-round staged sweeps. A 2,909-parameter convolutional network trained on Weinstock data was quantized to 8-bit integers (INT8) with four calibration-selection strategies at two budgets. In a prespecified secondary contrast, contiguous first-N selection, spanning two participants and capping the input range at 250.9 mg/dL, cost 13.4 points of held-out directional recall (95% CI 10.3-16.9) against equal-size uniform random selection while accuracy rose. The primary contrast (range stratification) was null: with every randomized selection covering the full input range, stratification, budget and observer choice moved recall by at most about a tenth of a point. A clip-only control attributes the loss to clipping; the fix is free to deploy. Two small cohorts did not confirm the frozen predictions; post hoc, difference-encoded inputs shrank the effect to 0.5 points. Four of five sweep rounds spent one pre-registered read (round four none), three on reused Weinstock test components. A macro-averaged F1 (macro-F1) winner passed every gate but was rejected post hoc as directional recall fell (0.517 to 0.438); training only on DiaData cohorts passed its gates; a seed-4 flatten-head artifact (cosine schedule, validation-chosen epoch) passed all gates on a never-evaluated 2008 trial cohort (+0.20 points [+0.11, +0.29] vs. round three's 1.1-point seed spread) but lowered macro-F1 there (0.410 vs. 0.427), failed two gates on both Weinstock components, and is bundled in the research applications. GlucoEdge is not a medical device.
+  GlucoEdge, an Android/iOS research prototype, classifies 12 five-minute continuous glucose monitor (CGM) readings into five classes of the mean rate of change over the next 15 minutes. We ask how quantization-calibration coverage affects directional (minority-class) recall, and which changes improve it in staged, pre-registered sweeps. For a 2,909-parameter convolutional network in 8-bit integers (INT8), range stratification, the primary contrast, was null; random selections already covered the input range. In a prespecified secondary contrast, contiguous first-N selection, capping inputs at 250.9 mg/dL, cost 13.4 points of held-out directional recall (95% CI 10.3-16.9) against uniform random selection; a clip-only control attributes the loss to clipping; the fix is free to deploy. Two small cohorts did not confirm frozen predictions; post hoc, difference-encoded inputs (variant chosen on held-out data) cut the effect to 0.5 points. Rounds one to three reused one Weinstock test split. Round one's macro-averaged F1 (macro-F1) winner passed every gate but was rejected post hoc: held-out INT8 directional recall fell (0.517 to 0.438). Round five's seed-4 artifact (flatten head, cosine schedule, validation-chosen epoch), now bundled in the research applications, passed all gates on a never-evaluated 2008 trial cohort by +0.20 points [+0.11, +0.29], against round three's 1.1-point seed spread, but lowered macro-F1 there (0.410 vs. 0.427) and failed two gates on both Weinstock components. GlucoEdge is not a medical device.
   ```
 
 Before submission, confirm the author name, email, affiliation, category, and
