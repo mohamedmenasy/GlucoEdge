@@ -137,6 +137,24 @@ source licences (`results/calibration-coverage/participant_counts_*_r1.json.gz`,
 written by `python -m experiments.participant_counts`); the script checks
 that 25 published intervals recompute exactly from the counts.
 
+The round-three revision (18 October 2026) answers a fresh simulated
+five-seat review (`analysis/panel-review-2026-10-18/`, Major Revision,
+11 required items; response in `response_to_reviewers.md` there). The
+first question is framed as a measured pitfall and an audit rule, and a
+post-hoc fully integer reconversion of the study checkpoints
+(`python -m experiments.full_integer`, record `full_integer_r1.json`)
+shows the 13.4-point loss is not a product of LiteRT Torch 0.9.1's
+hybrid float/INT8 lowering (+13.09 points). The sweep program is
+compressed to a short evaluation-governance case in the body, with the
+round narratives in Appendix D, and reports per-seed gates, quadratic
+weighted kappa and per-class precision for every confirmatory read, the
+RT-CGM slow-to-fast reallocation, and float and INT8 profiles of the
+bundled pair, all recomputed from the published counts
+(`python -m experiments.panel_r3`, record `panel_r3_r1.json`). The
+override rule is labelled post hoc, and a Declarations statement
+describes the use of AI tools, including the AI-generated review that
+proposed round five. The count files now verify 27 intervals.
+
 ## Build
 
 ```bash
@@ -160,17 +178,17 @@ pdfLaTeX).
 - **Author:** Mohamed Menasy
 - **Primary category:** `cs.LG`
 - **Possible cross-lists:** `eess.SP`, `q-bio.QM`
-- **Comments:** 29 pages (18-page body plus references and appendices), 3 figures, 23 tables. Source code and model artifacts are
+- **Comments:** 32 pages (16-page body plus references and appendices), 3 figures, 26 tables. Source code and model artifacts are
   available at <https://github.com/mohamedmenasy/GlucoEdge>.
-- **Abstract** (plain text for the form, 1,541 characters against arXiv's
+- **Abstract** (plain text for the form, 1,635 characters against arXiv's
   1,920 limit; regenerate it if the LaTeX abstract changes):
 
   ```text
-  GlucoEdge, an Android/iOS research prototype, classifies 12 five-minute continuous glucose monitor (CGM) readings into five classes of the mean rate of change over the next 15 minutes. We ask how quantization-calibration coverage affects directional (minority-class) recall, and which changes improve it in staged, pre-registered sweeps. For a 2,909-parameter convolutional network in 8-bit integers (INT8), range stratification, the primary contrast, was null; random selections already covered the input range. In a prespecified secondary contrast, contiguous first-N selection, capping inputs at 250.9 mg/dL, cost 13.4 points of held-out directional recall (95% CI 10.3-16.9) against uniform random selection; a clip-only control attributes the loss to clipping; the fix is free to deploy. Two small cohorts did not confirm frozen predictions; post hoc, difference-encoded inputs (variant chosen on held-out data) cut the effect to 0.5 points. Rounds one to three reused one Weinstock test split. Round one's macro-averaged F1 (macro-F1) winner passed every gate but was rejected post hoc: held-out INT8 directional recall fell (0.517 to 0.438). Round five's seed-4 artifact (flatten head, cosine schedule, validation-chosen epoch), now bundled in the research applications, passed all gates on a never-evaluated 2008 trial cohort by +0.20 points [+0.11, +0.29], against round three's 1.1-point seed spread, but lowered macro-F1 there (0.410 vs. 0.427) and failed two gates on both Weinstock components. GlucoEdge is not a medical device.
+  GlucoEdge, an Android/iOS research prototype, classifies 12 five-minute continuous glucose monitor (CGM) readings into five classes of the mean rate of change over the next 15 minutes. We measure a quantization pitfall and state an audit rule. A 2,909-parameter convolutional network was quantized to 8-bit integers (INT8); the converter produces a hybrid float/INT8 graph. Calibrated on contiguous first-N windows, as this project once did, two participants' overlapping windows capped the input range at 250.9 mg/dL and, in a secondary contrast, cost 13.4 points of held-out directional (minority-class) recall (95% CI 10.3-16.9) against uniform random selection, while accuracy rose. A clip-only control attributes the loss to clipping; the fix is free to deploy; a fully integer re-expression reproduces the loss (13.1 points). The rule: compare the calibration set's input range with the deployment range, and gate INT8 models on minority-class metrics. The primary contrast, range stratification, was untestable as posed, since every random selection covered the range; two small cohorts did not confirm frozen predictions. In five staged, pre-registered selection rounds, gate outcomes were decided by the chosen seed, and round one's disagreement between macro-averaged F1 (macro-F1) and directional recall was settled after the read in favor of recall. The bundled round-five artifact is a choice between two artifacts: on a trial cohort whose rate labels may be distorted, it gained 0.20 directional-recall points by moving recall from slow to fast classes, with macro-F1 1.65 points lower. GlucoEdge is not a medical device.
   ```
 
 Before submission, confirm the author name, email, affiliation, category, and
-license in the arXiv form. The funding, competing-interest, and CRediT
-declarations follow the Conclusion. The manuscript deliberately labels
+license in the arXiv form. The funding, competing-interest, CRediT, and
+AI-use declarations follow the Conclusion. The manuscript deliberately labels
 the system as a research engineering demonstration and documents the current
 evaluation limitations; it does not make a medical-device or treatment claim.

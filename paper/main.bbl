@@ -1,4 +1,4 @@
-\begin{thebibliography}{68}
+\begin{thebibliography}{70}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -100,12 +100,6 @@ Beyza Cinar and Maria Maleshkova.
 \newblock Zenodo, version 3, 2026.
 \newblock URL \url{https://doi.org/10.5281/zenodo.17285631}.
 \newblock CC BY-NC 4.0.
-
-\bibitem[Loshchilov and Hutter(2017)]{loshchilov2017sgdr}
-Ilya Loshchilov and Frank Hutter.
-\newblock {SGDR}: Stochastic gradient descent with warm restarts.
-\newblock In \emph{International Conference on Learning Representations}, 2017.
-\newblock URL \url{https://arxiv.org/abs/1608.03983}.
 
 \bibitem[Reifman et~al.(2007)Reifman, Rajaraman, Gribok, and
   Ward]{reifman2007predictive}
@@ -447,6 +441,22 @@ Heather Hall, Dalia Perelman, Alessandra Breschi, Patricia Limcaoco, Ryan
 \newblock \emph{{PLOS} Biology}, 16\penalty0 (7):\penalty0 e2005143, 2018.
 \newblock \doi{10.1371/journal.pbio.2005143}.
 
+\bibitem[Dwork et~al.(2015)Dwork, Feldman, Hardt, Pitassi, Reingold, and
+  Roth]{dwork2015reusable}
+Cynthia Dwork, Vitaly Feldman, Moritz Hardt, Toniann Pitassi, Omer Reingold,
+  and Aaron Roth.
+\newblock The reusable holdout: Preserving validity in adaptive data analysis.
+\newblock \emph{Science}, 349\penalty0 (6248):\penalty0 636--638, 2015.
+\newblock \doi{10.1126/science.aaa9375}.
+
+\bibitem[Blum and Hardt(2015)]{blum2015ladder}
+Avrim Blum and Moritz Hardt.
+\newblock The ladder: A reliable leaderboard for machine learning competitions.
+\newblock In \emph{Proceedings of the 32nd International Conference on Machine
+  Learning}, volume~37 of \emph{Proceedings of Machine Learning Research},
+  pages 1006--1014, 2015.
+\newblock URL \url{https://proceedings.mlr.press/v37/blum15.html}.
+
 \bibitem[Cameron et~al.(2008)Cameron, Gelbach, and
   Miller]{cameron2008bootstrap}
 A.~Colin Cameron, Jonah~B. Gelbach, and Douglas~L. Miller.
@@ -455,31 +465,11 @@ A.~Colin Cameron, Jonah~B. Gelbach, and Douglas~L. Miller.
   414--427, 2008.
 \newblock \doi{10.1162/rest.90.3.414}.
 
-\bibitem[Polat et~al.(2022)Polat, Ergenc, Kani, Ozen~Alahdab, Atug, and
-  Temizel]{polat2022cdwce}
-Gorkem Polat, Ilkay Ergenc, Haluk~Tarik Kani, Yesim Ozen~Alahdab, Ozlen Atug,
-  and Alptekin Temizel.
-\newblock Class distance weighted cross-entropy loss for ulcerative colitis
-  severity estimation.
-\newblock In \emph{Medical Image Understanding and Analysis (MIUA 2022)},
-  volume 13413 of \emph{Lecture Notes in Computer Science}, pages 157--171,
-  2022.
-\newblock \doi{10.1007/978-3-031-12053-4_12}.
-
-\bibitem[D{\'\i}az and Marathe(2019)]{diaz2019softlabels}
-Ra{\'u}l D{\'\i}az and Amit Marathe.
-\newblock Soft labels for ordinal regression.
-\newblock In \emph{2019 IEEE/CVF Conference on Computer Vision and Pattern
-  Recognition (CVPR)}, pages 4733--4742, 2019.
-\newblock \doi{10.1109/CVPR.2019.00487}.
-
-\bibitem[Lin et~al.(2017)Lin, Goyal, Girshick, He, and
-  Doll{\'a}r]{lin2017focal}
-Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, and Piotr Doll{\'a}r.
-\newblock Focal loss for dense object detection.
-\newblock In \emph{2017 IEEE International Conference on Computer Vision
-  (ICCV)}, pages 2999--3007, 2017.
-\newblock \doi{10.1109/ICCV.2017.324}.
+\bibitem[Loshchilov and Hutter(2017)]{loshchilov2017sgdr}
+Ilya Loshchilov and Frank Hutter.
+\newblock {SGDR}: Stochastic gradient descent with warm restarts.
+\newblock In \emph{International Conference on Learning Representations}, 2017.
+\newblock URL \url{https://arxiv.org/abs/1608.03983}.
 
 \bibitem[Facchinetti et~al.(2014)Facchinetti, Del~Favero, Sparacino, Castle,
   Ward, and Cobelli]{facchinetti2014sensor}
@@ -489,42 +479,6 @@ Andrea Facchinetti, Simone Del~Favero, Giovanni Sparacino, Jessica~R. Castle,
 \newblock \emph{IEEE Transactions on Biomedical Engineering}, 61\penalty0
   (3):\penalty0 620--629, 2014.
 \newblock \doi{10.1109/TBME.2013.2284023}.
-
-\bibitem[Yang et~al.(2021)Yang, Zha, Chen, Wang, and
-  Katabi]{yang2021imbalanced}
-Yuzhe Yang, Kaiwen Zha, Yingcong Chen, Hao Wang, and Dina Katabi.
-\newblock Delving into deep imbalanced regression.
-\newblock In \emph{Proceedings of the 38th International Conference on Machine
-  Learning}, volume 139 of \emph{Proceedings of Machine Learning Research},
-  pages 11842--11851, 2021.
-\newblock URL \url{https://proceedings.mlr.press/v139/yang21m.html}.
-
-\bibitem[Shi et~al.(2023)Shi, Cao, and Raschka]{shi2023corn}
-Xintong Shi, Wenzhi Cao, and Sebastian Raschka.
-\newblock Deep neural networks for rank-consistent ordinal regression based on
-  conditional probabilities.
-\newblock \emph{Pattern Analysis and Applications}, 26\penalty0 (3):\penalty0
-  941--955, 2023.
-\newblock \doi{10.1007/s10044-023-01181-9}.
-
-\bibitem[Wortsman et~al.(2022)Wortsman, Ilharco, Gadre,
-  et~al.]{wortsman2022soups}
-Mitchell Wortsman, Gabriel Ilharco, Samir~Yitzhak Gadre, et~al.
-\newblock Model soups: Averaging weights of multiple fine-tuned models improves
-  accuracy without increasing inference time.
-\newblock In \emph{Proceedings of the 39th International Conference on Machine
-  Learning}, volume 162 of \emph{Proceedings of Machine Learning Research},
-  pages 23965--23998, 2022.
-\newblock URL \url{https://proceedings.mlr.press/v162/wortsman22a.html}.
-
-\bibitem[Frankle et~al.(2020)Frankle, Dziugaite, Roy, and
-  Carbin]{frankle2020linear}
-Jonathan Frankle, Gintare~Karolina Dziugaite, Daniel Roy, and Michael Carbin.
-\newblock Linear mode connectivity and the lottery ticket hypothesis.
-\newblock In \emph{Proceedings of the 37th International Conference on Machine
-  Learning}, volume 119 of \emph{Proceedings of Machine Learning Research},
-  pages 3259--3269, 2020.
-\newblock URL \url{https://proceedings.mlr.press/v119/frankle20a.html}.
 
 \bibitem[Laffel et~al.(2020)Laffel, Kanapka, Beck, et~al.]{laffel2020city}
 Lori~M. Laffel, Lauren~G. Kanapka, Roy~W. Beck, et~al.
@@ -578,6 +532,68 @@ Margaret Mitchell, Simone Wu, Andrew Zaldivar, Parker Barnes, Lucy Vasserman,
 \newblock In \emph{Proceedings of the Conference on Fairness, Accountability,
   and Transparency}, pages 220--229, 2019.
 \newblock \doi{10.1145/3287560.3287596}.
+
+\bibitem[Polat et~al.(2022)Polat, Ergenc, Kani, Ozen~Alahdab, Atug, and
+  Temizel]{polat2022cdwce}
+Gorkem Polat, Ilkay Ergenc, Haluk~Tarik Kani, Yesim Ozen~Alahdab, Ozlen Atug,
+  and Alptekin Temizel.
+\newblock Class distance weighted cross-entropy loss for ulcerative colitis
+  severity estimation.
+\newblock In \emph{Medical Image Understanding and Analysis (MIUA 2022)},
+  volume 13413 of \emph{Lecture Notes in Computer Science}, pages 157--171,
+  2022.
+\newblock \doi{10.1007/978-3-031-12053-4_12}.
+
+\bibitem[D{\'\i}az and Marathe(2019)]{diaz2019softlabels}
+Ra{\'u}l D{\'\i}az and Amit Marathe.
+\newblock Soft labels for ordinal regression.
+\newblock In \emph{2019 IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, pages 4733--4742, 2019.
+\newblock \doi{10.1109/CVPR.2019.00487}.
+
+\bibitem[Lin et~al.(2017)Lin, Goyal, Girshick, He, and
+  Doll{\'a}r]{lin2017focal}
+Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, and Piotr Doll{\'a}r.
+\newblock Focal loss for dense object detection.
+\newblock In \emph{2017 IEEE International Conference on Computer Vision
+  (ICCV)}, pages 2999--3007, 2017.
+\newblock \doi{10.1109/ICCV.2017.324}.
+
+\bibitem[Yang et~al.(2021)Yang, Zha, Chen, Wang, and
+  Katabi]{yang2021imbalanced}
+Yuzhe Yang, Kaiwen Zha, Yingcong Chen, Hao Wang, and Dina Katabi.
+\newblock Delving into deep imbalanced regression.
+\newblock In \emph{Proceedings of the 38th International Conference on Machine
+  Learning}, volume 139 of \emph{Proceedings of Machine Learning Research},
+  pages 11842--11851, 2021.
+\newblock URL \url{https://proceedings.mlr.press/v139/yang21m.html}.
+
+\bibitem[Shi et~al.(2023)Shi, Cao, and Raschka]{shi2023corn}
+Xintong Shi, Wenzhi Cao, and Sebastian Raschka.
+\newblock Deep neural networks for rank-consistent ordinal regression based on
+  conditional probabilities.
+\newblock \emph{Pattern Analysis and Applications}, 26\penalty0 (3):\penalty0
+  941--955, 2023.
+\newblock \doi{10.1007/s10044-023-01181-9}.
+
+\bibitem[Wortsman et~al.(2022)Wortsman, Ilharco, Gadre,
+  et~al.]{wortsman2022soups}
+Mitchell Wortsman, Gabriel Ilharco, Samir~Yitzhak Gadre, et~al.
+\newblock Model soups: Averaging weights of multiple fine-tuned models improves
+  accuracy without increasing inference time.
+\newblock In \emph{Proceedings of the 39th International Conference on Machine
+  Learning}, volume 162 of \emph{Proceedings of Machine Learning Research},
+  pages 23965--23998, 2022.
+\newblock URL \url{https://proceedings.mlr.press/v162/wortsman22a.html}.
+
+\bibitem[Frankle et~al.(2020)Frankle, Dziugaite, Roy, and
+  Carbin]{frankle2020linear}
+Jonathan Frankle, Gintare~Karolina Dziugaite, Daniel Roy, and Michael Carbin.
+\newblock Linear mode connectivity and the lottery ticket hypothesis.
+\newblock In \emph{Proceedings of the 37th International Conference on Machine
+  Learning}, volume 119 of \emph{Proceedings of Machine Learning Research},
+  pages 3259--3269, 2020.
+\newblock URL \url{https://proceedings.mlr.press/v119/frankle20a.html}.
 
 \bibitem[Battelino et~al.(2019)Battelino, Danne, Bergenstal,
   et~al.]{battelino2019timeinrange}
