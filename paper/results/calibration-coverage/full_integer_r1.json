@@ -3622,5 +3622,13 @@
     "seed4_int8_uniform_random_200_d101.tflite": "a458eb65c92b28b67a96461cf8b23f82de6c7c4e8e32cdf8cc88f5e1cc89a2a7",
     "seed4_int8_uniform_random_200_d102.tflite": "8cd07162655599e9ac438762c0e424fc191ba68a21cc298daee2a6a413e3a232",
     "seed4_int8_uniform_random_200_d103.tflite": "131e3dd0b0c86633a9ae0a1a879075fc924322d66069e98f8778e4e33f6bfeaf"
+  },
+  "serialized_bytes": {
+    "float": [
+      14396
+    ],
+    "int8": [
+      8112
+    ]
   }
 }

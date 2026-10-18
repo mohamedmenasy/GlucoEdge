@@ -223,6 +223,8 @@ def stage_summarize():
         "arms": {}, "per_seed": {}, "agreement": {},
         "sha256": {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
                    for p in sorted((run / "artifacts").glob("*.tflite"))},
+        "serialized_bytes": {k: sorted({p.stat().st_size for p in (run / "artifacts").glob(f"*_{k}*.tflite")})
+                             for k in ("float", "int8")},
     }
 
     mmr = lambda y, p: minority_macro_recall(confusion_counts(y, p))

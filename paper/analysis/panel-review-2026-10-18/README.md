@@ -22,6 +22,7 @@
 | `<seat>.phase2.md` | Paper-visible reviews: `eic` journal fit, `methodology` R1, `domain` R2, `perspective` R3, `da` devil's advocate |
 | [contract.json](contract.json), [metadata.json](metadata.json) | The contract as injected, and the Phase 1 metadata envelope |
 | [provenance_input.json](provenance_input.json), [provenance.json](provenance.json) | Typed panel provenance (six axes, no binary independence claim) |
+| [response_to_reviewers.md](response_to_reviewers.md) | The author's response: R1–R11 item by item, and what this pass left for later |
 
 ## Process caveats
 

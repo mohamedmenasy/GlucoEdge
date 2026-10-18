@@ -50,9 +50,10 @@ continuous glucose monitor (CGM) readings into five classes of the mean
 rate of change over the next 15 minutes. We measure a quantization pitfall
 and state an audit rule. A 2,909-parameter convolutional network was
 quantized to 8-bit integers (INT8); the converter produces a hybrid
-float/INT8 graph. Calibrated on contiguous first-$N$ windows, as this
-project once did, two participants' overlapping windows capped the input
-range at 250.9~\mgdl\ and, in a secondary contrast, cost 13.4 points of
+float/INT8 graph. Calibrating it on contiguous first-$N$ windows, as this
+project once did, capped the input range at 250.9~\mgdl\ (two
+participants' overlapping windows) and, in a secondary contrast, cost 13.4
+points of
 held-out directional (minority-class) recall (95\% CI 10.3--16.9) against
 uniform random selection, while accuracy rose. A clip-only control
 attributes the loss to clipping; the fix is free to deploy; a fully
@@ -61,10 +62,10 @@ the calibration set's input range with the deployment range, and gate
 INT8 models on minority-class metrics. The primary contrast, range
 stratification, was untestable as posed, since every random selection
 covered the range; two small cohorts did not confirm frozen predictions.
-In five staged, pre-registered selection rounds, gate outcomes were
-decided by the chosen seed, and round one's disagreement between
-macro-averaged F1 (macro-F1) and directional recall was settled after the read in
-favor of recall. The bundled round-five artifact is a choice between two
+In five staged, pre-registered selection rounds, round one's disagreement
+between macro-averaged F1 (macro-F1) and directional recall was settled
+after the read in favor of recall, and the gate outcomes of rounds two and
+three were decided by the chosen seed. The bundled round-five artifact is a choice between two
 artifacts: on a trial cohort whose rate labels may be distorted, it gained
 0.20 directional-recall points by moving recall from slow to fast classes,
 with macro-F1 1.65 points lower. \project is not a medical device.
@@ -146,8 +147,9 @@ float sources, plus a ten-artifact min--max-observer arm. Its hypotheses,
 samplers, budgets, endpoint, bootstrap, and missing-class rules were frozen
 before any held-out label was read (Table~\ref{tab:protocolmap},
 Appendix~\ref{app:calibdetails}). The converter turns this model into a
-hybrid float/INT8 graph, so a post-hoc rerun repeats the contrasts on a
-fully integer re-expression of the same checkpoints
+hybrid float/INT8 graph, so a post-hoc rerun repeats the
+histogram-observer contrasts on a fully integer re-expression of the same
+checkpoints
 (Section~\ref{sec:deploycost}).
 
 The second question is reported as a compact evaluation-governance case
@@ -174,14 +176,17 @@ randomized-trial cohort that no round had evaluated
     was untestable as posed, because both arms received the same input
     range. Where every randomized selection covers the full input range,
     as in this pool, stratification, a five-fold budget, and the observer
-    choice move recall by at most about a tenth of a point;
+    choice move recall by at most about a tenth of a point in the
+    converter's hybrid graph (stratification and budget by up to 0.3
+    points in the fully integer one);
     \item mechanism controls that attribute the loss to input-range
     clipping rather than input-grid resolution or internal quantization:
     the clip-only input image, fed to the float model, reproduces 13.14
     points of the sequential arm's 13.35-point float-to-INT8 loss
     (Section~\ref{sec:mechanism});
-    \item a fully integer check: re-expressing the convolutions in two
-    dimensions turns the converter's hybrid graph into an all-integer one,
+    \item a fully integer check: re-expressing the convolutions and the
+    average pool in two dimensions turns the converter's hybrid graph into
+    an all-integer one,
     and the pitfall holds there ($+13.09$ points, CI 9.99--16.61;
     Section~\ref{sec:deploycost});
     \item deployment-cost accounting for the hybrid graph that LiteRT
@@ -190,8 +195,8 @@ randomized-trial cohort that no round had evaluated
     0.03~s, and a prespecified nine-artifact iPhone benchmark found the
     calibration arms within 0.05~$\mu$s of each other, so the corrected
     calibration is free at deployment. That hybrid INT8 graph was never
-    faster than float, and INT8 saves 31\% of file size for the study
-    model and 70\% for the bundled one;
+    faster than float, and its artifacts are 31\% smaller than float for
+    the study model and 70\% for the bundled one;
     \item two exploratory follow-ups: on two small further cohorts the
     frozen predictions were not confirmed (Dubosson $+2.0$ points, exact
     sign-flip $p=0.094$; Hall inconclusive, its premise failed;
@@ -783,10 +788,10 @@ windows, and carried the winner forward; a final stage picked one seed.
 Round one selected and confirmed on macro-F1; from
 round two on, both used directional recall, guarded by a stable-recall
 floor relative to the champion, the pair bundled when the round began
-(Table~\ref{tab:variants}). Rounds two to five trained on five cohorts of
-the public DiaData v3 collection \cite{cinar2026diadata} and never on
-Weinstock; Appendix~\ref{app:sweepdetails} gives stages, data, recipes and
-conversion.
+(Table~\ref{tab:variants}). From round two on, every candidate trained on
+five cohorts of the public DiaData v3 collection \cite{cinar2026diadata}
+and on no Weinstock window; Appendix~\ref{app:sweepdetails} gives stages,
+data, recipes and conversion.
 
 From round two on, three gates decided the candidate artifact, the best
 validation seed's uniform-200 INT8 model: (1) it beats the champion's INT8
@@ -810,10 +815,13 @@ decisions taken, round one's candidate rejected and round five's adopted,
 amount to a preference stated after both outcomes were known: directional
 recall on the primary component ranks first, and losses on other metrics
 or components do not override it. This rule is post hoc and fitted to the
-two cases. An outcome-neutral rule that overrides whenever a pre-declared
-secondary metric falls on the primary component would have overridden
-both, because round five's candidate also lost RT-CGM macro-F1
-(Section~\ref{sec:sweepresults}).
+two cases. An outcome-neutral rule, overriding whenever another reported
+class-balanced metric falls on the primary component with an interval
+excluding zero, would have overridden both: round one's directional
+recall fell by 7.91 points [$-8.87$, $-6.97$] and round five's RT-CGM
+macro-F1 by 1.65 [$-1.75$, $-1.57$] (Section~\ref{sec:sweepresults}). A
+future round should freeze such a rule, naming the metric and its harm
+bound, before its read.
 
 \section{Results: Calibration Coverage}
 
@@ -1202,7 +1210,8 @@ Full record: \texttt{delta\_inputs\_r1.json}.
 \subsection{Deployment costs and a fully integer graph}
 \label{sec:deploycost}
 
-Calibration coverage has no deployment cost in this model. All 110 study
+Calibration coverage has no deployment cost in this model's hybrid
+graph, the one timed. All 110 study
 INT8 artifacts serialize to exactly 11,976 bytes regardless of strategy,
 budget or observer (float: 17,352 bytes, a 31.0\% reduction) and share a
 single operator inventory, so no change in operators or size is
@@ -1242,7 +1251,8 @@ study checkpoints were re-expressed with $(1\times3)$ two-dimensional
 convolutions and a $(1\times12)$ average pool, keeping their weights
 (float logits within $2.4\times10^{-6}$ of the original, argmax identical
 on every evaluation window), and reconverted with the same 20 calibration
-selections, a post-hoc run on the already-read held-out and temporal
+selections and the histogram observer (the min--max observer arm was not
+repeated), a post-hoc run on the already-read held-out and temporal
 components (Table~\ref{tab:readledger}). Every resulting INT8 artifact is
 a six-operator graph whose tensors are all int8 or int32, at 8,112 bytes
 (float 14,396), and its input scale and zero point equal the hybrid
@@ -1253,9 +1263,10 @@ at every seed (12.71 to 13.85 held-out), and the clip-only control again
 accounts for 13.14 points. Quantizing the convolutions costs more inside
 the network (QDQ minus INT8 0.46 points for uniform-200, against 0.17),
 and the full-integer artifacts agree with their hybrid counterparts on
-88--98\% of held-out windows. The primary contrast stays null ($+0.06$
-[$-0.03$, $+0.15$]), but two shared-range contrasts now exclude zero by at
-most 0.3 points: range coverage at 1,000 against 200 windows ($-0.19$
+88--98\% of held-out windows. The primary contrast stays near zero and
+untestable as posed ($+0.06$ [$-0.03$, $+0.15$]; its arms still share one
+input range), but two shared-range contrasts now exclude zero by at most
+0.3 points: range coverage at 1,000 against 200 windows ($-0.19$
 [$-0.30$, $-0.07$] held-out; $-0.30$ [$-0.45$, $-0.15$] temporal) and
 range coverage against uniform random at 200 ($+0.13$ [$+0.03$, $+0.23$]
 held-out). Once the convolutions are quantized, which windows set their
@@ -1280,13 +1291,13 @@ loss, passed every gate ($+5.68$ held-out macro-F1 points
 precision of every directional class, but held-out INT8 directional recall
 fell from 0.517 to 0.438 because it predicted \texttt{stable} more often.
 It was rejected after the read on that drop (Section~\ref{sec:sweepdiscussion}).
-Round two's DiaData-only recipe passed all three gates at the chosen seed,
-by $+0.60$ points [$-0.06$, $+1.33$], and was bundled. That pass belongs
-to the artifact, not the recipe (Table~\ref{tab:seedgates}): the five
-candidate seeds gained $+0.55$ points on average [$+0.05$, $+1.14$], but
-three of them lost more than 2 points of stable recall and a fourth did
-not beat the champion, so only the chosen seed passes all three held-out
-gates, and the seed-averaged stable change ($-2.76$ points) fails gate~2.
+Round two's chosen-seed artifact (DiaData-only recipe) passed all three
+gates, by $+0.60$ points [$-0.06$, $+1.33$], and was bundled. The pass
+belongs to the artifact, not the recipe (Table~\ref{tab:seedgates}): the
+five candidate seeds gained $+0.55$ points on average [$+0.05$, $+1.14$],
+but three of them lost more than 2 points of stable recall and a fourth
+failed gate~1's lower bound ($+0.00$ [$-0.56$, $+0.65$]), so only the
+chosen seed passes all three held-out gates, and the seed-averaged stable change ($-2.76$ points) fails gate~2.
 Round three's temporal convolutional network (TCN) artifact gained
 $+0.77$ points [$+0.09$, $+1.49$] and failed gate~2 (stable recall
 $-4.4$ points), while its five-seed mean ($+0.05$ points) and one other
@@ -1348,8 +1359,9 @@ check in this pool: every randomized 200-window set reaches
 contrasts show. The primary contrast and the randomized budget contrasts
 compared arms whose inputs were quantized identically, so they show that,
 once the range is covered, stratification, a larger budget, and the
-observer choice moved recall by at most about a tenth of a point, not that
-range-aware selection is useless. It was not tested where uniform draws
+observer choice moved recall by at most about a tenth of a point in the
+hybrid graph (stratification and budget by up to 0.3 points in the fully
+integer one), not that range-aware selection is useless. It was not tested where uniform draws
 under-cover the range, as in Dubosson and Hall, whose uniform-200 sets
 still clip 10.9\% (Dubosson temporal) and 0.5--1.0\% (Hall) of windows
 (Table~\ref{tab:confirmation}).
@@ -1413,9 +1425,9 @@ usefulness to a person with diabetes.
 \subsection{What the sweeps show}
 \label{sec:sweepdiscussion}
 
-In one case, two endpoints disagreed. Round one's candidate improved every
-class-balanced measure computed here (macro-F1, QWK and directional
-precision) while lowering directional recall, because it predicted
+In one case, two endpoints disagreed. Round one's candidate improved
+macro-F1, QWK and the precision of every directional class while lowering
+directional recall, because it predicted
 \texttt{stable} more often; its rejection, decided after the read,
 expressed a preference for directional recall that no protocol had
 stated. That preference has a cost structure. Directional recall weights
@@ -1423,9 +1435,9 @@ the four movement classes equally and counts \texttt{stable} only through
 the floor, and the inverse-frequency class weights of the training loss
 price a missed \texttt{falling\_fast} window at 23.5 (Weinstock) to 26.3
 (DiaData) times a missed \texttt{stable} one; neither separates an
-adjacent rate band from a reversed direction, as QWK does. Under QWK,
-round one's candidate would have been adopted and round five's would not
-(Table~\ref{tab:sweep}). The sweeps therefore record a single case in
+adjacent rate band from a reversed direction, as QWK does. With QWK as
+the endpoint, round one's candidate would have been adopted and the
+candidates of rounds two, three and five rejected (Table~\ref{tab:sweep}). The sweeps therefore record a single case in
 which the declared endpoint and a class-balanced alternative disagreed,
 settled by a stated preference; they do not show that pre-registered
 endpoints in general optimize the wrong quantity. The floor, relative to
@@ -1472,11 +1484,11 @@ output.
     quantizer, and one primary cohort: a case-control sample of older
     adults with long-standing type-1 diabetes, about half of whom had a
     severe hypoglycemic event in the prior year, recorded with blinded CGM
-    \cite{weinstock2016risk}. The range-stratification and budget nulls
+    \cite{weinstock2016risk}. The range-stratification and budget results
     hold in a saturated regime in which every randomized 200-window
     selection receives the same INT8 input range; range-aware selection was
     not tested where random draws under-cover the range. These
-    nulls and the observer comparison describe this 2,909-parameter CNN
+    results and the observer comparison describe this 2,909-parameter CNN
     with per-tensor affine input quantization, not PTQ in general
     \cite{bouthillier2021variance,hubara2021smallcalibration}; in its
     fully integer re-expression, a post-hoc run on the same checkpoints,
@@ -1554,9 +1566,10 @@ output.
     artifact is the hybrid graph of LiteRT Torch 0.9.1's convolution
     lowering, which runs the convolutions in float; that graph showed no
     mean-latency advantage over float in any measurement, and the fully
-    integer artifacts were not timed. The size saving is 31\% (5,376 bytes)
-    for the 2,909-parameter study model and 70\% (146,624 bytes) for the
-    50,645-parameter bundled model. For this lowering, the quantization
+    integer artifacts were not timed. The hybrid artifacts' size saving is
+    31\% (5,376 bytes) for the 2,909-parameter study model and 70\%
+    (146,624 bytes) for the 50,645-parameter bundled model; the fully
+    integer study artifacts save 44\% (6,284 bytes). For this lowering, the quantization
     trade-off studied here is an accuracy risk against a size saving, with
     no measured speed benefit.
     \item The application replays synthetic or locally extracted
@@ -1689,15 +1702,17 @@ was re-expressed as a fully integer one. The practical result is a
 pitfall and an audit rule: check the calibration set's input range against
 the deployment range, and gate INT8 artifacts on minority-class metrics.
 Once the range was covered, stratification, budget, and observer choice
-moved recall by at most about a tenth of a point in the hybrid graph and
-0.3 points in the integer one. These nulls, and the primary contrast that
+moved recall by at most about a tenth of a point in the hybrid graph, and
+stratification and budget by at most 0.3 points in the integer one, where
+the observer arm was not repeated. These nulls, and the primary contrast that
 was untestable as posed, are scoped to that saturated regime: range-aware
 selection was not tested where random draws under-cover the range, as they
 did in the two small cohorts. The corrected calibration is free at
 deployment. The hybrid INT8 graph, a product of LiteRT Torch 0.9.1's
 convolution lowering rather than of 8-bit inference, brought no
-mean-latency advantage in any measurement, and INT8 saves 31\% of file
-size for the 2,909-parameter study model and 70\% for the bundled model.
+mean-latency advantage in any measurement; the hybrid INT8 artifacts are
+31\% smaller than float for the 2,909-parameter study model and 70\% for
+the bundled model, and the fully integer study artifacts 44\%.
 
 The staged sweeps are a single case. Four rounds spent one pre-registered
 confirmatory read each; round four, whose candidate converted to the
@@ -1833,7 +1848,8 @@ monotonic \texttt{DispatchTime} clock on the iPhone 18 Pro Max during
 the latest 100 inferences per model in two rounds, in a debug application
 build over the prebuilt release LiteRT binary; a separate test-runner
 benchmark called each model 100 times back to back after one warm-up call,
-in three runs. Neither phone showed an INT8 latency advantage (iPhone
+in three runs. Neither phone showed a latency advantage for this hybrid
+INT8 graph (iPhone
 back-to-back means 2.83--2.85~$\mu$s float, 3.69--3.72~$\mu$s INT8), the
 same picture as the study's benchmark.
 
@@ -1966,12 +1982,12 @@ Date & Analysis & Labels read & Decision taken \\
 2026-10-10 \texttt{207b7a1} & Delta-encoded inputs (frozen gates; post hoc on previously read data) & Weinstock held-out, temporal & Anchor variant chosen on held-out float recall; bundled \\
 2026-10-11 \texttt{aa6127f} & Round one confirmatory read (frozen) & Weinstock held-out, temporal & Gates passed \\
 2026-10-11 \texttt{e490ceb} & Round one per-class read of the cached confirmatory predictions (post hoc) & Weinstock held-out, temporal & Not bundled, decided on directional recall; later endpoints changed \\
-2026-10-12 \texttt{eff6eac} & Round two confirmatory read (frozen) & Weinstock held-out, temporal; PEDAP & All gates passed; bundled \\
+2026-10-12 \texttt{eff6eac} & Round two confirmatory read (frozen) & Weinstock held-out, temporal; PEDAP & All gates passed at the chosen seed (artifact level; the five-seed mean fails gate 2, Table~\ref{tab:seedgates}); bundled \\
 2026-10-12 \texttt{a84b237} & Round three confirmatory read (frozen) & Weinstock held-out, temporal; PEDAP; RT-CGM training labels (rejected arm) & Gate 2 failed; rejected \\
 2026-10-13 \texttt{c8f3de6} & Round-four motivation: error structure of round three's saved predictions (descriptive) & Weinstock held-out & Arm choice only \\
 2026-10-14 \texttt{cdd26ea} & Round four & None (identity outcome) & Champion retained \\
 2026-10-14 \texttt{3755d55} & AI-generated review (a separate AI agent session; Appendix~\ref{app:sweepdetails}): stable-logit offset scan of cached round-two and round-three predictions, offsets chosen on the labels (exploratory) & Weinstock held-out, temporal & None from the scan; its proposed head, schedule and epoch selection became round five \\
-2026-10-15 \texttt{3278363} & Round five confirmatory read (frozen) & RT-CGM (primary); Weinstock held-out, temporal and PEDAP (non-gating) & All gates passed on RT-CGM; gates 1 and 2 would fail on both Weinstock components; bundled \\
+2026-10-15 \texttt{3278363} & Round five confirmatory read (frozen) & RT-CGM (primary); Weinstock held-out, temporal and PEDAP (non-gating) & All gates passed on RT-CGM, by a slow-to-fast reallocation with macro-F1 $-1.65$ [$-1.75$, $-1.57$]; gates 1 and 2 would fail on both Weinstock components; bundled \\
 2026-10-16 \texttt{c739c76} & Revision answering the first simulated panel review (AI agents): descriptive re-analyses of cached predictions & Weinstock held-out, temporal; Dubosson; Hall; RT-CGM; PEDAP & None \\
 2026-10-16 \texttt{cca2fda} & Follow-up to the simulated re-review (AI agents): round-five RT-CGM contrast without windows holding readings outside 40--400~\mgdl\ (descriptive, cached predictions) & RT-CGM & None \\
 2026-10-18 \texttt{d45f3a4}, \texttt{efedf2d} & Per-participant confusion counts of every cached arm, published; the simulated round-three panel (AI agents) and this revision's re-analyses (\path{panel_r3_r1.json}) recompute from them & Weinstock held-out, temporal; Dubosson; Hall; RT-CGM; PEDAP & None \\
@@ -2398,12 +2414,17 @@ validation pool.
 
 Round five's design came from an AI-generated review, not an independent
 one: a separate session of an AI agent (Claude) wrote
-\path{paper/analysis/accuracy-review-2026-10-13/} (commit
-\texttt{3755d55}) between rounds four and five. It read the Weinstock
-held-out and temporal labels through round two's and round three's cached
-predictions and logits, and proposed three changes, all adopted in round
-five: the flatten head (from its synthetic recency diagnostic), the
-learning-rate schedule, and epoch selection. It also scanned a scalar
+\path{paper/analysis/accuracy-review-2026-10-13/} on 13 October against
+commit \texttt{2415fa7}, before round four's results, and it was
+committed after them (\texttt{3755d55}), before round five's protocol
+was frozen. It read the Weinstock held-out and temporal labels through
+round two's and round three's cached predictions and logits. Round five
+adopted three of its proposals: the flatten head (from its synthetic
+recency diagnostic), a learning-rate schedule, and epoch selection. Round
+five did not take up its other proposals, among them a position-aware
+MLP control, ordinal or auxiliary-regression heads, participant-grouped
+development folds with an untouched final set, and five-seed results
+reported beside the selected artifact. It also scanned a scalar
 offset added to the \texttt{stable} logit, with offsets chosen on the
 evaluation labels, so its results are descriptive. Near 44.7\% held-out
 stable recall the offset favored the round-two artifact over round
@@ -2471,8 +2492,9 @@ includes zero, so gate~1 here certifies non-inferiority within 0.5 points,
 not superiority. The pass is an artifact-level result
 (Table~\ref{tab:seedgates}): the five candidate seeds gained $+0.55$
 points [$+0.05$, $+1.14$] on average, but three lost more than 2 points
-of stable recall and seed~4 did not beat the champion, so only the chosen
-seed passes all three held-out gates, and the seed-averaged stable change
+of stable recall and seed~4 failed gate~1's lower bound ($+0.00$
+[$-0.56$, $+0.65$]), so only the chosen seed passes all three held-out
+gates, and the seed-averaged stable change
 ($-2.76$ points) fails gate~2. Macro-F1 and QWK slipped held-out, and on
 PEDAP (7.0M windows, on which no model trained) directional recall rose.
 The candidate was bundled after golden parity passed in the Android unit
