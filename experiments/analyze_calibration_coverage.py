@@ -85,12 +85,41 @@ def paired_cluster_bootstrap(y_true, participant_ids, pred_pairs,
     rng = np.random.default_rng(seed)
     boot = np.array([mean_delta(resample_rows(participant_ids, rng, clusters))
                      for _ in range(n_boot)])
+    return _bootstrap_summary(boot, mean_delta(np.arange(len(y_true))), n_boot, seed)
+
+
+def participant_counts(y_true, participant_ids, y_pred):
+    """(P, 5, 5) confusion counts, one matrix per participant, in the sorted
+    participant order paired_cluster_bootstrap resamples."""
+    ids, pid = np.unique(participant_ids, return_inverse=True)
+    idx = (pid.ravel() * N_CLASSES + np.asarray(y_true)) * N_CLASSES + np.asarray(y_pred)
+    return np.bincount(idx, minlength=len(ids) * N_CLASSES ** 2).reshape(
+        len(ids), N_CLASSES, N_CLASSES)
+
+
+def paired_cluster_bootstrap_counts(count_pairs, metric=minority_macro_recall,
+                                    n_boot=2000, seed=ANALYSIS_SEED):
+    """paired_cluster_bootstrap from per-participant counts alone: the same
+    seed draws the same participants, and summing their matrices gives the
+    same confusion counts, so the result is identical."""
+    count_pairs = [(np.asarray(a), np.asarray(b)) for a, b in count_pairs]
+    n = len(count_pairs[0][0])
+
+    def mean_delta(drawn):
+        return float(np.mean([metric(a[drawn].sum(axis=0)) - metric(b[drawn].sum(axis=0))
+                              for a, b in count_pairs]))
+
+    rng = np.random.default_rng(seed)
+    boot = np.array([mean_delta(rng.integers(0, n, size=n)) for _ in range(n_boot)])
+    return _bootstrap_summary(boot, mean_delta(np.arange(n)), n_boot, seed)
+
+
+def _bootstrap_summary(boot, point, n_boot, seed):
     undefined = float(np.mean(np.isnan(boot)))
     defined = boot[~np.isnan(boot)]
     ci = None
     if undefined <= 0.05 and len(defined):
         ci = [float(v) for v in np.percentile(defined, [2.5, 97.5])]
-    point = mean_delta(np.arange(len(y_true)))
     return {
         "delta": None if np.isnan(point) else point,
         "ci95": ci,
