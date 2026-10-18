@@ -116,11 +116,14 @@ def _verify(records):
             pairs = [(f"seed{s}_int8_{a.format(d=d)}", f"seed{s}_int8_{b.format(d=d)}")
                      for s, d in seeds_draws]
             out.append(_check(records, f"r1/{comp}", pairs, agg["contrasts"][comp][key]) | {"key": key})
+        headline = [(f"seed{s}_int8_uniform_random_200_d{d}", f"seed{s}_int8_sequential_200_d0")
+                    for s, d in seeds_draws]
         for cohort in ("dubosson", "hall"):
-            pairs = [(f"seed{s}_int8_uniform_random_200_d{d}", f"seed{s}_int8_sequential_200_d0")
-                     for s, d in seeds_draws]
             pub = _pub(f"confirmation_{cohort}")["contrast_uniform200_vs_sequential200"][comp]
-            out.append(_check(records, f"conf-{cohort}/{comp}", pairs, pub))
+            out.append(_check(records, f"conf-{cohort}/{comp}", headline, pub))
+        pub = _pub("full_integer_r1")["contrasts"][comp]["uniform200_vs_sequential200"]
+        out.append(_check(records, f"full-int-r1/{comp}", headline, pub["full_integer"])
+                   | {"key": "uniform200_vs_sequential200"})
         delta = _pub("delta_inputs_r1")["int8_robustness"]["anchor"][comp]
         for key, arm in (("uniform_vs_sequential", "int8_uniform_random_200_d{d}"),
                          ("float_vs_sequential", "float")):
