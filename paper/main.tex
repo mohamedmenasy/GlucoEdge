@@ -1828,14 +1828,16 @@ drift), the eligibility audit, the complete aggregate results with all
 and the SHA-256 hashes of all 190 study, second-cohort, and delta-encoding
 artifacts (\texttt{artifact\_hashes\_r1.json}). Re-analyses of cached
 results are in \texttt{panel\_revision\_r1.json}
-(\texttt{experiments/panel\_revision.py}). Checkpoints, window
-keys, per-window predictions, per-participant confusion counts, and run
-reports stay local because they derive from participant-level data
-distributed under the providers' terms, so a third party must regenerate
-them with the committed runners before recomputing any interval. The
-committed analysis commands then recompute the reported numbers from those
-predictions, but because retraining is not bitwise reproducible across
-platforms, a third party's numbers may differ from the published ones.
+(\texttt{experiments/panel\_revision.py}). Per-participant confusion
+counts of every cached evaluation arm, published under the source
+licences (\path{participant_counts_*_r1.json.gz}), recompute the 25
+full-split intervals that \texttt{experiments/participant\_counts.py}
+checks exactly, without retraining. Checkpoints, window keys, per-window
+predictions, and run reports stay local (they derive from
+participant-level data under the providers' terms); subset analyses such
+as the sensitivity tiers need predictions regenerated with the committed
+runners, which may differ from the published ones because retraining is
+not bitwise reproducible across platforms.
 Accuracy-sweep rounds one, two, three, and five each version a frozen protocol and a full record
 in the same directory (\texttt{protocol\_sweep\_r$N$.json},
 \texttt{accuracy\_sweep\_r$N$.json}). Round four, which spent no read,
@@ -1883,12 +1885,9 @@ results, and known failure modes, among them frequent movement labels
 during stable glucose and over-calling of the fast classes, together with
 the populations its data do not represent.
 
-Code, bundled model files, and synthetic golden vectors are in the project
-repository; source CGM access is described by GlucoBench
-\cite{sergazinov2024glucobench} and DiaData \cite{cinar2026diadata}. This
-secondary analysis used only public,
-de-identified data under the providers' terms; no participants were
-recruited, and no ethics review was sought.
+This secondary analysis used only public, de-identified data under the
+providers' terms; no participants were recruited, and no ethics review
+was sought.
 
 \section{Conclusion}
 

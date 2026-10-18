@@ -131,7 +131,11 @@ Table 1, the read ledger's round-one and round-three rows, the delta
 artifacts' input ranges, the round-five seed spread beside its gate
 sentence, and the round-five RT-CGM contrast without windows holding
 readings outside 40-400 mg/dL. The new numbers come from the same script
-and cached predictions.
+and cached predictions. A further pass (re-review item S17) publishes
+per-participant confusion counts for every cached evaluation arm under the
+source licences (`results/calibration-coverage/participant_counts_*_r1.json.gz`,
+written by `python -m experiments.participant_counts`); the script checks
+that 25 published intervals recompute exactly from the counts.
 
 ## Build
 
