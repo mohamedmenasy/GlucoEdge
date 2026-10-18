@@ -337,6 +337,38 @@ def _clip_stats(windows, labels, scale, zp, dtype_info):
             "by_true_class": by_class}
 
 
+def _evaluate_artifacts(run, base, windows, labels):
+    """Every artifact's predictions plus, for INT8, the QDQ-grid and
+    clip-only controls on the same seed's float artifact."""
+    for a in sorted((run / "artifacts").glob("*.tflite")):
+        p = base / f"{a.stem}.npy"
+        if p.exists():
+            continue
+        t0 = time.time()
+        preds, detail = _predict_tflite_batch(a, windows)
+        np.save(p, preds)
+        meta = {"inference_time_s": round(time.time() - t0, 2),
+                "input_dtype": np.dtype(detail["dtype"]).name,
+                "quantization": [float(detail["quantization"][0]),
+                                 int(detail["quantization"][1])]}
+        if "int8" in a.stem:
+            scale, zp = detail["quantization"]
+            info = np.iinfo(detail["dtype"])
+            seed = a.stem.split("_")[0]
+            fpath = run / "artifacts" / f"{seed}_float.tflite"
+            qdq_preds, _ = _predict_tflite_batch(fpath, qdq_from_detail(windows, detail))
+            np.save(base / f"{a.stem}_qdqfloat.npy", qdq_preds)
+            clip_preds, _ = _predict_tflite_batch(
+                fpath, clip_only(windows, np.float32(scale), int(zp), info.min, info.max))
+            np.save(base / f"{a.stem}_cliponly.npy", clip_preds)
+            meta["clipping"] = _clip_stats(windows, labels, scale, zp, info)
+            meta["real_range_exceedance_window_fraction"] = float(
+                ((windows > scale * (info.max - zp)) | (windows < scale * (info.min - zp)))
+                .any(axis=1).mean())
+        _write_json(base / f"{a.stem}_meta.json", meta)
+        print(f"{base.name}/{a.stem} evaluated in {time.time() - t0:.1f}s")
+
+
 def stage_evaluate(run_id, dataset="weinstock"):
     """LOCKED-EVALUATION GATE: first read of held-out labels."""
     import torch
@@ -367,7 +399,6 @@ def stage_evaluate(run_id, dataset="weinstock"):
     _write_json(ev / "class_support.json", support)
     print("class support:", support)
 
-    arts = sorted((run / "artifacts").glob("*.tflite"))
     for comp, d in components.items():
         windows, labels = d["windows"], d["labels"]
 
@@ -391,33 +422,7 @@ def stage_evaluate(run_id, dataset="weinstock"):
             clf = joblib.load(run / "baselines" / "logistic.joblib")
             np.save(base / "logistic.npy", clf.predict(windows))
         # Artifacts + input-grid controls.
-        for a in arts:
-            p = base / f"{a.stem}.npy"
-            if p.exists():
-                continue
-            t0 = time.time()
-            preds, detail = _predict_tflite_batch(a, windows)
-            np.save(p, preds)
-            meta = {"inference_time_s": round(time.time() - t0, 2),
-                    "input_dtype": np.dtype(detail["dtype"]).name,
-                    "quantization": [float(detail["quantization"][0]),
-                                     int(detail["quantization"][1])]}
-            if "int8" in a.stem:
-                scale, zp = detail["quantization"]
-                info = np.iinfo(detail["dtype"])
-                seed = a.stem.split("_")[0]
-                fpath = run / "artifacts" / f"{seed}_float.tflite"
-                qdq_preds, _ = _predict_tflite_batch(fpath, qdq_from_detail(windows, detail))
-                np.save(base / f"{a.stem}_qdqfloat.npy", qdq_preds)
-                clip_preds, _ = _predict_tflite_batch(
-                    fpath, clip_only(windows, np.float32(scale), int(zp), info.min, info.max))
-                np.save(base / f"{a.stem}_cliponly.npy", clip_preds)
-                meta["clipping"] = _clip_stats(windows, labels, scale, zp, info)
-                meta["real_range_exceedance_window_fraction"] = float(
-                    ((windows > scale * (info.max - zp)) | (windows < scale * (info.min - zp)))
-                    .any(axis=1).mean())
-            _write_json(base / f"{a.stem}_meta.json", meta)
-            print(f"{comp}/{a.stem} evaluated in {time.time() - t0:.1f}s")
+        _evaluate_artifacts(run, base, windows, labels)
 
 
 def main():
