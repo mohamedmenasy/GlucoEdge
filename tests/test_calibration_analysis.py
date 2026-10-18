@@ -4,8 +4,9 @@ import numpy as np
 import pytest
 
 from experiments.analyze_calibration_coverage import (
-    accuracy, confusion_counts, macro_recall, minority_macro_recall,
-    paired_cluster_bootstrap, recalls, resample_rows)
+    accuracy, confusion_counts, macro_f1, macro_recall, minority_macro_recall,
+    paired_cluster_bootstrap, paired_cluster_bootstrap_counts, participant_counts,
+    recalls, resample_rows)
 from experiments.calibration_coverage import clip_only, qdq, qdq_from_detail
 
 # --- metrics -----------------------------------------------------------------
@@ -96,6 +97,19 @@ def test_bootstrap_is_deterministic_for_a_fixed_seed():
     o1 = paired_cluster_bootstrap(y, pids, [(a, b)], n_boot=100, seed=7)
     o2 = paired_cluster_bootstrap(y, pids, [(a, b)], n_boot=100, seed=7)
     assert o1 == o2
+
+
+@pytest.mark.parametrize("metric", [minority_macro_recall, macro_f1])
+def test_bootstrap_from_participant_counts_matches_window_level(metric):
+    # Shuffled rows and string IDs whose sorted order is not numeric order.
+    rng = np.random.default_rng(11)
+    y = rng.integers(0, 5, 600)
+    pids = rng.choice(["5.0", "19.0", "100.0", "7.0", "69.0", "39.0"], 600)
+    pairs = [((y + rng.integers(0, k, 600)) % 5, (y + rng.integers(0, 3, 600)) % 5)
+             for k in (2, 4)]
+    by_rows = paired_cluster_bootstrap(y, pids, pairs, metric=metric, n_boot=300, seed=9)
+    counts = [(participant_counts(y, pids, a), participant_counts(y, pids, b)) for a, b in pairs]
+    assert paired_cluster_bootstrap_counts(counts, metric=metric, n_boot=300, seed=9) == by_rows
 
 
 # --- quantization controls ---------------------------------------------------
