@@ -151,9 +151,9 @@ weighted kappa and per-class precision for every confirmatory read, the
 RT-CGM slow-to-fast reallocation, and float and INT8 profiles of the
 bundled pair, all recomputed from the published counts
 (`python -m experiments.panel_r3`, record `panel_r3_r1.json`). The
-override rule is labelled post hoc, and a Declarations statement
-describes the use of AI tools, including the AI-generated review that
-proposed round five. The count files now verify 27 intervals.
+override rule is labelled post hoc, and Appendix D describes the
+AI-generated review that proposed round five. The count files now
+verify 27 intervals.
 
 ## Build
 
@@ -188,7 +188,6 @@ pdfLaTeX).
   ```
 
 Before submission, confirm the author name, email, affiliation, category, and
-license in the arXiv form. The funding, competing-interest, CRediT, and
-AI-use declarations follow the Conclusion. The manuscript deliberately labels
-the system as a research engineering demonstration and documents the current
-evaluation limitations; it does not make a medical-device or treatment claim.
+license in the arXiv form. The manuscript deliberately labels the system as a
+research engineering demonstration and documents the current evaluation
+limitations; it does not make a medical-device or treatment claim.
