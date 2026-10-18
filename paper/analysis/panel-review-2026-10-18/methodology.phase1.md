@@ -1,0 +1,33 @@
+## Contract Paraphrase
+
+D1 (methodology_rigor, mandatory, owned by my seat): from a methodology-rigor standpoint, this dimension asks whether the experimental design can actually answer the questions it poses. That covers how units of analysis are defined and split, whether information leaks between fitting, selection, calibration and evaluation data, whether uncertainty statements respect the dependence structure of the data (repeated measurements within a subject, not independent rows), whether variation from training seeds, data order and resampling draws is separated from the effect being claimed, whether multiplicity and selection effects are handled, and whether an outside researcher could rerun the pipeline from the released artifacts and get the same numbers.
+
+D2 (domain_accuracy, mandatory, domain seat): this dimension concerns whether the paper's statements about the application domain and about prior work are factually right, whether terminology is used in its accepted sense, and whether cited results are reported faithfully. I will not score it. A methodological flaw that also produces a factual misstatement goes to that seat as a cross-reference, not into my score.
+
+D3 (argumentative_coherence, mandatory, devil's-advocate seat owns it, methodology also eligible): from my side, this is the inferential-chain view of coherence. Does each headline claim follow from the analysis that was actually run, at the strength the analysis supports? Are exploratory or post-hoc findings kept apart from confirmatory ones in the conclusions? Do pre-declared decision rules (for example non-inferiority margins or multi-step selection gates) get applied as written, rather than reinterpreted after the data were seen?
+
+D4 (cross_disciplinary_relevance, high, perspective seat): this dimension asks whether readers from neighbouring fields can follow the framing, definitions and implications, and whether claims that reach across disciplines are backed up. Not mine to score. I only note where statistical terminology would need definition for an adjacent audience.
+
+D5 (writing_and_structure, normal, EIC seat): this dimension covers organisation, clarity, quality of figures and tables, and venue conventions. Not mine to score. Overlap with my seat is limited to whether tables and figures report the statistics my D1 plan needs (interval type, number of clusters, seeds and draws).
+
+D6 (venue_fit_and_contribution, mandatory, EIC seat): this dimension asks whether the work suits the target venue and adds something original and significant for its readers. Not mine to score. I give no opinion on novelty beyond whether the evidence is strong enough to carry any contribution claim.
+
+## Scoring Plan
+
+### D1: methodology_rigor
+dimension_id: D1
+what_to_look_for: Subject-level (cluster-level) split integrity with leakage audited across training, model selection, calibration and test partitions; uncertainty intervals computed by cluster-aware resampling with the number of clusters, resamples and seeds stated; a variance account separating seed, data-order and resampling-draw variability from the claimed effect; an explicit split between pre-declared confirmatory analyses and post-hoc or descriptive ones; multiplicity or selective-inference control wherever several candidates or metrics are compared and a winner is reported; effect sizes weighed against that variability, not only interval signs; numbers consistent across abstract, body, tables, figures and any cited result files; released code, seeds, pinned dependencies and artifact hashes enough for an independent rerun.
+what_triggers_block: Any one of these, correctable within a revision: intervals treat within-subject windows as independent, or omit the cluster count; a selected winner is evaluated on the same data used to pick it with no correction or held-out confirmation; an effect claim is smaller than the reported seed or draw spread but still presented as an established difference; a numeric inconsistency between two places in the manuscript or its result files that changes a reported conclusion.
+what_triggers_warn: Defensible design with gaps that do not overturn a conclusion: the confirmatory/exploratory boundary is stated but blurred in places; seed or draw variability is reported for some headline numbers but not all; the multiplicity treatment is described informally rather than as a named procedure; small cluster counts are acknowledged but their effect on interval coverage is not discussed; reproducibility artifacts exist but some step (environment pin, data-preparation command, hash) is missing; minor numeric discrepancies that change no conclusion.
+what_triggers_fatal: A design defect no revision of the analysis can repair: evaluation subjects demonstrably overlap with training or selection subjects so that the headline result is contaminated at the source, or the headline result cannot be reproduced from the stated procedure and artifacts at all, or the reported primary numbers are shown to be fabricated or irreconcilable with the underlying result files.
+
+### D3: argumentative_coherence
+dimension_id: D3
+what_to_look_for: Each abstract and conclusion claim mapped to the specific analysis that supports it, at matching strength; pre-declared decision rules (margins, gates, stopping rules, selection criteria) applied exactly as declared, with any post-hoc deviation labelled; null or inconclusive outcomes reported as such, not reframed as support; no causal or generalising language beyond what the design (sample size, population, single dataset) licenses; limitations that address the actual threats to the inference rather than generic caveats.
+what_triggers_block: A headline claim relies on an analysis that was exploratory or post-hoc yet is presented as confirmatory; a pre-declared decision rule is altered, its margin redefined, or its failure reinterpreted after seeing results without disclosure; an inconclusive interval (one crossing the decision threshold) is reported as passing.
+what_triggers_warn: Claims are mostly supported but some wording overstates the evidence (for example generalising beyond the evaluated population or device set); a disclosed post-hoc deviation from the declared plan is not carried through to how firmly the conclusion is stated; limitations list the right threats but do not tie them to specific claims.
+what_triggers_fatal: The central thesis is contradicted by the paper's own reported primary results, or the core argument depends on a decision rule that is shown to have been chosen after the outcome was known, so the main conclusion has no valid evidential support.
+
+criteria_binding_unavailable
+
+[CONTRACT-ACKNOWLEDGED]

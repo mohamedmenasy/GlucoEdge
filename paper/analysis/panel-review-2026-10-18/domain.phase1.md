@@ -1,0 +1,26 @@
+## Contract Paraphrase
+
+D1 (methodology_rigor, mandatory, owned by the methodology seat). This dimension asks whether study design, data handling, statistical reporting and reproducibility support meet the peer-review bar of the field. I do not score it. Seen from domain accuracy, it matters to me only where a design choice decides whether a domain claim holds up: for example, whether a resampling unit fits clustered wearable data, or whether a reported metric is computed in a way that matches its usual meaning in the literature. I will pass those points to the methodology seat instead of scoring them myself.
+
+D2 (domain_accuracy, mandatory, owned by my seat). This dimension asks whether the manuscript's claims fit current evidence in its field, whether prior work is described correctly, and whether domain terminology and reported results are free of factual errors. For applied ML for health sensing, that covers several things. Prior benchmarks, datasets, licences and baselines must be described faithfully. Imbalanced and ordinal evaluation metrics, operating-point and calibration terms, and quantization and on-device inference terms must be used in their standard sense. Claims about label derivation from sensor signals, and about transfer across cohorts or prevalence shift, must not go beyond what the cited evidence and the reported numbers support. Within the stated non-clinical scope, no wording should imply clinical validity. Numbers must agree wherever a domain result is restated.
+
+D3 (argumentative_coherence, mandatory, owned by the devil's advocate seat, with the methodology seat also eligible). This dimension asks whether the core thesis is internally consistent and supported by its evidence, without fallacies that undermine it. I do not score it. From the domain side, a claim stated with more confidence than the field's evidence supports is a domain-accuracy problem first. Any coherence consequences of such a claim I leave to the eligible seats.
+
+D4 (cross_disciplinary_relevance, high, owned by the perspective seat). This dimension asks whether framing, definitions and implications are accessible to readers from adjacent fields, and whether interdisciplinary claims are substantiated. I do not score it. My check stops at whether the domain definitions those readers depend on are correct. Whether they are accessible is for the perspective seat.
+
+D5 (writing_and_structure, normal, owned by the EIC seat). This dimension covers organisation, clarity, figure and table quality, and venue conventions. I do not score it. I will mention a figure or table only when it misstates a domain quantity, and I will treat that as a D2 issue.
+
+D6 (venue_fit_and_contribution, mandatory, owned by the EIC seat). This dimension asks whether the manuscript fits the configured venue and makes an original, significant contribution for that readership. I do not score it. My input is limited to whether the contribution is positioned accurately against prior work, which also falls under D2. Novelty and significance are the EIC's call.
+
+## Scoring Plan
+
+### D2: domain_accuracy
+dimension_id: D2
+what_to_look_for: Check four things. (1) Cited datasets, benchmarks, licences and prior results are described faithfully. (2) Imbalance-aware and ordinal metrics (macro and per-class recall and precision, PR trade-offs, ordinal or cost-weighted error), calibration and operating-point terms, and quantization and on-device inference terms are used in their standard sense. (3) Claims about sensor-derived labels, threshold conventions and transfer across cohorts or prevalence shift stay within what the cited evidence and the reported clustered variability support. (4) The same domain quantity agrees across abstract, text, tables, figures and any cited result files, and no wording implies clinical validity.
+what_triggers_block: Any of the following, where it bears on a central claim. A prior work, dataset, benchmark or licence is materially misrepresented. A core evaluation or quantization term is misused so that the headline result means something other than it appears to. A domain result is restated with contradictory values across the manuscript. A generalization, deployment or cross-cohort claim goes beyond the reported evidence. Wording implies clinical utility or validity outside the stated non-clinical scope.
+what_triggers_warn: Domain gaps that do not overturn a central claim. Examples include: missing or thin coverage of directly relevant literature on imbalanced or ordinal evaluation, operating-point selection, quantization calibration or external validation; imprecise but recoverable terminology; numeric drift limited to secondary results; and limitations such as label noise from sensor-derived targets, prevalence shift or single-cohort scope that are acknowledged but not discussed in enough depth.
+what_triggers_fatal: The central contribution rests on a domain error that cannot be repaired by revision. Examples: the headline result depends on a fundamentally misstated metric, label definition or prior-work baseline, so that correcting it would remove the claimed finding; or the manuscript presents fabricated or unverifiable domain results or citations as established evidence.
+
+criteria_binding_unavailable
+
+[CONTRACT-ACKNOWLEDGED]
