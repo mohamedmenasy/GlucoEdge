@@ -9,8 +9,8 @@ repository-code: "https://github.com/mohamedmenasy/GlucoEdge"
 # Zenodo concept DOI: resolves to the latest archived release.
 doi: 10.5281/zenodo.23426170
 license: MIT
-version: 1.1.0
-date-released: 2026-10-16
+version: 1.2.0
+date-released: 2026-10-18
 abstract: >-
   Android and iOS research prototype that maps 12 five-minute continuous
   glucose monitor readings to one of five trend classes with a small 1D CNN,
